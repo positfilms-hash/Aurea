@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="js/scale.js"></script>
+  <title>Entrar · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .login-wrap{display:grid;grid-template-columns:1fr 1fr;height:100vh;}
+    .login-left{background:var(--night-soft);border-right:0.5px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px;gap:32px;}
+    .login-left-quote{font-family:var(--font-serif);font-size:22px;font-style:italic;color:var(--text-muted);line-height:1.6;text-align:center;max-width:320px;}
+    .login-left-author{font-size:10px;font-weight:300;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-faint);}
+    .login-right{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px;}
+    .login-box{width:100%;max-width:380px;display:flex;flex-direction:column;gap:24px;}
+    .login-title{font-family:var(--font-serif);font-size:32px;font-weight:500;color:var(--text-primary);line-height:1.1;}
+    .login-sub{font-size:12px;font-weight:300;color:var(--text-muted);margin-top:-16px;line-height:1.6;}
+    .login-fields{display:flex;flex-direction:column;gap:14px;}
+    .login-actions{display:flex;flex-direction:column;gap:10px;}
+    .btn-login{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--night);background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));border:none;padding:14px;border-radius:100px;cursor:pointer;box-shadow:0 4px 12px #C8973A33;transition:opacity 0.2s;width:100%;}
+    .btn-login:hover{opacity:0.88;}
+    .btn-login:disabled{opacity:0.5;cursor:default;}
+    .login-error{display:none;color:#ff6b6b;font-size:11px;font-weight:300;text-align:center;line-height:1.5;}
+    .login-footer{font-size:11px;font-weight:300;color:var(--text-faint);text-align:center;}
+    .login-footer a{color:var(--gold);text-decoration:none;}
+    .login-footer a:hover{text-decoration:underline;}
+    .divider-or{display:flex;align-items:center;gap:12px;margin:4px 0;}
+    .divider-or-line{flex:1;height:0.5px;background:var(--border);}
+    .divider-or-text{font-size:10px;font-weight:300;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-ghost);}
+    .btn-ghost-full{width:100%;font-size:12px;font-weight:300;color:var(--text-muted);background:none;border:0.5px solid var(--border);border-radius:100px;padding:12px;cursor:pointer;transition:all 0.2s;}
+    .btn-ghost-full:hover{border-color:var(--border-gold);color:var(--text-primary);}
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <!-- Izquierda: cita -->
+    <div class="login-left">
+      <a href="index.html"><img src="assets/logo.png" alt="Aurea" style="width:72px;height:72px;object-fit:contain;opacity:0.8;"></a>
+      <p class="login-left-quote" id="ql-text">"El que aprende y no piensa pierde el tiempo."</p>
+      <p class="login-left-author" id="ql-author">— Confucio</p>
+    </div>
+
+    <!-- Derecha: formulario -->
+    <div class="login-right">
+      <div class="login-box">
+        <div>
+          <div class="login-title">Bienvenido<br>de vuelta.</div>
+          <p class="login-sub">Entra en tu cuenta de Aurea.</p>
+        </div>
+
+        <div class="login-fields">
+          <div class="field-wrap">
+            <span class="field-label">Correo electrónico</span>
+            <input class="field-input" type="email" id="l-email" placeholder="tu@correo.com" autocomplete="email">
+          </div>
+          <div class="field-wrap">
+            <span class="field-label">Contraseña</span>
+            <input class="field-input" type="password" id="l-password" placeholder="Tu contraseña" autocomplete="current-password">
+          </div>
+        </div>
+
+        <div id="login-error" class="login-error"></div>
+
+        <div class="login-actions">
+          <button class="btn-login" id="btn-login" onclick="entrar()">Entrar en Aurea</button>
+          <div class="divider-or"><div class="divider-or-line"></div><span class="divider-or-text">¿aún no tienes cuenta?</span><div class="divider-or-line"></div></div>
+          <button class="btn-ghost-full" onclick="location.href='registro.html'">Crear una cuenta</button>
+        </div>
+
+        <p class="login-footer">
+          Al entrar aceptas los <a href="privacidad.html">términos de privacidad</a> de Aurea.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { getSession } from './js/auth.js';
+
+    // Si ya hay sesión activa, redirigir directamente
+    getSession().then(session => {
+      if (session) window.location.href = 'discover.html';
+    });
+
+    // Carrusel de citas
+    const quotes = [
+      {t:'"El que aprende y no piensa pierde el tiempo."',         a:'— Confucio'},
+      {t:'"Dime y lo olvido, enséñame y lo recuerdo."',           a:'— Benjamin Franklin'},
+      {t:'"El discípulo supera al maestro solo cuando el maestro lo desea."', a:'— Leonardo da Vinci'},
+    ];
+    let qi = 0;
+    const qt = document.getElementById('ql-text'), qa = document.getElementById('ql-author');
+    qt.style.transition = 'opacity 0.6s'; qa.style.transition = 'opacity 0.6s';
+    setInterval(() => {
+      qi = (qi + 1) % quotes.length;
+      qt.style.opacity = '0'; qa.style.opacity = '0';
+      setTimeout(() => { qt.textContent = quotes[qi].t; qa.textContent = quotes[qi].a; qt.style.opacity = '1'; qa.style.opacity = '1'; }, 500);
+    }, 5000);
+
+    // Enter en el campo de contraseña dispara el login
+    document.getElementById('l-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') entrar();
+    });
+
+    window.entrar = async function() {
+      const email    = document.getElementById('l-email').value.trim();
+      const password = document.getElementById('l-password').value;
+      const btn      = document.getElementById('btn-login');
+      const errDiv   = document.getElementById('login-error');
+
+      if (!email || !password) {
+        mostrarError('Introduce tu correo y contraseña.');
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Entrando…';
+      errDiv.style.display = 'none';
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        const msgs = {
+          'Invalid login credentials': 'Correo o contraseña incorrectos.',
+          'Email not confirmed':        'Confirma tu correo antes de entrar.',
+          'Too many requests':          'Demasiados intentos. Espera un momento.',
+        };
+        mostrarError(msgs[error.message] || ('Error: ' + error.message));
+        btn.disabled    = false;
+        btn.textContent = 'Entrar en Aurea';
+      } else {
+        window.location.href = 'discover.html';
+      }
+    };
+
+    function mostrarError(msg) {
+      const d = document.getElementById('login-error');
+      d.textContent   = msg;
+      d.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

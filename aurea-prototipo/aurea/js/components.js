@@ -8,7 +8,7 @@ function renderNavPublic(active=''){
 
 function renderNavAuth(active='',user='RM'){
   const pages=[{id:'discover',label:'Discover',href:'discover.html'},{id:'relaciones',label:'Mis relaciones',href:'relaciones.html'},{id:'solicitudes',label:'Mis solicitudes',href:'solicitudes.html'},{id:'perfil',label:'Mi perfil',href:'perfil.html'},{id:'dona',label:'Dona',href:'dona.html'}];
-  return `<nav class="nav"><a class="nav-logo" href="discover.html"><img src="${LOGO_URL}" alt="Aurea"><span class="nav-wordmark">Aurea</span></a><div class="nav-links">${pages.map(p=>`<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('')}</div><div class="nav-avatar">${user}</div></nav>`;
+  return `<nav class="nav"><a class="nav-logo" href="discover.html"><img src="${LOGO_URL}" alt="Aurea"><span class="nav-wordmark">Aurea</span></a><div class="nav-links">${pages.map(p=>`<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('')}</div><div class="nav-avatar">${user}</div><a href="logout.html" class="nav-link" style="font-size:10px;letter-spacing:0.1em;opacity:0.5;" title="Cerrar sesión">Salir</a></nav>`;
 }
 
 function renderFooter(){
