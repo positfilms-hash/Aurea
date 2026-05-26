@@ -82,9 +82,13 @@
   </div>
   <div id="chat-container"></div>
   <script src="js/components.js"></script>
-  <script>
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+
     document.getElementById('nav-container').innerHTML = renderNavAuth('discover');
-    const ALL=[
+
+    // — Datos de demostración (fallback si la BD está vacía) —
+    const DEMO = [
       {i:'RM',n:'Rafael M.',d:'Filosofía estoica',tags:['#presencial','#riguroso','#avanzado'],rep:'4.9',pl:'1',dist:'2.4 km',open:true,bg:'#C8973A'},
       {i:'CL',n:'Carmen L.',d:'Cerámica',tags:['#presencial','#paciente','#principiantes'],rep:'4.7',pl:'2',dist:'5.1 km',open:true,bg:'#7A4F2A'},
       {i:'AO',n:'Andrés O.',d:'Astronomía',tags:['#online','#teórico','#riguroso'],rep:'5.0',pl:'1',dist:'8.7 km',open:true,bg:'#4A3A2A'},
@@ -114,13 +118,108 @@
       {i:'VR',n:'Valentina R.',d:'Astronomía árabe',tags:['#online','#teórico','#avanzado'],rep:'4.7',pl:'2',dist:'Online',open:true,bg:'#534AB7'},
       {i:'HG',n:'Hugo G.',d:'Relojería',tags:['#presencial','#riguroso','#avanzado'],rep:'5.0',pl:'1',dist:'138 km',open:true,bg:'#185FA5'},
     ];
-    const PER=12;let page=1;const total=ALL.length;const totalPgs=Math.ceil(total/PER);
-    function cardHTML(m){const plLabel=m.open?(m.pl+' plaza'+(m.pl!=='1'&&m.pl!=='—'?'s':'')):'Lista de espera';return `<div class="mcard" onclick="window.location.href='perfil-maestro.html'"><div class="mcard-top"><div class="mavatar" style="background:${m.bg};">${m.i}</div><div><div class="mname">${m.n}</div><div class="mdisc">${m.d}</div></div></div><div class="mcard-body"><div class="mtags">${m.tags.map(t=>`<span class="mtag">${t}</span>`).join('')}</div><div class="mstats"><div class="mstat"><div class="mstat-n">${m.rep}</div><div class="mstat-l">Reputación</div></div><div class="mstat"><div class="mstat-n">${m.pl}</div><div class="mstat-l">Plazas</div></div></div><div class="mcard-footer"><span class="mdist">${m.dist}</span><span class="mplaza ${m.open?'open':'wait'}">${plLabel}</span></div></div></div>`;}
-    function renderPage(p){page=p;const s=(p-1)*PER,e=Math.min(s+PER,total);document.getElementById('cards-grid').innerHTML=ALL.slice(s,e).map(cardHTML).join('');document.getElementById('list-title').textContent=`Mostrando ${s+1}–${e} de ${total} maestros`;renderPag();}
-    function renderPag(){const pg=document.getElementById('pagination');let h=`<button class="pg-btn" onclick="renderPage(${page-1})" ${page===1?'disabled':''}>←</button>`;for(let i=1;i<=totalPgs;i++){if(i===1||i===totalPgs||Math.abs(i-page)<=1)h+=`<button class="pg-btn ${i===page?'active':''}" onclick="renderPage(${i})">${i}</button>`;else if(Math.abs(i-page)===2)h+=`<span class="pg-info">…</span>`;}h+=`<button class="pg-btn" onclick="renderPage(${page+1})" ${page===totalPgs?'disabled':''}>→</button>`;pg.innerHTML=h;}
-    document.querySelectorAll('.filter-chips .chip').forEach(c=>{c.addEventListener('click',function(){const isHash=this.parentElement.id==='hash-chips';if(isHash)this.classList.toggle('on');else{this.parentElement.querySelectorAll('.chip').forEach(s=>s.classList.remove('on'));this.classList.add('on');}});});
-    document.getElementById('hash-in').addEventListener('keydown',function(e){if(e.key==='Enter'&&this.value.trim()){const v=this.value.trim().replace(/^#/,'');const c=document.createElement('span');c.className='chip on';c.textContent='#'+v;c.addEventListener('click',function(){this.classList.toggle('on');});document.getElementById('hash-chips').appendChild(c);this.value='';}});
-    renderPage(1);
+
+    let ALL = [];
+    const PER = 12;
+    let page = 1;
+
+    // — Card HTML —
+    function cardHTML(m) {
+      const plLabel = m.open ? (m.pl + ' plaza' + (m.pl !== '1' && m.pl !== '—' ? 's' : '')) : 'Lista de espera';
+      const href    = m.id ? `perfil-maestro.html?id=${m.id}` : 'perfil-maestro.html';
+      return `<div class="mcard" onclick="window.location.href='${href}'">
+        <div class="mcard-top">
+          <div class="mavatar" style="background:${m.bg};">${m.i}</div>
+          <div><div class="mname">${m.n}</div><div class="mdisc">${m.d}</div></div>
+        </div>
+        <div class="mcard-body">
+          <div class="mtags">${m.tags.map(t => `<span class="mtag">${t}</span>`).join('')}</div>
+          <div class="mstats">
+            <div class="mstat"><div class="mstat-n">${m.rep}</div><div class="mstat-l">Reputación</div></div>
+            <div class="mstat"><div class="mstat-n">${m.pl}</div><div class="mstat-l">Plazas</div></div>
+          </div>
+          <div class="mcard-footer"><span class="mdist">${m.dist}</span><span class="mplaza ${m.open ? 'open' : 'wait'}">${plLabel}</span></div>
+        </div>
+      </div>`;
+    }
+
+    // — Paginación —
+    function renderPage(p) {
+      page = p;
+      const total = ALL.length, tPgs = Math.ceil(total / PER);
+      const s = (p - 1) * PER, e = Math.min(s + PER, total);
+      document.getElementById('cards-grid').innerHTML  = ALL.slice(s, e).map(cardHTML).join('');
+      document.getElementById('list-title').textContent = `Mostrando ${s + 1}–${e} de ${total} maestros`;
+      // Paginación
+      const pg = document.getElementById('pagination');
+      let h = `<button class="pg-btn" onclick="window._goPage(${p - 1})" ${p === 1 ? 'disabled' : ''}>←</button>`;
+      for (let i = 1; i <= tPgs; i++) {
+        if (i === 1 || i === tPgs || Math.abs(i - p) <= 1)
+          h += `<button class="pg-btn ${i === p ? 'active' : ''}" onclick="window._goPage(${i})">${i}</button>`;
+        else if (Math.abs(i - p) === 2)
+          h += `<span class="pg-info">…</span>`;
+      }
+      h += `<button class="pg-btn" onclick="window._goPage(${p + 1})" ${p === tPgs ? 'disabled' : ''}>→</button>`;
+      pg.innerHTML = h;
+    }
+    window._goPage = p => renderPage(p);
+
+    // — Carga desde Supabase (fallback a DEMO si vacío) —
+    async function cargarMaestros() {
+      try {
+        const { data, error } = await supabase
+          .from('maestro_perfiles')
+          .select(`id, disciplina, hashtags, acepta_solicitudes, reputacion, max_discipulos, formato,
+                   profiles (nombre, apellido, avatar_color, ubicacion)`)
+          .order('reputacion', { ascending: false, nullsFirst: false });
+
+        if (!error && data && data.length > 0) {
+          ALL = data.map(m => {
+            const p     = m.profiles;
+            const nombre  = p?.nombre  || '';
+            const apellido= p?.apellido || '';
+            return {
+              id:   m.id,
+              i:    ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '??',
+              n:    nombre + (apellido ? ' ' + apellido[0] + '.' : ''),
+              d:    m.disciplina,
+              tags: (m.hashtags || []).slice(0, 3),
+              rep:  m.reputacion != null ? Number(m.reputacion).toFixed(1) : '—',
+              pl:   m.acepta_solicitudes ? String(m.max_discipulos || 1) : '—',
+              dist: p?.ubicacion || (m.formato === 'online' ? 'Online' : '—'),
+              open: m.acepta_solicitudes,
+              bg:   p?.avatar_color || '#C8973A',
+            };
+          });
+        } else {
+          ALL = DEMO; // BD vacía → mostrar demo
+        }
+      } catch {
+        ALL = DEMO;
+      }
+      renderPage(1);
+    }
+
+    // — Filtros —
+    document.querySelectorAll('.filter-chips .chip').forEach(c => {
+      c.addEventListener('click', function() {
+        const isHash = this.parentElement.id === 'hash-chips';
+        if (isHash) this.classList.toggle('on');
+        else { this.parentElement.querySelectorAll('.chip').forEach(s => s.classList.remove('on')); this.classList.add('on'); }
+      });
+    });
+    document.getElementById('hash-in').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && this.value.trim()) {
+        const v = this.value.trim().replace(/^#/, '');
+        const c = document.createElement('span');
+        c.className = 'chip on'; c.textContent = '#' + v;
+        c.addEventListener('click', function() { this.classList.toggle('on'); });
+        document.getElementById('hash-chips').appendChild(c);
+        this.value = '';
+      }
+    });
+
+    cargarMaestros();
   </script>
 </body>
 </html>
