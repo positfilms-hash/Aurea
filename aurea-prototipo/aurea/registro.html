@@ -86,10 +86,10 @@
           <div class="form-title">Crea tu cuenta</div>
           <p class="form-sub">Tus datos son privados. Nunca los compartimos.</p>
           <div class="field-group">
-            <div class="field-row"><div class="field-wrap"><span class="field-label">Nombre</span><input class="field-input" type="text" placeholder="Rafael" id="f-nombre"></div><div class="field-wrap"><span class="field-label">Apellido</span><input class="field-input" type="text" placeholder="Montoya"></div></div>
+            <div class="field-row"><div class="field-wrap"><span class="field-label">Nombre</span><input class="field-input" type="text" placeholder="Rafael" id="f-nombre"></div><div class="field-wrap"><span class="field-label">Apellido</span><input class="field-input" type="text" placeholder="Montoya" id="f-apellido"></div></div>
             <div class="field-wrap"><span class="field-label">Correo electrónico</span><input class="field-input" type="email" placeholder="rafael@correo.com" id="f-email"></div>
-            <div class="field-wrap"><span class="field-label">Contraseña</span><input class="field-input" type="password" placeholder="Mínimo 8 caracteres"></div>
-            <div class="field-wrap"><span class="field-label">Ubicación</span><input class="field-input" type="text" placeholder="Madrid, España"></div>
+            <div class="field-wrap"><span class="field-label">Contraseña</span><input class="field-input" type="password" placeholder="Mínimo 8 caracteres" id="f-password"></div>
+            <div class="field-wrap"><span class="field-label">Ubicación</span><input class="field-input" type="text" placeholder="Madrid, España" id="f-ubicacion"></div>
           </div>
           <div class="divider-or" style="margin:20px 0;"><div class="divider-or-line"></div><span class="divider-or-text">o continúa con</span><div class="divider-or-line"></div></div>
           <div class="social-btns">
@@ -102,12 +102,18 @@
           <p class="form-sub">No tiene que ser perfecto — podrás editarlo cuando quieras.</p>
           <div style="display:flex;flex-direction:column;gap:14px;">
             <div class="avatar-pick"><div class="avatar-preview" id="av-prev">RM</div><button class="btn-ghost" style="padding:8px 16px;">Subir foto</button></div>
-            <div class="field-wrap"><span class="field-label">Disciplina principal</span><input class="field-input" type="text" placeholder="Ej. Filosofía estoica, Carpintería…"></div>
-            <div class="field-wrap"><span class="field-label">Categoría</span><select class="field-input" style="cursor:pointer;"><option value="" disabled selected>Selecciona una categoría</option><option>Filosofía</option><option>Artes</option><option>Oficios</option><option>Deportes</option><option>Espiritualidad</option><option>Ciencia</option><option>Lenguas</option></select></div>
-            <div class="field-wrap"><span class="field-label">Una frase sobre ti</span><input class="field-input" type="text" placeholder="Lo que te define…"></div>
-            <div class="field-wrap"><span class="field-label">Formato</span><select class="field-input" style="cursor:pointer;"><option value="" disabled selected>¿Presencial, online o ambos?</option><option>Presencial</option><option>Online</option><option>Ambos</option></select></div>
+            <div class="field-wrap"><span class="field-label">Disciplina principal</span><input class="field-input" type="text" placeholder="Ej. Filosofía estoica, Carpintería…" id="f-disciplina"></div>
+            <div class="field-wrap"><span class="field-label">Categoría</span><select class="field-input" style="cursor:pointer;" id="f-categoria"><option value="" disabled selected>Selecciona una categoría</option><option>Filosofía</option><option>Artes</option><option>Oficios</option><option>Deportes</option><option>Espiritualidad</option><option>Ciencia</option><option>Lenguas</option></select></div>
+            <div class="field-wrap"><span class="field-label">Una frase sobre ti</span><input class="field-input" type="text" placeholder="Lo que te define…" id="f-frase"></div>
+            <div class="field-wrap"><span class="field-label">Formato</span><select class="field-input" style="cursor:pointer;" id="f-formato"><option value="" disabled selected>¿Presencial, online o ambos?</option><option>Presencial</option><option>Online</option><option>Ambos</option></select></div>
           </div>
         </div>
+      </div>
+      <div id="reg-error" style="display:none;color:#ff6b6b;font-size:11px;font-weight:300;padding:6px 40px;text-align:center;line-height:1.5;"></div>
+      <div id="reg-success" style="display:none;background:#1A2A12;border-top:0.5px solid #3B6D1144;padding:14px 40px;text-align:center;">
+        <div style="font-size:20px;margin-bottom:6px;">✦</div>
+        <div style="font-family:var(--font-serif);font-size:15px;color:var(--text-primary);margin-bottom:4px;">Revisa tu correo</div>
+        <div style="font-size:11px;font-weight:300;color:var(--text-muted);">Te hemos enviado un enlace de confirmación. Una vez confirmado, ya puedes entrar en Aurea.</div>
       </div>
       <div class="reg-footer">
         <button class="btn-back-reg" id="btn-back" onclick="prevStep()" style="visibility:hidden;">← Volver</button>
@@ -117,59 +123,157 @@
     </div>
   </div>
   <script src="js/components.js"></script>
-  <script>
-    let step=1,rolOk=false;
-    const quotes=[
-      {t:'"El que aprende y no piensa pierde el tiempo."',a:'— Confucio'},
-      {t:'"Dime y lo olvido, enséñame y lo recuerdo."',a:'— Benjamin Franklin'},
-      {t:'"El discípulo supera al maestro solo cuando el maestro lo desea."',a:'— Leonardo da Vinci'},
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+
+    let step = 1, rolOk = false;
+
+    // — Carrusel de citas —
+    const quotes = [
+      {t:'"El que aprende y no piensa pierde el tiempo."', a:'— Confucio'},
+      {t:'"Dime y lo olvido, enséñame y lo recuerdo."',   a:'— Benjamin Franklin'},
+      {t:'"El discípulo supera al maestro solo cuando el maestro lo desea."', a:'— Leonardo da Vinci'},
     ];
-    let qi=0;
-    const qt=document.getElementById('ql-text'),qa=document.getElementById('ql-author');
-    qt.style.transition='opacity 0.6s';qa.style.transition='opacity 0.6s';
-    setInterval(()=>{qi=(qi+1)%quotes.length;qt.style.opacity='0';qa.style.opacity='0';setTimeout(()=>{qt.textContent=quotes[qi].t;qa.textContent=quotes[qi].a;qt.style.opacity='1';qa.style.opacity='1';},500);},5000);
+    let qi = 0;
+    const qt = document.getElementById('ql-text'), qa = document.getElementById('ql-author');
+    qt.style.transition = 'opacity 0.6s'; qa.style.transition = 'opacity 0.6s';
+    setInterval(() => {
+      qi = (qi + 1) % quotes.length;
+      qt.style.opacity = '0'; qa.style.opacity = '0';
+      setTimeout(() => { qt.textContent = quotes[qi].t; qa.textContent = quotes[qi].a; qt.style.opacity = '1'; qa.style.opacity = '1'; }, 500);
+    }, 5000);
 
-    function selRol(el){document.querySelectorAll('.rol-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');rolOk=true;document.getElementById('btn-next').disabled=false;}
-
-    function updateProgress(){
-      for(let i=1;i<=3;i++){
-        const c=document.getElementById('pc'+i),l=document.getElementById('sl'+i);
-        if(i<step){c.className='p-circle done';c.textContent='✓';}
-        else if(i===step){c.className='p-circle active';c.textContent=i;}
-        else{c.className='p-circle pending';c.textContent=i;}
-        if(l){l.className='step-label'+(i===step?' active':'');}
-        if(i<3){const pl=document.getElementById('pl'+i);if(pl)pl.className='p-line'+(i<step?' done':'');}
+    // — Progreso —
+    function updateProgress() {
+      for (let i = 1; i <= 3; i++) {
+        const c = document.getElementById('pc'+i), l = document.getElementById('sl'+i);
+        if (i < step)      { c.className = 'p-circle done';    c.textContent = '✓'; }
+        else if (i===step) { c.className = 'p-circle active';  c.textContent = i;   }
+        else               { c.className = 'p-circle pending'; c.textContent = i;   }
+        if (l) l.className = 'step-label' + (i === step ? ' active' : '');
+        if (i < 3) { const pl = document.getElementById('pl'+i); if (pl) pl.className = 'p-line' + (i < step ? ' done' : ''); }
       }
-      document.getElementById('step-counter').textContent='Paso '+step+' de 3';
-      document.getElementById('btn-back').style.visibility=step>1?'visible':'hidden';
+      document.getElementById('step-counter').textContent = 'Paso ' + step + ' de 3';
+      document.getElementById('btn-back').style.visibility = step > 1 ? 'visible' : 'hidden';
     }
 
-    function nextStep(){
-      if(step<3){
+    function checkP2() {
+      const filled = Array.from(document.querySelectorAll('#paso2 .field-input')).filter(f => f.value.trim()).length;
+      document.getElementById('btn-next').disabled = filled < 3;
+    }
+
+    // — Registro en Supabase —
+    async function registrar() {
+      const btn    = document.getElementById('btn-next');
+      const errDiv = document.getElementById('reg-error');
+      const okDiv  = document.getElementById('reg-success');
+
+      // Recoger datos del formulario
+      const rolTitle = document.querySelector('.rol-card.selected .rol-title')?.textContent || 'Discípulo';
+      const rolMap   = { 'Maestro':'maestro', 'Discípulo':'discipulo', 'Ambos':'ambos' };
+      const rol      = rolMap[rolTitle] || 'discipulo';
+
+      const nombre   = document.getElementById('f-nombre').value.trim();
+      const apellido = document.getElementById('f-apellido').value.trim();
+      const email    = document.getElementById('f-email').value.trim();
+      const password = document.getElementById('f-password').value;
+      const ubicacion= document.getElementById('f-ubicacion').value.trim();
+      const disciplina= document.getElementById('f-disciplina').value.trim();
+      const categoria = document.getElementById('f-categoria').value;
+      const frase     = document.getElementById('f-frase').value.trim();
+      const formatoRaw= document.getElementById('f-formato').value;
+      const fmtMap    = { 'Presencial':'presencial', 'Online':'online', 'Ambos':'ambos' };
+      const formato   = fmtMap[formatoRaw] || 'ambos';
+
+      // Validación básica
+      if (!email || !password) { mostrarError('Completa el correo y la contraseña.'); return; }
+      if (password.length < 6) { mostrarError('La contraseña debe tener al menos 6 caracteres.'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Registrando…';
+      errDiv.style.display = 'none';
+
+      try {
+        // signUp: el trigger handle_new_user crea profiles (y maestro_perfiles si aplica)
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { nombre, apellido, rol, ubicacion, frase, disciplina, categoria, formato }
+          }
+        });
+
+        if (error) throw error;
+
+        // Si hay sesión activa → confirmación desactivada → redirigir
+        if (data.session) {
+          window.location.href = 'discover.html';
+        } else {
+          // Confirmación de email activada → mostrar aviso
+          btn.closest('.reg-footer').style.display = 'none';
+          okDiv.style.display = 'block';
+        }
+
+      } catch (err) {
+        const msgs = {
+          'User already registered':                         'Ya existe una cuenta con ese correo.',
+          'Password should be at least 6 characters':        'La contraseña debe tener al menos 6 caracteres.',
+          'Unable to validate email address: invalid format':'El correo electrónico no es válido.',
+          'Invalid email':                                   'El correo electrónico no es válido.',
+        };
+        mostrarError(msgs[err.message] || ('Error: ' + err.message));
+        btn.disabled    = false;
+        btn.textContent = 'Entrar en Aurea';
+      }
+    }
+
+    function mostrarError(msg) {
+      const d = document.getElementById('reg-error');
+      d.textContent    = msg;
+      d.style.display  = 'block';
+    }
+
+    // — Navegación entre pasos —
+    window.selRol = function(el) {
+      document.querySelectorAll('.rol-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      rolOk = true;
+      document.getElementById('btn-next').disabled = false;
+    };
+
+    window.nextStep = async function() {
+      if (step < 3) {
         document.getElementById('paso'+step).classList.add('hidden');
         step++;
         document.getElementById('paso'+step).classList.remove('hidden');
-        const btn=document.getElementById('btn-next');
-        btn.textContent=step===3?'Entrar en Aurea':'Continuar';
-        btn.disabled=step===2;
-        if(step===2){document.querySelectorAll('#paso2 .field-input').forEach(f=>f.addEventListener('input',checkP2));}
+        const btn = document.getElementById('btn-next');
+        btn.textContent = step === 3 ? 'Entrar en Aurea' : 'Continuar';
+        btn.disabled    = step === 2;
+        if (step === 2) document.querySelectorAll('#paso2 .field-input').forEach(f => f.addEventListener('input', checkP2));
         updateProgress();
       } else {
-        window.location.href='discover.html';
+        await registrar();
       }
-    }
+    };
 
-    function checkP2(){
-      const filled=Array.from(document.querySelectorAll('#paso2 .field-input')).filter(i=>i.value.trim()).length;
-      document.getElementById('btn-next').disabled=filled<3;
-    }
+    window.prevStep = function() {
+      if (step > 1) {
+        document.getElementById('paso'+step).classList.add('hidden');
+        step--;
+        document.getElementById('paso'+step).classList.remove('hidden');
+        document.getElementById('btn-next').textContent = 'Continuar';
+        document.getElementById('btn-next').disabled    = step === 1 && !rolOk;
+        updateProgress();
+      }
+    };
 
-    function prevStep(){
-      if(step>1){document.getElementById('paso'+step).classList.add('hidden');step--;document.getElementById('paso'+step).classList.remove('hidden');document.getElementById('btn-next').textContent='Continuar';document.getElementById('btn-next').disabled=step===1&&!rolOk;updateProgress();}
-    }
-
-    const fn=document.getElementById('f-nombre');
-    if(fn)fn.addEventListener('input',function(){const v=this.value.trim();if(v){const i=v[0].toUpperCase();document.getElementById('av-prev').textContent=i+(v.split(' ')[1]?v.split(' ')[1][0].toUpperCase():'');}});
+    // — Vista previa del avatar —
+    document.getElementById('f-nombre').addEventListener('input', function() {
+      const v  = this.value.trim();
+      const ap = document.getElementById('f-apellido');
+      if (v) document.getElementById('av-prev').textContent =
+        v[0].toUpperCase() + (ap?.value.trim() ? ap.value.trim()[0].toUpperCase() : '');
+    });
   </script>
 </body>
 </html>
