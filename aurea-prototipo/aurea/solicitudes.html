@@ -131,7 +131,7 @@
     function acciones(sol) {
       if (sol.estado === 'aceptada') return `<span style="font-size:10px;font-style:italic;font-family:var(--font-serif);color:var(--green);">En periodo de prueba</span>`;
       if (sol.estado === 'rechazada') return `<span style="font-size:10px;font-style:italic;font-family:var(--font-serif);color:var(--red);">Solicitud rechazada</span>`;
-      return `<button class="btn-small" onclick="verPerfil('${sol.discipulo_id}')">Ver perfil</button>
+      return `<button class="btn-small" onclick="verPerfil('${sol.discipulo_id}','${sol.id}')">Ver perfil</button>
               <button class="btn-ac" onclick="aceptar('${sol.id}','${sol.discipulo_id}','${sol.disciplina || ''}')">Aceptar</button>
               <button class="btn-re" onclick="rechazar('${sol.id}')">✕</button>`;
     }
@@ -206,8 +206,8 @@
     }
 
     // — Acciones —
-    window.verPerfil = function(discipuloId) {
-      location.href = `perfil-discipulo.html?id=${discipuloId}`;
+    window.verPerfil = function(discipuloId, solId) {
+      location.href = `perfil-discipulo.html?id=${discipuloId}&sol=${solId}`;
     };
 
     window.aceptar = async function(solId, discipuloId, disciplina) {

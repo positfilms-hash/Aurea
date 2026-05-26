@@ -65,49 +65,209 @@
       <a class="nav-link" href="perfil.html">Mi perfil</a>
       <a class="nav-link" href="dona.html">Dona</a>
     </div>
-    <div class="nav-avatar" style="background:rgba(255,255,255,0.3);border-color:var(--mahogany);color:var(--night);">RM</div>
+    <div class="nav-avatar" id="pd-nav-avatar" style="background:rgba(255,255,255,0.3);border-color:var(--mahogany);color:var(--night);">—</div>
   </nav>
 
   <div class="layout">
     <div class="col-left">
       <div class="profile-header">
-        <div class="big-avatar">JM</div>
-        <div><div class="profile-name">Javier Molina</div><div class="profile-disc">Filosofía estoica</div><div class="profile-location">Madrid · Presencial</div></div>
+        <div class="big-avatar" id="pd-avatar">—</div>
+        <div>
+          <div class="profile-name" id="pd-nombre">…</div>
+          <div class="profile-disc" id="pd-disc"></div>
+          <div class="profile-location" id="pd-loc"></div>
+        </div>
       </div>
       <div class="const-wrap">
         <span class="section-label" style="color:var(--mahogany);">Constancia</span>
-        <div class="const-n">82</div>
-        <div class="const-bar-bg"><div class="const-bar" style="width:82%;"></div></div>
-        <div class="const-sub">de 100 puntos · Alta</div>
+        <div class="const-n" id="pd-const-n">—</div>
+        <div class="const-bar-bg"><div class="const-bar" id="pd-const-bar" style="width:50%;"></div></div>
+        <div class="const-sub" id="pd-const-sub">de 100 puntos</div>
       </div>
       <div class="stats-grid">
-        <div class="stat-box"><div class="stat-n">1</div><div class="stat-l">Prácticas activas</div></div>
-        <div class="stat-box"><div class="stat-n">0</div><div class="stat-l">Abandonos</div></div>
+        <div class="stat-box"><div class="stat-n" id="pd-activas">—</div><div class="stat-l">Prácticas activas</div></div>
+        <div class="stat-box"><div class="stat-n" id="pd-abandonos">—</div><div class="stat-l">Abandonos</div></div>
       </div>
-      <div><span class="section-label" style="color:var(--mahogany);">Hashtags</span><div class="tags-wrap"><span class="tag">#presencial</span><span class="tag">#comprometido</span><span class="tag">#principiante</span></div></div>
-      <div><span class="section-label" style="color:var(--mahogany);">Disponibilidad</span><div class="avail-row"><span class="avail-label">Días</span><span class="avail-val">Martes y jueves</span></div><div class="avail-row"><span class="avail-label">Horas / semana</span><span class="avail-val">3–4 h</span></div><div class="avail-row"><span class="avail-label">Nivel</span><span class="avail-val">Principiante</span></div></div>
-      <div class="action-btns">
-        <button class="btn-ac" onclick="location.href='solicitudes.html'">Aceptar solicitud</button>
-        <button class="btn-re" onclick="location.href='solicitudes.html'">Rechazar solicitud</button>
+      <div id="pd-actions" class="action-btns">
+        <button class="btn-ac" onclick="window.aceptarDisc()">Aceptar solicitud</button>
+        <button class="btn-re" onclick="window.rechazarDisc()">Rechazar solicitud</button>
       </div>
     </div>
     <div class="col-right">
-      <div><div class="bio-title">Su mensaje de motivación</div><div class="msg-mot"><div class="msg-mot-label">Por qué quiere aprender contigo</div><p class="msg-mot-text">"Llevo dos años leyendo a Marco Aurelio de forma autodidacta pero siento que me falta alguien que me corrija cuando me equivoco en la práctica. No busco un curso, busco a alguien que ya haya pasado por lo que yo estoy intentando."</p></div></div>
+      <div id="pd-sol-sec">
+        <div class="bio-title">Su mensaje de motivación</div>
+        <div class="msg-mot">
+          <div class="msg-mot-label">Por qué quiere aprender contigo</div>
+          <p class="msg-mot-text" id="pd-motivacion" style="color:var(--mahogany);font-style:italic;font-size:14px;">Cargando…</p>
+        </div>
+      </div>
       <div class="divider-sand"></div>
-      <div><div class="bio-title">Sobre Javier</div><p class="bio-text">"Me dedico a la ingeniería de software pero desde hace dos años siento que me falta una dimensión de sentido más profunda. El estoicismo me está ayudando a encontrarla."</p></div>
+      <div>
+        <div class="bio-title" id="pd-bio-title">Sobre este discípulo</div>
+        <p class="bio-text" id="pd-bio" style="color:var(--text-faint);font-style:italic;font-size:14px;">Sin descripción todavía.</p>
+      </div>
       <div class="divider-sand"></div>
-      <div><span class="section-label" style="color:var(--mahogany);">Historial de prácticas</span><div class="hist-item"><div><div class="hist-disc">Meditación vipassana</div><div class="hist-sub">Maestro: Carmen L. · 4 meses</div></div><span class="hist-badge hb-complete">✓ Completada</span></div><div class="hist-item"><div><div class="hist-disc">Astronomía básica</div><div class="hist-sub">Maestro: Andrés O. · 2 meses</div></div><span class="hist-badge hb-partial">En curso</span></div></div>
-      <div class="divider-sand"></div>
-      <div><span class="section-label" style="color:var(--mahogany);">Referencias de maestros</span><div class="review-item"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><span class="review-author">Carmen Leal — Meditación</span><span style="font-size:11px;color:var(--gold);">★★★★★</span></div><div class="review-disc">4 meses · Relación finalizada</div><p class="review-text">"Javier es serio y disciplinado. Nunca faltó a una sesión sin avisar con antelación."</p></div></div>
+      <div>
+        <span class="section-label" style="color:var(--mahogany);">Historial de prácticas</span>
+        <div id="pd-historial">
+          <p style="font-size:12px;color:var(--mahogany);padding:8px 0;">Cargando…</p>
+        </div>
+      </div>
     </div>
   </div>
 
   <div id="chat-container"></div>
   <script src="js/components.js"></script>
-  <script>
-    // Chat flotante solo
-    const c=document.getElementById('chat-container');
-    if(c){c.innerHTML=renderChatWidget()+renderMediador();}
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { getSession } from './js/auth.js';
+
+    const params      = new URLSearchParams(location.search);
+    const discipuloId = params.get('id');
+    const solId       = params.get('sol');
+
+    if (!discipuloId) { location.href = 'solicitudes.html'; }
+
+    let _maestroId = null;
+    let _solData   = null;
+
+    // Sesión del maestro que está viendo
+    const session = await getSession();
+    if (session) {
+      const { data: mp } = await supabase
+        .from('maestro_perfiles').select('id').eq('id', session.user.id).single();
+      _maestroId = mp ? session.user.id : null;
+
+      const { data: me } = await supabase
+        .from('profiles').select('nombre, apellido').eq('id', session.user.id).single();
+      if (me) {
+        const i = ((me.nombre||'')[0] + (me.apellido||'')[0]).toUpperCase() || '?';
+        document.getElementById('pd-nav-avatar').textContent = i;
+      }
+    }
+
+    // Cargar perfil + historial + solicitud en paralelo
+    const fetches = [
+      supabase.from('profiles')
+        .select('nombre, apellido, avatar_color, ubicacion, frase, constancia_score')
+        .eq('id', discipuloId).single(),
+      supabase.from('historial_discipulo')
+        .select('disciplina, duracion_meses, estado, maestro_nombre')
+        .eq('discipulo_id', discipuloId)
+        .order('created_at', { ascending: false }),
+    ];
+    if (solId) {
+      fetches.push(
+        supabase.from('solicitudes')
+          .select('motivacion, disciplina, estado')
+          .eq('id', solId).single()
+      );
+    }
+
+    const [perfilRes, histRes, solRes] = await Promise.all(fetches);
+    const perfil   = perfilRes.data;
+    const historial = histRes.data || [];
+    _solData = solRes?.data || null;
+
+    // — Columna izquierda —
+    if (perfil) {
+      const nombre   = perfil.nombre   || '';
+      const apellido = perfil.apellido || '';
+      const initials = ((nombre[0]||'') + (apellido[0]||'')).toUpperCase() || '?';
+
+      document.getElementById('pd-avatar').textContent    = initials;
+      document.getElementById('pd-avatar').style.background = perfil.avatar_color || 'var(--mahogany)';
+      document.getElementById('pd-nombre').textContent    = (nombre + ' ' + apellido).trim();
+      document.getElementById('pd-loc').textContent       = perfil.ubicacion || '—';
+      document.getElementById('pd-bio-title').textContent = `Sobre ${nombre || 'este discípulo'}`;
+
+      // Disciplina: de la solicitud o del historial
+      const disc = _solData?.disciplina || historial[0]?.disciplina || '—';
+      document.getElementById('pd-disc').textContent = disc;
+
+      // Constancia
+      const c = perfil.constancia_score ?? 50;
+      document.getElementById('pd-const-n').textContent    = c;
+      document.getElementById('pd-const-bar').style.width  = c + '%';
+      const nivel = c >= 80 ? 'Alta' : c >= 50 ? 'Media' : 'Baja';
+      document.getElementById('pd-const-sub').textContent  = `de 100 puntos · ${nivel}`;
+
+      // Stats de historial
+      const activas   = historial.filter(h => h.estado === 'en_curso').length;
+      const abandonos = historial.filter(h => h.estado === 'cancelada').length;
+      document.getElementById('pd-activas').textContent  = activas;
+      document.getElementById('pd-abandonos').textContent = abandonos;
+
+      // Bio
+      if (perfil.frase) {
+        document.getElementById('pd-bio').textContent = `"${perfil.frase}"`;
+        document.getElementById('pd-bio').style.color = 'var(--mahogany)';
+      }
+    }
+
+    // — Solicitud / mensaje de motivación —
+    if (_solData) {
+      document.getElementById('pd-motivacion').textContent =
+        _solData.motivacion ? `"${_solData.motivacion}"` : '(Sin mensaje de motivación)';
+
+      // Si ya fue respondida, deshabilitar botones
+      if (_solData.estado === 'aceptada' || _solData.estado === 'rechazada') {
+        document.getElementById('pd-actions').innerHTML =
+          `<div style="text-align:center;font-size:12px;color:var(--mahogany);font-family:var(--font-serif);font-style:italic;padding:8px;">
+            ${_solData.estado === 'aceptada' ? '✓ Ya aceptaste esta solicitud' : '✕ Ya rechazaste esta solicitud'}
+           </div>`;
+      }
+    } else {
+      // Sin solicitud: ocultar sección de motivación y botones de acción
+      document.getElementById('pd-sol-sec').style.display   = 'none';
+      document.getElementById('pd-actions').style.display   = 'none';
+      // Ocultar el divider-sand que sigue al pd-sol-sec
+      const dividers = document.querySelectorAll('.divider-sand');
+      if (dividers[0]) dividers[0].style.display = 'none';
+    }
+
+    // — Historial —
+    document.getElementById('pd-historial').innerHTML = historial.length
+      ? historial.map(h => {
+          const done = h.estado === 'completada';
+          const cancel = h.estado === 'cancelada';
+          const badgeClass = done ? 'hb-complete' : cancel ? '' : 'hb-partial';
+          const badgeText  = done ? '✓ Completada' : cancel ? '✕ Cancelada' : 'En curso';
+          const badgeStyle = cancel
+            ? 'color:var(--red);background:rgba(113,43,19,0.1);border:0.5px solid rgba(113,43,19,0.3);'
+            : '';
+          return `
+            <div class="hist-item">
+              <div>
+                <div class="hist-disc">${h.disciplina}</div>
+                <div class="hist-sub">${h.maestro_nombre ? 'Maestro: ' + h.maestro_nombre : ''}${h.duracion_meses ? ' · ' + h.duracion_meses + ' meses' : ''}</div>
+              </div>
+              <span class="hist-badge ${badgeClass}" style="${badgeStyle}">${badgeText}</span>
+            </div>`;
+        }).join('')
+      : `<p style="font-size:12px;color:var(--mahogany);padding:8px 0;">Sin historial de prácticas todavía.</p>`;
+
+    // — Acciones aceptar / rechazar —
+    window.aceptarDisc = async function() {
+      if (!solId || !_maestroId) { location.href = 'solicitudes.html'; return; }
+      const btn = document.querySelector('.btn-ac');
+      btn.textContent = 'Aceptando…'; btn.disabled = true;
+
+      await supabase.from('solicitudes').update({ estado: 'aceptada' }).eq('id', solId);
+      await supabase.from('relaciones').insert({
+        maestro_id:   _maestroId,
+        discipulo_id: discipuloId,
+        disciplina:   _solData?.disciplina || '',
+        estado:       'prueba',
+      });
+      location.href = 'solicitudes.html';
+    };
+
+    window.rechazarDisc = async function() {
+      if (!solId) { location.href = 'solicitudes.html'; return; }
+      await supabase.from('solicitudes').update({ estado: 'rechazada' }).eq('id', solId);
+      location.href = 'solicitudes.html';
+    };
   </script>
 </body>
 </html>
