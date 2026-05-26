@@ -12,7 +12,7 @@
     .quote-rotator{min-height:140px;margin-bottom:32px;}
     .quote-text{font-family:var(--font-serif);font-size:36px;font-weight:500;line-height:1.15;color:var(--text-primary);transition:opacity 0.6s;}
     .quote-text em{font-style:italic;color:var(--gold);}
-    .quote-author{font-size:11px;font-weight:300;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-ghost);margin-top:14px;transition:opacity 0.6s;}
+    .quote-author{font-size:11px;font-weight:300;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin-top:14px;transition:opacity 0.6s;}
     .hero-actions{display:flex;align-items:center;gap:20px;}
     .maestro-card{background:var(--night-mid);border:0.5px solid var(--border-soft);border-radius:16px;width:100%;max-width:340px;overflow:hidden;}
     .card-top{background:#2A1F14;padding:24px 24px 18px;display:flex;align-items:center;gap:14px;border-bottom:0.5px solid var(--border);}
@@ -142,7 +142,7 @@
       setTimeout(()=>{qt.innerHTML=quotes[i].t;qa.textContent=quotes[i].a;qt.style.opacity='1';qa.style.opacity='1';},anim?500:0);
     }
     setQ(0,false);
-    setInterval(()=>{qi=(qi+1)%quotes.length;setQ(qi,true);},5000);
+    setInterval(()=>{qi=(qi+1)%quotes.length;setQ(qi,true);},9000);
   </script>
 
   <!-- Modal ¿Tienes cuenta? -->
