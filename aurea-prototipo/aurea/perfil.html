@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi perfil · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .page{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 57px);overflow:hidden;}
+    .col-left{border-right:0.5px solid var(--border);padding:28px 24px;display:flex;flex-direction:column;gap:22px;background:var(--night-soft);overflow-y:auto;}
+    .role-toggle{display:flex;background:var(--night-mid);border:0.5px solid var(--border);border-radius:100px;padding:3px;gap:2px;}
+    .role-btn{flex:1;font-size:10px;font-weight:400;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);background:none;border:none;padding:7px 12px;border-radius:100px;cursor:pointer;transition:all 0.22s;text-align:center;}
+    .role-btn.active{background:var(--gold);color:var(--night);}
+    .profile-header{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;}
+    .big-avatar{width:88px;height:88px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:34px;font-weight:600;color:var(--night);border:2px solid var(--border-soft);position:relative;cursor:pointer;}
+    .avatar-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(28,20,16,0.6);display:flex;align-items:center;justify-content:center;font-size:22px;opacity:0;transition:opacity 0.2s;}
+    .big-avatar:hover .avatar-overlay{opacity:1;}
+    .profile-name{font-family:var(--font-serif);font-size:26px;font-weight:500;color:var(--text-primary);line-height:1.1;}
+    .profile-role-label{font-size:10px;font-weight:300;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-top:2px;}
+    .profile-location{font-size:11px;font-weight:300;color:var(--text-faint);margin-top:4px;}
+    .badge-v{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#854F0B;background:var(--night-deep);border:0.5px solid var(--border-gold);padding:4px 10px;border-radius:100px;}
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .stat-box{background:var(--night-mid);border:0.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;}
+    .stat-n{font-family:var(--font-serif);font-size:24px;font-weight:500;color:var(--gold);}
+    .stat-l{font-size:8px;font-weight:300;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);margin-top:3px;}
+    .tags-wrap{display:flex;flex-wrap:wrap;gap:5px;}
+    .tag{font-size:10px;color:var(--text-muted);border:0.5px solid var(--border);padding:4px 10px;border-radius:100px;}
+    .tag.gold{color:var(--gold);border-color:var(--border-gold);}
+    .avail-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);}
+    .avail-row:last-child{border-bottom:none;}
+    .avail-label{font-size:11px;font-weight:300;color:var(--text-muted);}
+    .avail-val{font-size:11px;font-weight:400;color:var(--text-primary);}
+    .btn-editar{width:100%;font-size:11px;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);background:none;border:0.5px solid var(--gold);padding:11px;border-radius:100px;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+    .btn-editar:hover{background:var(--night-deep);}
+    .constancia-wrap{background:var(--night-mid);border:0.5px solid var(--border);border-radius:10px;padding:20px;text-align:center;}
+    .constancia-bar-wrap{background:var(--border);border-radius:100px;height:6px;margin:12px 0;overflow:hidden;}
+    .constancia-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,#A67828,#C8973A);}
+    .constancia-n{font-family:var(--font-serif);font-size:40px;font-weight:500;color:var(--gold);line-height:1;}
+    .constancia-sub{font-size:11px;font-weight:300;color:var(--text-faint);margin-top:4px;}
+    .col-right{padding:28px 32px;display:flex;flex-direction:column;gap:28px;overflow-y:auto;}
+    .bio-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);margin-bottom:12px;}
+    .bio-text{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--text-secondary);line-height:1.7;}
+    .tl-item{display:grid;grid-template-columns:80px 1fr;gap:16px;margin-bottom:14px;}
+    .tl-year{font-size:11px;font-weight:300;color:var(--text-faint);padding-top:2px;}
+    .tl-title{font-size:13px;font-weight:400;color:var(--text-primary);margin-bottom:2px;}
+    .tl-sub{font-size:11px;font-weight:300;color:var(--text-faint);}
+    .review-item{background:var(--night-mid);border:0.5px solid var(--border);border-radius:8px;padding:16px;margin-bottom:10px;}
+    .review-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+    .review-author{font-size:12px;font-weight:400;color:var(--text-primary);}
+    .review-stars{font-size:11px;color:var(--gold);letter-spacing:2px;}
+    .review-disc{font-size:10px;font-weight:300;color:var(--text-faint);margin-bottom:6px;}
+    .review-text{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-muted);line-height:1.6;}
+    .disc-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);}
+    .disc-row:last-child{border-bottom:none;}
+    .disc-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:12px;font-weight:600;color:var(--night);flex-shrink:0;}
+    .disc-info{flex:1;}
+    .disc-name{font-size:12px;font-weight:400;color:var(--text-primary);}
+    .disc-sub{font-size:10px;font-weight:300;color:var(--text-faint);}
+    .disc-since{font-size:10px;color:var(--text-faint);}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="page">
+    <div class="col-left">
+      <div class="role-toggle">
+        <button class="role-btn active" onclick="setRole('maestro',this)">Maestro</button>
+        <button class="role-btn" onclick="setRole('discipulo',this)">Discípulo</button>
+      </div>
+      <div class="profile-header">
+        <div class="big-avatar">RM<div class="avatar-overlay">📷</div></div>
+        <div><div class="profile-name">Rafael Montoya</div><div class="profile-role-label" id="role-label">Maestro · Filosofía estoica</div><div class="profile-location">Madrid · Presencial y online</div></div>
+        <span class="badge-v">✦ Verificado por Aurea</span>
+      </div>
+      <div id="stats-maestro" class="stats-grid">
+        <div class="stat-box"><div class="stat-n">4.9</div><div class="stat-l">Reputación</div></div>
+        <div class="stat-box"><div class="stat-n">12</div><div class="stat-l">Años exp.</div></div>
+        <div class="stat-box"><div class="stat-n">3</div><div class="stat-l">Discípulos</div></div>
+        <div class="stat-box"><div class="stat-n">1</div><div class="stat-l">Plaza libre</div></div>
+      </div>
+      <div id="stats-discipulo" class="constancia-wrap hidden">
+        <span class="section-label">Constancia</span>
+        <div class="constancia-n">82</div>
+        <div class="constancia-bar-wrap"><div class="constancia-bar" style="width:82%;"></div></div>
+        <div class="constancia-sub">de 100 puntos</div>
+      </div>
+      <div id="tags-maestro">
+        <span class="section-label">Hashtags</span>
+        <div class="tags-wrap"><span class="tag gold">#presencial</span><span class="tag gold">#riguroso</span><span class="tag gold">#avanzado</span><span class="tag">#online</span><span class="tag">#teórico</span></div>
+      </div>
+      <div id="tags-discipulo" class="hidden">
+        <span class="section-label">Hashtags</span>
+        <div class="tags-wrap"><span class="tag gold">#presencial</span><span class="tag gold">#comprometido</span><span class="tag">#principiante</span></div>
+      </div>
+      <div id="avail-maestro">
+        <span class="section-label">Disponibilidad</span>
+        <div class="avail-row"><span class="avail-label">Días</span><span class="avail-val">Martes y jueves</span></div>
+        <div class="avail-row"><span class="avail-label">Horas semanales</span><span class="avail-val">3–4 h</span></div>
+        <div class="avail-row"><span class="avail-label">Nivel</span><span class="avail-val">Intermedio / avanzado</span></div>
+        <div class="avail-row"><span class="avail-label">Radio presencial</span><span class="avail-val">30 km</span></div>
+      </div>
+      <div id="avail-discipulo" class="hidden">
+        <span class="section-label">Disponibilidad</span>
+        <div class="avail-row"><span class="avail-label">Días</span><span class="avail-val">Lunes y miércoles</span></div>
+        <div class="avail-row"><span class="avail-label">Horas semanales</span><span class="avail-val">2–3 h</span></div>
+        <div class="avail-row"><span class="avail-label">Prácticas activas</span><span class="avail-val">2 / 3</span></div>
+      </div>
+      <button class="btn-editar" onclick="location.href='perfil-edicion.html'">✎ Editar perfil</button>
+    </div>
+    <div class="col-right" id="col-right"></div>
+  </div>
+  <div id="chat-container"></div>
+  <script src="js/components.js"></script>
+  <script>
+    document.getElementById('nav-container').innerHTML = renderNavAuth('perfil');
+    const CONTENT={
+      maestro:`<div><div class="bio-title">Sobre mí</div><p class="bio-text">"Llevo doce años estudiando y enseñando filosofía estoica, no como curiosidad académica sino como práctica diaria. No busco estudiantes, busco discípulos que quieran comprometerse de verdad."</p></div><div class="divider"></div><div><span class="section-label">Trayectoria</span><div class="tl-item"><span class="tl-year">2012–hoy</span><div><div class="tl-title">Práctica y estudio independiente del estoicismo</div><div class="tl-sub">Marco Aurelio, Epicteto, Séneca</div></div></div><div class="tl-item"><span class="tl-year">2020</span><div><div class="tl-title">Licenciatura en Filosofía — UCM</div><div class="tl-sub">Especialidad en filosofía clásica y helenística</div></div></div></div><div class="divider"></div><div><span class="section-label">Reseñas de ex-discípulos</span><div class="review-item"><div class="review-header"><span class="review-author">Claudia F.</span><span class="review-stars">★★★★★</span></div><div class="review-disc">Filosofía estoica · 2 años</div><p class="review-text">"Rafael no enseña filosofía, la vive. Uno de los maestros más honestos que he tenido."</p></div></div><div class="divider"></div><div><span class="section-label">Discípulos actuales</span><div class="disc-row"><div class="disc-avatar" style="background:#7A4F2A;">JM</div><div class="disc-info"><div class="disc-name">Javier M.</div><div class="disc-sub">Filosofía estoica</div></div><span class="disc-since">Desde hace 8 meses</span></div><div class="disc-row"><div class="disc-avatar" style="background:#3B6D11;">LP</div><div class="disc-info"><div class="disc-name">Laura P.</div><div class="disc-sub">Filosofía estoica</div></div><span class="disc-since">Desde hace 5 meses</span></div></div>`,
+      discipulo:`<div><div class="bio-title">Por qué aprendo</div><p class="bio-text">"Llevo años acumulando conocimiento de forma autodidacta, pero sé que hay cosas que solo se aprenden de otra persona."</p></div><div class="divider"></div><div><span class="section-label">Disciplinas activas</span><div class="disc-row"><div class="disc-avatar" style="background:#534AB7;">AO</div><div class="disc-info"><div class="disc-name">Andrés Ortega</div><div class="disc-sub">Astronomía · Maestro aceptado</div></div><span class="disc-since">Desde hace 85 días</span></div></div><div class="divider"></div><div><span class="section-label">Referencias de mis maestros</span><div class="review-item"><div class="review-header"><span class="review-author">Andrés Ortega — Astronomía</span><span class="review-stars">★★★★★</span></div><div class="review-disc">85 días · Relación activa</div><p class="review-text">"Rafael es curioso, riguroso y viene a cada sesión habiendo hecho el trabajo."</p></div></div>`
+    };
+    function setRole(role,btn){
+      document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const esMaestro=role==='maestro';
+      document.getElementById('role-label').textContent=esMaestro?'Maestro · Filosofía estoica':'Discípulo · Astronomía';
+      ['stats-maestro','tags-maestro','avail-maestro'].forEach(id=>document.getElementById(id).classList.toggle('hidden',!esMaestro));
+      ['stats-discipulo','tags-discipulo','avail-discipulo'].forEach(id=>document.getElementById(id).classList.toggle('hidden',esMaestro));
+      document.getElementById('col-right').innerHTML=CONTENT[role];
+    }
+    setRole('maestro',document.querySelector('.role-btn.active'));
+  </script>
+</body>
+</html>

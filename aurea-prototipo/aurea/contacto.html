@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .page{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 57px - 200px);}
+    .col-left{padding:56px;border-right:0.5px solid var(--border);display:flex;flex-direction:column;gap:32px;background:var(--night-soft);}
+    .page-title{font-family:var(--font-serif);font-size:48px;font-weight:500;color:var(--text-primary);line-height:1.05;}
+    .page-title em{font-style:italic;color:var(--gold);}
+    .page-sub{font-size:13px;font-weight:300;color:var(--text-muted);line-height:1.8;}
+    .contact-item{display:flex;align-items:flex-start;gap:16px;padding:20px 0;border-bottom:0.5px solid var(--border);}
+    .contact-item:last-child{border-bottom:none;}
+    .contact-icon{font-size:18px;flex-shrink:0;margin-top:2px;}
+    .contact-label{font-size:9px;font-weight:400;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-faint);margin-bottom:5px;}
+    .contact-val{font-family:var(--font-serif);font-size:17px;font-weight:500;color:var(--text-primary);}
+    .contact-sub{font-size:11px;font-weight:300;color:var(--text-muted);margin-top:3px;}
+    .col-right{padding:56px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;}
+    .form-title{font-family:var(--font-serif);font-size:22px;font-weight:500;color:var(--text-primary);}
+    .motivo-chips{display:flex;flex-wrap:wrap;gap:6px;}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .field-textarea{background:var(--night-mid);border:0.5px solid var(--border);border-radius:6px;padding:10px 14px;font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-primary);outline:none;resize:none;min-height:120px;line-height:1.6;width:100%;transition:border-color 0.2s;}
+    .field-textarea:focus{border-color:var(--gold);}
+    .field-textarea::placeholder{color:var(--text-ghost);}
+    .success-msg{display:none;background:#1A2A12;border:0.5px solid #3B6D1144;border-radius:10px;padding:20px 24px;text-align:center;}
+    .success-msg.show{display:block;}
+    .success-icon{font-size:28px;margin-bottom:8px;}
+    .success-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);margin-bottom:6px;}
+    .success-sub{font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.6;}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="page">
+    <div class="col-left">
+      <div><div class="eyebrow" style="margin-bottom:16px;">Contacto</div><h1 class="page-title">Estamos<br>aquí para<br><em>escucharte.</em></h1></div>
+      <p class="page-sub">Aurea es un proyecto pequeño y humano. Detrás hay personas reales que leen cada mensaje.</p>
+      <div>
+        <div class="contact-item"><span class="contact-icon">✉</span><div><div class="contact-label">Email general</div><div class="contact-val">hola@aurea.app</div><div class="contact-sub">Respondemos en 24–48 horas</div></div></div>
+        <div class="contact-item"><span class="contact-icon">⚖</span><div><div class="contact-label">Incidencias y moderación</div><div class="contact-val">incidencias@aurea.app</div><div class="contact-sub">Para conflictos entre usuarios que requieren revisión humana</div></div></div>
+        <div class="contact-item"><span class="contact-icon">📰</span><div><div class="contact-label">Prensa y colaboraciones</div><div class="contact-val">prensa@aurea.app</div><div class="contact-sub">Medios, podcasts, colaboraciones institucionales</div></div></div>
+      </div>
+    </div>
+    <div class="col-right">
+      <div class="form-title">Envíanos un mensaje</div>
+      <div>
+        <span class="section-label" style="margin-bottom:8px;">Motivo</span>
+        <div class="motivo-chips">
+          <span class="chip on" onclick="selMotivo(this)">Consulta general</span>
+          <span class="chip" onclick="selMotivo(this)">Sugerencia</span>
+          <span class="chip" onclick="selMotivo(this)">Incidencia</span>
+          <span class="chip" onclick="selMotivo(this)">Prensa</span>
+          <span class="chip" onclick="selMotivo(this)">Colaboración</span>
+          <span class="chip" onclick="selMotivo(this)">Otro</span>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-wrap"><span class="field-label">Nombre</span><input class="field-input" type="text" placeholder="Tu nombre"></div>
+        <div class="field-wrap"><span class="field-label">Email</span><input class="field-input" type="email" placeholder="tu@correo.com"></div>
+      </div>
+      <div class="field-wrap"><span class="field-label">Mensaje</span><textarea class="field-textarea" placeholder="Cuéntanos lo que necesitas…"></textarea></div>
+      <button class="btn-primary" id="btn-enviar" onclick="enviar()" style="width:100%;">Enviar mensaje</button>
+      <div class="success-msg" id="success">
+        <div class="success-icon">✦</div>
+        <div class="success-title">Mensaje enviado</div>
+        <div class="success-sub">Lo hemos recibido. Te responderemos en 24–48 horas.</div>
+      </div>
+    </div>
+  </div>
+  <div id="footer-container"></div>
+  <div id="chat-container"></div>
+  <script src="js/components.js"></script>
+  <script>
+    document.getElementById('nav-container').innerHTML = renderNavPublic('contacto');
+    document.getElementById('footer-container').innerHTML = renderFooter();
+    function selMotivo(el){document.querySelectorAll('.motivo-chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
+    function enviar(){document.getElementById('btn-enviar').style.display='none';document.getElementById('success').classList.add('show');}
+  </script>
+</body>
+</html>

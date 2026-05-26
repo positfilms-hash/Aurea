@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Periodo de prueba · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    body{overflow:hidden;}
+    .layout{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 57px);}
+    .col-left{border-right:0.5px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--night-soft);}
+    .col-head{padding:16px 20px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+    .col-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:14px;font-weight:600;color:var(--night);flex-shrink:0;}
+    .col-head-name{font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--text-primary);}
+    .col-head-sub{font-size:10px;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-top:2px;}
+    .sesiones-title{padding:14px 20px 8px;font-size:9px;font-weight:400;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-faint);border-bottom:0.5px solid var(--border);flex-shrink:0;}
+    .sesiones-list{flex:1;overflow-y:auto;padding:8px 0;}
+    .sesion-item{padding:12px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:0.5px solid var(--border);transition:background 0.15s;}
+    .sesion-item:hover{background:var(--night-mid);}
+    .sesion-num{font-family:var(--font-serif);font-size:22px;font-weight:400;color:var(--text-faint);width:28px;flex-shrink:0;text-align:center;}
+    .sesion-n{color:var(--gold);}
+    .sesion-info{flex:1;}
+    .sesion-title{font-size:12px;font-weight:400;color:var(--text-primary);margin-bottom:2px;}
+    .sesion-fecha{font-size:10px;font-weight:300;color:var(--text-faint);}
+    .sesion-badge{font-size:8px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;padding:3px 8px;border-radius:100px;white-space:nowrap;flex-shrink:0;}
+    .sb-done{color:var(--green);background:#1A2A12;border:0.5px solid #3B6D1144;}
+    .sb-today{color:var(--gold);background:var(--night-deep);border:0.5px solid var(--border-gold);}
+    .sb-pending{color:var(--text-faint);background:var(--night-mid);border:0.5px solid var(--border);}
+    .progress-section{padding:14px 20px;border-top:0.5px solid var(--border);flex-shrink:0;}
+    .prog-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+    .prog-text{font-size:10px;font-weight:300;color:var(--text-muted);}
+    .prog-pct{font-family:var(--font-serif);font-size:13px;color:var(--gold);}
+    .prog-bar{height:4px;background:var(--border);border-radius:100px;overflow:hidden;}
+    .prog-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#A67828,#C8973A);}
+    .decision-band{padding:14px 20px;border-top:0.5px solid var(--border);background:var(--night-mid);flex-shrink:0;display:flex;gap:8px;}
+    .btn-decision{flex:1;font-family:var(--font-serif);font-size:14px;font-style:italic;padding:11px;border-radius:100px;cursor:pointer;transition:all 0.2s;border:none;}
+    .btn-accept{color:var(--night);background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));box-shadow:0 4px 12px #C8973A33;}
+    .btn-cancel{color:var(--text-muted);background:none;border:0.5px solid var(--border);}
+    .btn-cancel:hover{color:var(--text-primary);border-color:var(--border-soft);}
+    .col-right{display:flex;flex-direction:column;overflow:hidden;}
+    .chat-header{padding:14px 20px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .chat-title{font-family:var(--font-serif);font-size:17px;font-weight:500;color:var(--text-primary);}
+    .chat-sub{font-size:10px;font-weight:300;color:var(--text-faint);}
+    .chat-badge{font-size:9px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:100px;color:var(--purple);background:#1A1830;border:0.5px solid #53489744;}
+    .messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px;}
+    .msg{max-width:70%;display:flex;flex-direction:column;gap:3px;}
+    .msg.mine{align-self:flex-end;}
+    .msg.theirs{align-self:flex-start;}
+    .msg-bubble{padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.5;}
+    .msg.theirs .msg-bubble{background:var(--night-mid);border:0.5px solid var(--border);border-radius:2px 10px 10px 10px;}
+    .msg.mine .msg-bubble{background:var(--night-deep);border:0.5px solid var(--border-gold);border-radius:10px 2px 10px 10px;}
+    .msg-meta{font-size:9px;color:var(--text-ghost);}
+    .msg.mine .msg-meta{text-align:right;}
+    .chat-input-bar{padding:12px 16px;border-top:0.5px solid var(--border);display:flex;gap:8px;flex-shrink:0;}
+    .chat-textarea{flex:1;background:var(--night-mid);border:0.5px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-primary);outline:none;resize:none;height:44px;line-height:1.5;}
+    .chat-textarea:focus{border-color:var(--gold);}
+    .chat-textarea::placeholder{color:var(--text-ghost);}
+    .chat-send-btn{background:var(--gold);border:none;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+    .modal-title{font-family:var(--font-serif);font-size:22px;font-weight:500;color:var(--text-primary);}
+    .modal-sub{font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.7;}
+    .modal-ta{background:var(--night-soft);border:0.5px solid var(--border-soft);border-radius:8px;padding:12px;font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-primary);outline:none;resize:none;height:90px;width:100%;margin-top:4px;}
+    .modal-ta:focus{border-color:var(--gold);}
+    .modal-ta::placeholder{color:var(--text-faint);}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+    .btn-mb{font-size:11px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-faint);background:none;border:0.5px solid var(--border);padding:9px 16px;border-radius:100px;cursor:pointer;}
+    .btn-mac{font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:var(--night);background:var(--gold);border:none;padding:9px 20px;border-radius:100px;cursor:pointer;}
+    .btn-mca{font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-primary);background:var(--red);border:none;padding:9px 20px;border-radius:100px;cursor:pointer;}
+    .sobre-cerrado{text-align:center;padding:24px;background:var(--night-soft);border:0.5px solid var(--border-gold);border-radius:12px;margin:8px 0;}
+    .sobre-icon{font-size:36px;margin-bottom:10px;}
+    .sobre-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);margin-bottom:6px;}
+    .sobre-sub{font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.6;}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="layout">
+    <div class="col-left">
+      <div class="col-head">
+        <div class="col-avatar" style="background:#993556;">SL</div>
+        <div><div class="col-head-name">Sofía Llorente</div><div class="col-head-sub">Filosofía estoica · Discípulo</div></div>
+      </div>
+      <div class="sesiones-title">Sesiones del periodo de prueba</div>
+      <div class="sesiones-list">
+        <div class="sesion-item"><span class="sesion-num sesion-n">1</span><div class="sesion-info"><div class="sesion-title">Primera sesión</div><div class="sesion-fecha">15 mayo 2026 · 18:00h</div></div><span class="sesion-badge sb-done">✓ Completada</span></div>
+        <div class="sesion-item"><span class="sesion-num sesion-n">2</span><div class="sesion-info"><div class="sesion-title">Segunda sesión</div><div class="sesion-fecha">Hoy · 19:00h</div></div><span class="sesion-badge sb-today">Hoy</span></div>
+        <div class="sesion-item"><span class="sesion-num" style="color:var(--border);">3</span><div class="sesion-info"><div class="sesion-title">Tercera sesión</div><div class="sesion-fecha">Por acordar</div></div><span class="sesion-badge sb-pending">Pendiente</span></div>
+      </div>
+      <div class="progress-section">
+        <div class="prog-label"><span class="prog-text">Días de prueba transcurridos</span><span class="prog-pct">10 / 30</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:33%;"></div></div>
+      </div>
+      <div class="decision-band">
+        <button class="btn-decision btn-accept" onclick="openModal('aceptar')">Aceptar la cadena</button>
+        <button class="btn-decision btn-cancel" onclick="openModal('cancelar')">Cancelar</button>
+      </div>
+    </div>
+    <div class="col-right">
+      <div class="chat-header"><div><div class="chat-title">Sofía Llorente</div><div class="chat-sub">Periodo de prueba activo</div></div><span class="chat-badge">⏳ En prueba · 10 días</span></div>
+      <div class="messages" id="messages">
+        <div class="msg theirs"><div class="msg-bubble">Hola Rafael, muchas gracias por aceptar mi solicitud. Llevo meses buscando alguien que enseñe estoicismo de verdad, no como moda.</div><div class="msg-meta">Sofía · 15 mayo</div></div>
+        <div class="msg mine"><div class="msg-bubble">Gracias por el mensaje, Sofía. Vi tu perfil y me pareció serio. ¿Qué estás leyendo ahora?</div><div class="msg-meta">Tú · 15 mayo</div></div>
+        <div class="msg theirs"><div class="msg-bubble">Estoy con el Manual de Epicteto. Ya lo he leído dos veces pero sigo sin entender bien la distinción entre lo que depende de nosotros y lo que no.</div><div class="msg-meta">Sofía · 15 mayo</div></div>
+        <div class="msg mine"><div class="msg-bubble">Eso es exactamente lo que trabajaremos en la primera sesión. No se entiende leyendo, se entiende aplicando. Nos vemos mañana a las 18h.</div><div class="msg-meta">Tú · 15 mayo</div></div>
+        <div class="msg theirs"><div class="msg-bubble">La sesión de ayer fue muy distinta a todo lo que esperaba. No sé si mejor o peor, pero diferente. Necesito unos días para digerirlo.</div><div class="msg-meta">Sofía · 17 mayo</div></div>
+        <div class="msg mine"><div class="msg-bubble">Eso es buena señal. Si todo encajara a la primera no estaría enseñando nada nuevo. Tómate tu tiempo.</div><div class="msg-meta">Tú · 17 mayo</div></div>
+        <div class="msg theirs"><div class="msg-bubble">Preparada para hoy. He hecho los ejercicios del diario que me propusiste. ¿A las 19h?</div><div class="msg-meta">Sofía · Hoy</div></div>
+      </div>
+      <div class="chat-input-bar">
+        <textarea class="chat-textarea" id="msg-input" placeholder="Escribe un mensaje…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+        <button class="chat-send-btn" onclick="sendMsg()"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8L14 2L8 14L7 9L2 8Z" fill="#1C1410"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal aceptar -->
+  <div class="overlay" id="modal-aceptar">
+    <div class="modal" style="width:440px;">
+      <div class="sobre-cerrado">
+        <div class="sobre-icon">◎</div>
+        <div class="sobre-title">Decisión en sobre cerrado</div>
+        <div class="sobre-sub">Si confirmas, tu decisión quedará registrada pero Sofía no la verá hasta que ella también decida.<br>Si ambos aceptáis, la cadena quedará consolidada.</div>
+      </div>
+      <div class="modal-actions"><button class="btn-mb" onclick="closeModals()">Volver</button><button class="btn-mac" onclick="closeModals()">Confirmar aceptación</button></div>
+    </div>
+  </div>
+
+  <!-- Modal cancelar -->
+  <div class="overlay" id="modal-cancelar">
+    <div class="modal" style="width:440px;">
+      <div class="modal-title">Cancelar el periodo de prueba</div>
+      <div class="modal-sub">Puedes dejar un mensaje opcional para Sofía. No es obligatorio, pero puede ser un gesto generoso.</div>
+      <textarea class="modal-ta" placeholder="Un mensaje de despedida (opcional)…"></textarea>
+      <div class="modal-actions"><button class="btn-mb" onclick="closeModals()">Volver</button><button class="btn-mca" onclick="closeModals()">Cancelar el periodo</button></div>
+    </div>
+  </div>
+
+  <div id="chat-container"></div>
+  <script src="js/components.js"></script>
+  <script>
+    document.getElementById('nav-container').innerHTML = renderNavAuth('relaciones');
+    function sendMsg(){const t=document.getElementById('msg-input');const v=t.value.trim();if(!v)return;const msgs=document.getElementById('messages');const d=document.createElement('div');d.className='msg mine';d.innerHTML=`<div class="msg-bubble">${v}</div><div class="msg-meta">Tú · Ahora</div>`;msgs.appendChild(d);t.value='';msgs.scrollTop=msgs.scrollHeight;}
+    function openModal(type){document.getElementById('modal-'+type).classList.add('open');}
+    function closeModals(){document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('open'));}
+    document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)closeModals();}));
+  </script>
+</body>
+</html>

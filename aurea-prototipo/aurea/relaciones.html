@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis relaciones · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    body{overflow:hidden;}
+    .layout{display:grid;grid-template-columns:200px 1fr;height:calc(100vh - 57px);}
+    .sidebar{border-right:0.5px solid var(--border);padding:20px 16px;display:flex;flex-direction:column;gap:18px;background:var(--night-soft);overflow-y:auto;}
+    .filter-chips{display:flex;flex-direction:column;gap:4px;}
+    .chip-side{font-size:11px;font-weight:300;color:var(--text-muted);border:0.5px solid var(--border);padding:7px 12px;border-radius:6px;cursor:pointer;transition:all 0.18s;background:none;text-align:left;display:flex;align-items:center;justify-content:space-between;}
+    .chip-side:hover,.chip-side.on{color:var(--gold);border-color:var(--gold);background:var(--night-deep);}
+    .chip-count{font-size:10px;color:var(--text-faint);}
+    .chip-side.on .chip-count{color:rgba(200,151,58,0.4);}
+    .filter-divider{height:0.5px;background:var(--border);}
+    .content{display:flex;flex-direction:column;overflow:hidden;}
+    .content-header{padding:16px 24px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
+    .content-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);}
+    .content-sub{font-size:11px;font-weight:300;color:var(--text-faint);margin-top:2px;}
+    .col-header{display:grid;grid-template-columns:4px 44px 1fr 110px 110px 1fr;gap:16px;padding:8px 24px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
+    .col-h{font-size:8px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-ghost);}
+    .list{flex:1;overflow-y:auto;}
+    .rel-row{display:grid;grid-template-columns:4px 44px 1fr 110px 110px 1fr;gap:16px;padding:14px 24px;border-bottom:0.5px solid var(--border);align-items:center;transition:background 0.15s;cursor:pointer;}
+    .rel-row:hover{background:var(--night-mid);}
+    .rel-row.faded{opacity:0.5;}
+    .ind{width:4px;border-radius:100px;flex-shrink:0;align-self:stretch;}
+    .ind.consolidada{background:var(--gold);}
+    .ind.prueba{background:var(--purple);}
+    .ind.finalizada{background:var(--border);}
+    .avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:15px;font-weight:600;color:var(--text-primary);flex-shrink:0;}
+    .rel-nombre{font-family:var(--font-serif);font-size:15px;font-weight:500;color:var(--text-primary);margin-bottom:2px;}
+    .rel-disc{font-size:10px;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);}
+    .rel-rol{font-size:10px;font-weight:300;color:var(--text-faint);margin-top:2px;}
+    .rel-desde{font-size:11px;font-weight:300;color:var(--text-muted);}
+    .rel-duracion{font-size:10px;font-weight:300;color:var(--text-faint);margin-top:2px;}
+    .rel-actions{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
+    .btn-small{font-family:var(--font-serif);font-size:12px;font-style:italic;color:var(--text-muted);background:none;border:0.5px solid var(--border);padding:6px 12px;border-radius:100px;cursor:pointer;transition:all 0.18s;white-space:nowrap;}
+    .btn-small:hover{color:var(--gold);border-color:var(--gold);}
+    .btn-small.warn:hover{color:var(--amber);border-color:var(--amber);}
+    .btn-small.danger:hover{color:var(--red);border-color:var(--red);}
+    .btn-small.disabled{opacity:0.3;cursor:not-allowed;pointer-events:none;}
+    .plazas-bar{padding:10px 24px;border-top:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:20px;background:var(--night-soft);}
+    .plaza-item{display:flex;align-items:center;gap:8px;}
+    .plaza-dot{width:8px;height:8px;border-radius:50%;}
+    .plaza-label{font-size:10px;font-weight:300;color:var(--text-faint);}
+    .plaza-n{font-size:10px;font-weight:400;color:var(--text-primary);}
+    .modal-title{font-family:var(--font-serif);font-size:22px;font-weight:500;color:var(--text-primary);}
+    .modal-sub{font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.7;}
+    .modal-textarea{background:var(--night-soft);border:0.5px solid var(--border-soft);border-radius:8px;padding:12px;font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-primary);outline:none;resize:none;height:90px;width:100%;}
+    .modal-textarea:focus{border-color:var(--gold);}
+    .modal-textarea::placeholder{color:var(--text-faint);}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+    .btn-modal-back{font-size:11px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-faint);background:none;border:0.5px solid var(--border);padding:9px 16px;border-radius:100px;cursor:pointer;}
+    .btn-modal-warn{font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-primary);background:var(--amber);border:none;padding:9px 16px;border-radius:100px;cursor:pointer;}
+    .btn-modal-end{font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-primary);background:var(--red);border:none;padding:9px 16px;border-radius:100px;cursor:pointer;}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="layout">
+    <aside class="sidebar">
+      <div><span class="section-label">Mostrar</span><div class="filter-chips"><div class="chip-side on">Todas <span class="chip-count">5</span></div><div class="chip-side">Consolidadas <span class="chip-count">3</span></div><div class="chip-side">En prueba <span class="chip-count">1</span></div><div class="chip-side">Finalizadas <span class="chip-count">1</span></div></div></div>
+      <div class="filter-divider"></div>
+      <div><span class="section-label">Rol</span><div class="filter-chips"><div class="chip-side on">Todos</div><div class="chip-side">Como maestro</div><div class="chip-side">Como discípulo</div></div></div>
+      <div class="filter-divider"></div>
+      <div><span class="section-label">Ordenar</span><div class="filter-chips"><div class="chip-side on">Más recientes</div><div class="chip-side">Más antiguas</div><div class="chip-side">Duración</div></div></div>
+    </aside>
+    <div class="content">
+      <div class="content-header"><div class="content-title">Mis relaciones</div><div class="content-sub">5 relaciones · 3 consolidadas · 1 en prueba · 1 finalizada</div></div>
+      <div class="col-header"><div></div><div></div><div class="col-h">Persona</div><div class="col-h">Estado</div><div class="col-h">Desde</div><div class="col-h"></div></div>
+      <div class="list">
+        <div class="rel-row"><div class="ind consolidada"></div><div class="avatar" style="background:#7A4F2A;">JM</div><div><div class="rel-nombre">Javier Molina</div><div class="rel-disc">Filosofía estoica</div><div class="rel-rol">Discípulo aceptado</div></div><span class="estado-badge badge-nueva">✦ Consolidada</span><div><div class="rel-desde">10 abril 2026</div><div class="rel-duracion">Hace 45 días</div></div><div class="rel-actions"><button class="btn-small" onclick="location.href='periodo-prueba.html'">Chat</button><button class="btn-small warn" onclick="openMediador('Javier Molina')">Incidencia</button><button class="btn-small danger" onclick="openFinalizar('Javier Molina')">Finalizar</button></div></div>
+        <div class="rel-row"><div class="ind consolidada"></div><div class="avatar" style="background:#3B6D11;">LP</div><div><div class="rel-nombre">Laura Pérez</div><div class="rel-disc">Filosofía estoica</div><div class="rel-rol">Discípulo aceptado</div></div><span class="estado-badge badge-nueva">✦ Consolidada</span><div><div class="rel-desde">5 mayo 2026</div><div class="rel-duracion">Hace 20 días</div></div><div class="rel-actions"><button class="btn-small">Chat</button><button class="btn-small warn" onclick="openMediador('Laura Pérez')">Incidencia</button><button class="btn-small danger disabled" title="Disponible tras 1 mes">Finalizar</button></div></div>
+        <div class="rel-row"><div class="ind consolidada"></div><div class="avatar" style="background:#534AB7;">AO</div><div><div class="rel-nombre">Andrés Ortega</div><div class="rel-disc">Astronomía</div><div class="rel-rol">Maestro aceptado</div></div><span class="estado-badge badge-nueva">✦ Consolidada</span><div><div class="rel-desde">1 marzo 2026</div><div class="rel-duracion">Hace 85 días</div></div><div class="rel-actions"><button class="btn-small">Chat</button><button class="btn-small warn" onclick="openMediador('Andrés Ortega')">Incidencia</button><button class="btn-small danger" onclick="openFinalizar('Andrés Ortega')">Finalizar</button></div></div>
+        <div class="rel-row"><div class="ind prueba"></div><div class="avatar" style="background:#993556;">SL</div><div><div class="rel-nombre">Sofía Llorente</div><div class="rel-disc">Filosofía estoica</div><div class="rel-rol">En periodo de prueba</div></div><span class="estado-badge badge-prueba">⏳ En prueba</span><div><div class="rel-desde">15 mayo 2026</div><div class="rel-duracion">Hace 10 días</div></div><div class="rel-actions"><button class="btn-small" onclick="location.href='periodo-prueba.html'">Chat</button></div></div>
+        <div class="rel-row faded"><div class="ind finalizada"></div><div class="avatar" style="background:var(--border);">CR</div><div><div class="rel-nombre">Carlos Rivas</div><div class="rel-disc">Filosofía estoica</div><div class="rel-rol">Discípulo · Finalizado</div></div><span class="estado-badge badge-vista">— Finalizada</span><div><div class="rel-desde">Ene – Mar 2026</div><div class="rel-duracion">3 meses</div></div><div class="rel-actions"></div></div>
+      </div>
+      <div class="plazas-bar">
+        <div class="plaza-item"><div class="plaza-dot" style="background:var(--gold);"></div><span class="plaza-label">Plazas ocupadas (maestro)</span><span class="plaza-n">3 / 4</span></div>
+        <div class="plaza-item"><div class="plaza-dot" style="background:var(--purple);"></div><span class="plaza-label">Prácticas activas (discípulo)</span><span class="plaza-n">2 / 3</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal incidencia -->
+  <div class="overlay" id="overlay-inc">
+    <div class="modal" style="width:400px;">
+      <div class="modal-title">Notificar incidencia</div>
+      <div class="modal-sub" id="inc-sub">Describe lo ocurrido. El equipo de Aurea lo revisará.</div>
+      <textarea class="modal-textarea" placeholder="Describe la incidencia…"></textarea>
+      <div class="modal-actions"><button class="btn-modal-back" onclick="closeModals()">Cancelar</button><button class="btn-modal-warn" onclick="closeModals()">Enviar incidencia</button></div>
+    </div>
+  </div>
+
+  <!-- Modal finalizar -->
+  <div class="overlay" id="overlay-fin">
+    <div class="modal" style="width:400px;">
+      <div class="modal-title">Finalizar la cadena</div>
+      <div class="modal-sub" id="fin-sub">Esta acción cerrará la relación de forma definitiva.</div>
+      <textarea class="modal-textarea" placeholder="Escribe un mensaje de cierre (opcional)…"></textarea>
+      <div class="modal-actions"><button class="btn-modal-back" onclick="closeModals()">Cancelar</button><button class="btn-modal-end" onclick="closeModals()">Finalizar cadena</button></div>
+    </div>
+  </div>
+
+  <div id="chat-container"></div>
+  <script src="js/components.js"></script>
+  <script>
+    document.getElementById('nav-container').innerHTML = renderNavAuth('relaciones');
+    document.querySelectorAll('.filter-chips .chip-side,.sidebar .chip-side').forEach(c=>{c.addEventListener('click',function(){this.parentElement.querySelectorAll('.chip-side').forEach(s=>s.classList.remove('on'));this.classList.add('on');});});
+    function openMediador(nombre){openMediador(nombre);}
+    function openFinalizar(nombre){document.getElementById('fin-sub').textContent=`Esta acción cerrará tu relación con ${nombre} de forma definitiva.`;document.getElementById('overlay-fin').classList.add('open');}
+    function closeModals(){document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('open'));}
+    document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)closeModals();}));
+
+    // Sobreescribir openMediador para usar el del modal nativo
+    window.openMediador = function(nombre){
+      document.getElementById('inc-sub').textContent=`Describe lo ocurrido con ${nombre}. El equipo de Aurea lo revisará de forma confidencial.`;
+      document.getElementById('overlay-inc').classList.add('open');
+    };
+  </script>
+</body>
+</html>

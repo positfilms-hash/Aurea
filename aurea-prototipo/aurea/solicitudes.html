@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis solicitudes · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    body{overflow:hidden;}
+    .layout{display:grid;grid-template-columns:200px 1fr;height:calc(100vh - 57px);}
+    .sidebar{border-right:0.5px solid var(--border);padding:20px 16px;display:flex;flex-direction:column;gap:18px;background:var(--night-soft);overflow-y:auto;}
+    .chip-side{font-size:11px;font-weight:300;color:var(--text-muted);border:0.5px solid var(--border);padding:7px 12px;border-radius:6px;cursor:pointer;transition:all 0.18s;background:none;text-align:left;display:flex;align-items:center;justify-content:space-between;width:100%;}
+    .chip-side:hover,.chip-side.on{color:var(--gold);border-color:var(--gold);background:var(--night-deep);}
+    .chip-count{font-size:10px;color:var(--text-faint);}
+    .chip-side.on .chip-count{color:rgba(200,151,58,0.4);}
+    .filter-chips{display:flex;flex-direction:column;gap:4px;}
+    .filter-divider{height:0.5px;background:var(--border);}
+    input[type=range]{width:100%;accent-color:var(--gold);}
+    .content{display:flex;flex-direction:column;overflow:hidden;}
+    .content-header{padding:16px 24px;border-bottom:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
+    .content-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);}
+    .content-sub{font-size:11px;font-weight:300;color:var(--text-faint);margin-top:2px;}
+    .col-header{display:grid;grid-template-columns:4px 44px 1fr 100px 80px 200px;gap:16px;padding:8px 24px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
+    .col-h{font-size:8px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-ghost);}
+    .list{flex:1;overflow-y:auto;}
+    .sol-row{display:grid;grid-template-columns:4px 44px 1fr 100px 80px 200px;gap:16px;padding:13px 24px;border-bottom:0.5px solid var(--border);align-items:center;transition:background 0.15s;}
+    .sol-row:hover{background:var(--night-mid);}
+    .ind{width:4px;border-radius:100px;flex-shrink:0;align-self:stretch;}
+    .ind.nueva{background:var(--gold);}
+    .ind.vista{background:var(--border-soft);}
+    .ind.aceptada{background:var(--green);}
+    .ind.rechazada{background:var(--red);}
+    .avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:15px;font-weight:600;color:var(--text-primary);flex-shrink:0;}
+    .sol-nombre{font-family:var(--font-serif);font-size:15px;font-weight:500;color:var(--text-primary);margin-bottom:2px;}
+    .sol-disc{font-size:10px;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);}
+    .sol-loc{font-size:10px;font-weight:300;color:var(--text-faint);margin-top:2px;}
+    .const-wrap{display:flex;flex-direction:column;gap:4px;}
+    .const-top{display:flex;align-items:center;justify-content:space-between;}
+    .const-n{font-family:var(--font-serif);font-size:13px;font-weight:500;color:var(--gold);}
+    .const-bar-bg{height:4px;background:var(--border);border-radius:100px;overflow:hidden;}
+    .const-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,#A67828,#C8973A);}
+    .sol-fecha{font-size:10px;font-weight:300;color:var(--text-faint);}
+    .sol-actions{display:flex;align-items:center;gap:6px;justify-content:flex-end;}
+    .btn-small{font-family:var(--font-serif);font-size:12px;font-style:italic;color:var(--text-muted);background:none;border:0.5px solid var(--border);padding:6px 12px;border-radius:100px;cursor:pointer;transition:all 0.18s;white-space:nowrap;}
+    .btn-small:hover{color:var(--gold);border-color:var(--gold);}
+    .btn-ac{font-family:var(--font-serif);font-size:12px;font-style:italic;color:var(--night);background:var(--gold);border:none;padding:6px 14px;border-radius:100px;cursor:pointer;white-space:nowrap;}
+    .btn-re{font-family:var(--font-serif);font-size:13px;color:var(--text-faint);background:none;border:0.5px solid var(--border);padding:5px 10px;border-radius:100px;cursor:pointer;}
+    .btn-re:hover{color:var(--red);border-color:var(--red);}
+    .plazas-bar{padding:10px 24px;border-top:0.5px solid var(--border);flex-shrink:0;display:flex;gap:20px;align-items:center;background:var(--night-soft);}
+    .plaza-item{display:flex;align-items:center;gap:8px;}
+    .plaza-dot{width:8px;height:8px;border-radius:50%;}
+    .plaza-label{font-size:10px;font-weight:300;color:var(--text-faint);}
+    .plaza-n{font-size:10px;font-weight:400;color:var(--text-primary);}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="layout">
+    <aside class="sidebar">
+      <div><span class="section-label">Estado</span><div class="filter-chips"><button class="chip-side on">Todas <span class="chip-count">8</span></button><button class="chip-side">Nuevas <span class="chip-count">3</span></button><button class="chip-side">Vistas <span class="chip-count">2</span></button><button class="chip-side">Aceptadas <span class="chip-count">2</span></button><button class="chip-side">Rechazadas <span class="chip-count">1</span></button></div></div>
+      <div class="filter-divider"></div>
+      <div><span class="section-label">Formato</span><div class="filter-chips"><button class="chip-side on">Todos</button><button class="chip-side">Presencial <span class="chip-count">5</span></button><button class="chip-side">Online <span class="chip-count">3</span></button></div></div>
+      <div class="filter-divider"></div>
+      <div><span class="section-label">Constancia</span><div class="filter-chips"><button class="chip-side on">Cualquiera</button><button class="chip-side">Alta · +80</button><button class="chip-side">Media · 50–80</button><button class="chip-side">Baja · −50</button></div></div>
+      <div class="filter-divider"></div>
+      <div><span class="section-label">Ordenar por</span><div class="filter-chips"><button class="chip-side on">Más recientes</button><button class="chip-side">Constancia</button><button class="chip-side">Distancia</button></div></div>
+    </aside>
+    <div class="content">
+      <div class="content-header"><div><div class="content-title">Solicitudes recibidas</div><div class="content-sub">8 solicitudes · 1 plaza disponible</div></div></div>
+      <div class="col-header"><div></div><div></div><div class="col-h">Discípulo</div><div class="col-h">Constancia</div><div class="col-h">Recibida</div><div class="col-h"></div></div>
+      <div class="list" id="lista"></div>
+      <div class="plazas-bar">
+        <div class="plaza-item"><div class="plaza-dot" style="background:var(--gold);"></div><span class="plaza-label">Plazas ocupadas</span><span class="plaza-n">3 / 4</span></div>
+        <div class="plaza-item"><div class="plaza-dot" style="background:var(--border);border:0.5px solid var(--text-faint);"></div><span class="plaza-label">Plaza libre</span><span class="plaza-n">1</span></div>
+      </div>
+    </div>
+  </div>
+  <div id="chat-container"></div>
+  <script src="js/components.js"></script>
+  <script>
+    document.getElementById('nav-container').innerHTML = renderNavAuth('solicitudes');
+    const DATA=[
+      {i:'JM',n:'Javier M.',d:'Filosofía estoica',loc:'Madrid · Presencial',c:82,fecha:'Hace 2 días',estado:'nueva',bg:'#7A4F2A'},
+      {i:'AP',n:'Ana P.',d:'Filosofía estoica',loc:'Online',c:91,fecha:'Hace 3 días',estado:'nueva',bg:'#3B6D11'},
+      {i:'CR',n:'Carlos R.',d:'Filosofía estoica',loc:'Madrid · Presencial',c:67,fecha:'Hace 4 días',estado:'nueva',bg:'#534AB7'},
+      {i:'LG',n:'Laura G.',d:'Filosofía estoica',loc:'Online',c:78,fecha:'Hace 6 días',estado:'vista',bg:'#993556'},
+      {i:'MF',n:'Marcos F.',d:'Filosofía estoica',loc:'Madrid · Presencial',c:55,fecha:'Hace 1 semana',estado:'vista',bg:'#185FA5'},
+      {i:'SL',n:'Sofía L.',d:'Filosofía estoica',loc:'Barcelona · Presencial',c:88,fecha:'Hace 1 semana',estado:'aceptada',bg:'#854F0B'},
+      {i:'DR',n:'Diego R.',d:'Filosofía estoica',loc:'Online',c:44,fecha:'Hace 10 días',estado:'rechazada',bg:'#0F6E56'},
+      {i:'NV',n:'Nuria V.',d:'Filosofía estoica',loc:'Madrid · Presencial',c:73,fecha:'Hace 12 días',estado:'aceptada',bg:'#712B13'},
+    ];
+    const LABEL={nueva:'Nueva',vista:'Vista',aceptada:'Aceptada',rechazada:'Rechazada'};
+    const ICON={nueva:'✦',vista:'◎',aceptada:'✓',rechazada:'✕'};
+    const BADGE={nueva:'badge-nueva',vista:'badge-vista',aceptada:'badge-aceptada',rechazada:'badge-rechazada'};
+    function acciones(e){
+      if(e==='aceptada')return`<span style="font-size:10px;font-style:italic;font-family:var(--font-serif);color:var(--green);">En periodo de prueba</span>`;
+      if(e==='rechazada')return`<span style="font-size:10px;font-style:italic;font-family:var(--font-serif);color:var(--red);">Solicitud rechazada</span>`;
+      return`<button class="btn-small" onclick="location.href='perfil-discipulo.html'">Ver perfil</button><button class="btn-ac">Aceptar</button><button class="btn-re">✕</button>`;
+    }
+    document.getElementById('lista').innerHTML=DATA.map(s=>`
+      <div class="sol-row">
+        <div class="ind ${s.estado}"></div>
+        <div class="avatar" style="background:${s.bg};">${s.i}</div>
+        <div><div class="sol-nombre">${s.n}</div><div class="sol-disc">${s.d}</div><div class="sol-loc">${s.loc}</div></div>
+        <div class="const-wrap"><div class="const-top"><span class="const-n">${s.c}</span><span style="font-size:9px;color:var(--text-ghost);">/ 100</span></div><div class="const-bar-bg"><div class="const-bar" style="width:${s.c}%;"></div></div></div>
+        <div><div class="sol-fecha">${s.fecha}</div><span class="estado-badge ${BADGE[s.estado]}">${ICON[s.estado]} ${LABEL[s.estado]}</span></div>
+        <div class="sol-actions">${acciones(s.estado)}</div>
+      </div>`).join('');
+    document.querySelectorAll('.filter-chips .chip-side').forEach(c=>{c.addEventListener('click',function(){this.parentElement.querySelectorAll('.chip-side').forEach(s=>s.classList.remove('on'));this.classList.add('on');});});
+  </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar perfil · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    body{overflow:hidden;}
+    .edit-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 28px;background:#2A1A08;border-bottom:0.5px solid var(--gold-dim);flex-shrink:0;}
+    .edit-bar-label{font-size:10px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);}
+    .edit-bar-actions{display:flex;gap:8px;}
+    .btn-preview{font-size:10px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);background:none;border:0.5px solid var(--border);padding:7px 14px;border-radius:100px;cursor:pointer;transition:all 0.2s;}
+    .btn-preview:hover{color:var(--text-primary);border-color:var(--border-soft);}
+    .btn-save{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--night);background:var(--gold);border:none;padding:7px 20px;border-radius:100px;cursor:pointer;}
+    .layout{display:grid;grid-template-columns:220px 1fr;height:calc(100vh - 57px - 41px);}
+    .sidebar{border-right:0.5px solid var(--border);background:var(--night-soft);overflow-y:auto;}
+    .tabs{display:flex;flex-direction:column;padding:16px 12px;gap:2px;}
+    .tab-btn{font-size:11px;font-weight:300;color:var(--text-muted);background:none;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;text-align:left;transition:all 0.18s;width:100%;display:flex;align-items:center;gap:10px;}
+    .tab-btn:hover{color:var(--text-primary);background:var(--night-mid);}
+    .tab-btn.active{color:var(--gold);background:var(--night-deep);}
+    .tab-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
+    .sidebar-info{padding:16px;border-top:0.5px solid var(--border);font-size:10px;font-weight:300;color:var(--text-ghost);line-height:1.7;}
+    .content{overflow-y:auto;padding:32px 48px;}
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+    .section-title{font-family:var(--font-serif);font-size:22px;font-weight:500;color:var(--text-primary);margin-bottom:24px;}
+    .edit-grid{display:flex;flex-direction:column;gap:18px;}
+    .edit-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .edit-field{display:flex;flex-direction:column;gap:6px;}
+    .edit-label{font-size:9px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-faint);}
+    .edit-input{background:var(--night-mid);border:0.5px solid var(--border);border-radius:6px;padding:11px 14px;font-size:13px;color:var(--text-primary);outline:none;transition:border-color 0.2s;width:100%;}
+    .edit-input:focus{border-color:var(--gold);}
+    .edit-input::placeholder{color:var(--text-ghost);}
+    .edit-textarea{background:var(--night-mid);border:0.5px solid var(--border);border-radius:6px;padding:11px 14px;font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--text-primary);outline:none;resize:none;height:120px;line-height:1.6;width:100%;transition:border-color 0.2s;}
+    .edit-textarea:focus{border-color:var(--gold);}
+    .edit-textarea::placeholder{color:var(--text-ghost);}
+    .avatar-section{display:flex;align-items:center;gap:20px;margin-bottom:8px;}
+    .edit-avatar{width:80px;height:80px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:30px;font-weight:600;color:var(--night);flex-shrink:0;}
+    .tl-block{background:var(--night-mid);border:0.5px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px;}
+    .tl-block-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .tl-block-title{font-size:12px;font-weight:400;color:var(--text-primary);}
+    .btn-del{font-size:11px;color:var(--text-faint);background:none;border:none;cursor:pointer;}
+    .btn-del:hover{color:var(--red);}
+    .btn-add{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-muted);background:none;border:0.5px solid var(--border-soft);padding:10px 20px;border-radius:100px;cursor:pointer;transition:all 0.2s;width:100%;}
+    .btn-add:hover{color:var(--gold);border-color:var(--gold);}
+    .req-block{background:var(--night-mid);border:0.5px solid var(--border);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;}
+    .toggle-desc{font-size:12px;font-weight:300;color:var(--text-muted);}
+    .toggle-label-sub{font-size:10px;font-weight:300;color:var(--text-faint);margin-top:2px;}
+    input[type=range]{width:100%;accent-color:var(--gold);}
+    .range-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text-ghost);margin-top:4px;}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="edit-bar">
+    <span class="edit-bar-label">✎ Modo edición activo</span>
+    <div class="edit-bar-actions">
+      <button class="btn-preview" onclick="location.href='perfil.html'">← Ver perfil</button>
+      <button class="btn-save" onclick="guardar()">Guardar cambios</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('perfil',this)"><span class="tab-icon">👤</span>Perfil</button>
+        <button class="tab-btn" onclick="showTab('trayectoria',this)"><span class="tab-icon">📋</span>Trayectoria</button>
+        <button class="tab-btn" onclick="showTab('requisitos',this)"><span class="tab-icon">✦</span>Requisitos mínimos</button>
+      </div>
+      <div class="sidebar-info">Los cambios no se publican hasta que pulses "Guardar cambios".</div>
+    </div>
+    <div class="content">
+      <!-- PERFIL -->
+      <div class="tab-panel active" id="tab-perfil">
+        <div class="section-title">Información del perfil</div>
+        <div class="edit-grid">
+          <div class="avatar-section"><div class="edit-avatar">RM</div><div><button class="btn-ghost" style="padding:8px 16px;margin-bottom:6px;">Subir foto</button><div style="font-size:10px;font-weight:300;color:var(--text-ghost);">JPG o PNG · Máx 2MB</div></div></div>
+          <div class="edit-row"><div class="edit-field"><span class="edit-label">Nombre</span><input class="edit-input" type="text" value="Rafael"></div><div class="edit-field"><span class="edit-label">Apellido</span><input class="edit-input" type="text" value="Montoya"></div></div>
+          <div class="edit-field"><span class="edit-label">Disciplina principal</span><input class="edit-input" type="text" value="Filosofía estoica"></div>
+          <div class="edit-row"><div class="edit-field"><span class="edit-label">Categoría</span><select class="edit-input" style="cursor:pointer;"><option selected>Filosofía</option><option>Artes</option><option>Oficios</option><option>Deportes</option></select></div><div class="edit-field"><span class="edit-label">Ubicación</span><input class="edit-input" type="text" value="Madrid, España"></div></div>
+          <div class="edit-field"><span class="edit-label">Bio (se mostrará en cursiva)</span><textarea class="edit-textarea" placeholder="Escribe tu bio…">Llevo doce años estudiando y enseñando filosofía estoica, no como curiosidad académica sino como práctica diaria. No busco estudiantes, busco discípulos que quieran comprometerse de verdad.</textarea></div>
+          <div class="edit-row"><div class="edit-field"><span class="edit-label">Formato</span><select class="edit-input" style="cursor:pointer;"><option selected>Presencial y online</option><option>Presencial</option><option>Online</option></select></div><div class="edit-field"><span class="edit-label">Disponibilidad</span><input class="edit-input" type="text" value="Martes y jueves, 3–4h semana"></div></div>
+          <div class="edit-field"><span class="edit-label">Hashtags (separados por comas)</span><input class="edit-input" type="text" value="#presencial, #riguroso, #avanzado, #online, #teórico"></div>
+          <div class="edit-row"><div class="edit-field"><span class="edit-label">Número máximo de discípulos</span><select class="edit-input" style="cursor:pointer;"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select></div><div class="edit-field"><span class="edit-label">Radio presencial (km)</span><input class="edit-input" type="number" value="30"></div></div>
+        </div>
+      </div>
+
+      <!-- TRAYECTORIA -->
+      <div class="tab-panel" id="tab-trayectoria">
+        <div class="section-title">Trayectoria</div>
+        <div id="tl-list">
+          <div class="tl-block"><div class="tl-block-header"><span class="tl-block-title">Entrada 1</span><button class="btn-del" onclick="this.closest('.tl-block').remove()">Eliminar</button></div><div style="display:flex;flex-direction:column;gap:10px;"><div class="edit-field"><span class="edit-label">Año o periodo</span><input class="edit-input" type="text" value="2012–hoy" placeholder="2018 / 2015–2020"></div><div class="edit-field"><span class="edit-label">Título</span><input class="edit-input" type="text" value="Práctica y estudio independiente del estoicismo"></div><div class="edit-field"><span class="edit-label">Descripción</span><input class="edit-input" type="text" value="Marco Aurelio, Epicteto, Séneca"></div></div></div>
+          <div class="tl-block"><div class="tl-block-header"><span class="tl-block-title">Entrada 2</span><button class="btn-del" onclick="this.closest('.tl-block').remove()">Eliminar</button></div><div style="display:flex;flex-direction:column;gap:10px;"><div class="edit-field"><span class="edit-label">Año o periodo</span><input class="edit-input" type="text" value="2020"></div><div class="edit-field"><span class="edit-label">Título</span><input class="edit-input" type="text" value="Licenciatura en Filosofía — UCM"></div><div class="edit-field"><span class="edit-label">Descripción</span><input class="edit-input" type="text" value="Especialidad en filosofía clásica y helenística"></div></div></div>
+        </div>
+        <button class="btn-add" onclick="addTL()">+ Añadir entrada</button>
+      </div>
+
+      <!-- REQUISITOS MÍNIMOS -->
+      <div class="tab-panel" id="tab-requisitos">
+        <div class="section-title">Requisitos mínimos</div>
+        <div class="edit-grid">
+          <div class="req-block">
+            <div><span class="edit-label">Constancia mínima del discípulo</span><div class="toggle-label-sub" style="margin-bottom:10px;">Valor actual: <strong id="const-val" style="color:var(--gold);">60</strong> / 100</div><input type="range" min="0" max="100" value="60" oninput="document.getElementById('const-val').textContent=this.value"><div class="range-labels"><span>Sin límite</span><span>Exigente (100)</span></div></div>
+          </div>
+          <div class="req-block">
+            <div class="toggle-row"><div><div class="toggle-desc">Mensaje de motivación obligatorio</div><div class="toggle-label-sub">El discípulo debe escribir un texto para solicitar</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+          <div class="req-block">
+            <div class="toggle-row"><div><div class="toggle-desc">Nivel mínimo requerido</div></div><select class="edit-input" style="width:auto;padding:6px 10px;cursor:pointer;"><option>Sin requisito</option><option selected>Principiante</option><option>Intermedio</option><option>Avanzado</option></select></div>
+          </div>
+          <div class="req-block">
+            <div class="toggle-row"><div><div class="toggle-desc">Formato obligatorio</div></div><select class="edit-input" style="width:auto;padding:6px 10px;cursor:pointer;"><option selected>Sin restricción</option><option>Solo presencial</option><option>Solo online</option></select></div>
+          </div>
+          <div class="edit-field"><span class="edit-label">Requisitos libres (un requisito por línea)</span><textarea class="edit-textarea" style="height:90px;">Haber leído al menos un texto estoico antes de la primera sesión
+Disponibilidad mínima de 3 horas semanales</textarea></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="chat-container"></div>
+  <script src="js/components.js"></script>
+  <script>
+    document.getElementById('nav-container').innerHTML = renderNavAuth('perfil');
+    function showTab(id,btn){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');btn.classList.add('active');}
+    function guardar(){const btn=document.querySelector('.btn-save');btn.textContent='✓ Guardado';btn.style.background='var(--green)';setTimeout(()=>{btn.textContent='Guardar cambios';btn.style.background='var(--gold)';},2000);}
+    let tlCount=3;
+    function addTL(){const d=document.createElement('div');d.className='tl-block';d.innerHTML=`<div class="tl-block-header"><span class="tl-block-title">Entrada ${tlCount++}</span><button class="btn-del" onclick="this.closest('.tl-block').remove()">Eliminar</button></div><div style="display:flex;flex-direction:column;gap:10px;"><div class="edit-field"><span class="edit-label">Año o periodo</span><input class="edit-input" type="text" placeholder="2022"></div><div class="edit-field"><span class="edit-label">Título</span><input class="edit-input" type="text" placeholder="Título o nombre del hito"></div><div class="edit-field"><span class="edit-label">Descripción</span><input class="edit-input" type="text" placeholder="Descripción breve (opcional)"></div></div>`;document.getElementById('tl-list').appendChild(d);}
+  </script>
+</body>
+</html>

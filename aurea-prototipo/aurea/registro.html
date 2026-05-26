@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .registro{display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 57px);}
+    .reg-left{background:var(--night-soft);border-right:0.5px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px;gap:32px;}
+    .reg-left-quote{font-family:var(--font-serif);font-size:22px;font-style:italic;color:var(--text-muted);line-height:1.6;text-align:center;max-width:320px;transition:opacity 0.6s;}
+    .reg-left-author{font-size:10px;font-weight:300;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-faint);transition:opacity 0.6s;}
+    .reg-right{display:flex;flex-direction:column;overflow:hidden;}
+    .progress-wrap{padding:24px 40px 0;flex-shrink:0;}
+    .progress-steps{display:flex;align-items:center;margin-bottom:8px;}
+    .p-step{display:flex;align-items:center;flex:1;}
+    .p-circle{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:400;flex-shrink:0;transition:all 0.3s;}
+    .p-circle.done{background:var(--gold);color:var(--night);}
+    .p-circle.active{background:var(--night-deep);border:1.5px solid var(--gold);color:var(--gold);}
+    .p-circle.pending{background:var(--night-mid);border:0.5px solid var(--border);color:var(--text-ghost);}
+    .p-line{flex:1;height:0.5px;background:var(--border);margin:0 4px;}
+    .p-line.done{background:var(--border-gold);}
+    .step-labels{display:flex;justify-content:space-between;padding:0 2px;}
+    .step-label{font-size:9px;font-weight:300;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);flex:1;text-align:center;}
+    .step-label.active{color:var(--gold);}
+    .reg-form{flex:1;overflow-y:auto;padding:24px 40px 20px;}
+    .form-title{font-family:var(--font-serif);font-size:28px;font-weight:500;color:var(--text-primary);margin-bottom:6px;line-height:1.1;}
+    .form-sub{font-size:12px;font-weight:300;color:var(--text-muted);margin-bottom:28px;line-height:1.6;}
+    .rol-card{border:0.5px solid var(--border);border-radius:10px;padding:18px 20px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:16px;background:var(--night-mid);margin-bottom:10px;}
+    .rol-card:hover{border-color:var(--border-gold);}
+    .rol-card.selected{border-color:var(--gold);background:var(--night-deep);}
+    .rol-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:var(--night-soft);}
+    .rol-card.selected .rol-icon{background:#C8973A22;}
+    .rol-title{font-family:var(--font-serif);font-size:18px;font-weight:500;color:var(--text-primary);margin-bottom:3px;}
+    .rol-desc{font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.5;}
+    .rol-check{width:18px;height:18px;border-radius:50%;border:0.5px solid var(--border);margin-left:auto;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--gold);background:var(--night-soft);}
+    .rol-card.selected .rol-check{background:var(--gold);border-color:var(--gold);color:var(--night);}
+    .field-group{display:flex;flex-direction:column;gap:14px;}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .social-btns{display:flex;flex-direction:column;gap:8px;}
+    .social-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-size:12px;font-weight:300;letter-spacing:0.08em;color:var(--text-secondary);background:var(--night-mid);border:0.5px solid var(--border);border-radius:6px;padding:10px;cursor:pointer;transition:all 0.2s;}
+    .social-btn:hover{border-color:var(--border-gold);color:var(--text-primary);}
+    .social-icon{width:18px;height:18px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+    .avatar-pick{display:flex;align-items:center;gap:16px;margin-bottom:4px;}
+    .avatar-preview{width:64px;height:64px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:24px;font-weight:600;color:var(--night);flex-shrink:0;}
+    .reg-footer{padding:16px 40px;border-top:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
+    .btn-back-reg{font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--text-faint);background:none;border:none;cursor:pointer;transition:color 0.2s;}
+    .btn-back-reg:hover{color:var(--text-primary);}
+    .step-counter{font-size:10px;font-weight:300;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-ghost);}
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-logo" href="index.html"><img src="assets/logo.png" alt="Aurea"><span class="nav-wordmark">Aurea</span></a>
+    <a href="discover.html" style="font-size:11px;font-weight:300;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);transition:color 0.2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-muted)'">¿Ya tienes cuenta? Entrar</a>
+  </nav>
+  <div class="registro">
+    <div class="reg-left">
+      <img src="assets/logo.png" alt="Aurea" style="width:80px;height:80px;object-fit:contain;opacity:0.7;">
+      <p class="reg-left-quote" id="ql-text">"El que aprende y no piensa pierde el tiempo."</p>
+      <p class="reg-left-author" id="ql-author">— Confucio</p>
+    </div>
+    <div class="reg-right">
+      <div class="progress-wrap">
+        <div class="progress-steps">
+          <div class="p-step"><div class="p-circle active" id="pc1">1</div><div class="p-line" id="pl1"></div></div>
+          <div class="p-step"><div class="p-circle pending" id="pc2">2</div><div class="p-line" id="pl2"></div></div>
+          <div class="p-step" style="flex:0;"><div class="p-circle pending" id="pc3">3</div></div>
+        </div>
+        <div class="step-labels">
+          <span class="step-label active" id="sl1">Tu rol</span>
+          <span class="step-label" id="sl2">Tus datos</span>
+          <span class="step-label" id="sl3">Tu perfil</span>
+        </div>
+      </div>
+      <div class="reg-form">
+        <div id="paso1">
+          <div class="form-title">¿Cómo quieres<br>empezar?</div>
+          <p class="form-sub">Puedes cambiar tu rol en cualquier momento desde tu perfil.</p>
+          <div class="rol-card" onclick="selRol(this)"><div class="rol-icon">🎓</div><div><div class="rol-title">Maestro</div><div class="rol-desc">Tengo conocimiento que quiero transmitir a un discípulo.</div></div><div class="rol-check">✓</div></div>
+          <div class="rol-card" onclick="selRol(this)"><div class="rol-icon">📖</div><div><div class="rol-title">Discípulo</div><div class="rol-desc">Quiero aprender de alguien con experiencia real.</div></div><div class="rol-check">✓</div></div>
+          <div class="rol-card" onclick="selRol(this)"><div class="rol-icon">⚭</div><div><div class="rol-title">Ambos</div><div class="rol-desc">Soy maestro en algunas disciplinas y discípulo en otras.</div></div><div class="rol-check">✓</div></div>
+        </div>
+        <div id="paso2" class="hidden">
+          <div class="form-title">Crea tu cuenta</div>
+          <p class="form-sub">Tus datos son privados. Nunca los compartimos.</p>
+          <div class="field-group">
+            <div class="field-row"><div class="field-wrap"><span class="field-label">Nombre</span><input class="field-input" type="text" placeholder="Rafael" id="f-nombre"></div><div class="field-wrap"><span class="field-label">Apellido</span><input class="field-input" type="text" placeholder="Montoya"></div></div>
+            <div class="field-wrap"><span class="field-label">Correo electrónico</span><input class="field-input" type="email" placeholder="rafael@correo.com" id="f-email"></div>
+            <div class="field-wrap"><span class="field-label">Contraseña</span><input class="field-input" type="password" placeholder="Mínimo 8 caracteres"></div>
+            <div class="field-wrap"><span class="field-label">Ubicación</span><input class="field-input" type="text" placeholder="Madrid, España"></div>
+          </div>
+          <div class="divider-or" style="margin:20px 0;"><div class="divider-or-line"></div><span class="divider-or-text">o continúa con</span><div class="divider-or-line"></div></div>
+          <div class="social-btns">
+            <button class="social-btn"><div class="social-icon" style="background:#fff;color:#4285F4;">G</div>Continuar con Google</button>
+            <button class="social-btn"><div class="social-icon" style="background:#1877F2;color:#fff;">f</div>Continuar con Facebook</button>
+          </div>
+        </div>
+        <div id="paso3" class="hidden">
+          <div class="form-title">Tu primer perfil</div>
+          <p class="form-sub">No tiene que ser perfecto — podrás editarlo cuando quieras.</p>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="avatar-pick"><div class="avatar-preview" id="av-prev">RM</div><button class="btn-ghost" style="padding:8px 16px;">Subir foto</button></div>
+            <div class="field-wrap"><span class="field-label">Disciplina principal</span><input class="field-input" type="text" placeholder="Ej. Filosofía estoica, Carpintería…"></div>
+            <div class="field-wrap"><span class="field-label">Categoría</span><select class="field-input" style="cursor:pointer;"><option value="" disabled selected>Selecciona una categoría</option><option>Filosofía</option><option>Artes</option><option>Oficios</option><option>Deportes</option><option>Espiritualidad</option><option>Ciencia</option><option>Lenguas</option></select></div>
+            <div class="field-wrap"><span class="field-label">Una frase sobre ti</span><input class="field-input" type="text" placeholder="Lo que te define…"></div>
+            <div class="field-wrap"><span class="field-label">Formato</span><select class="field-input" style="cursor:pointer;"><option value="" disabled selected>¿Presencial, online o ambos?</option><option>Presencial</option><option>Online</option><option>Ambos</option></select></div>
+          </div>
+        </div>
+      </div>
+      <div class="reg-footer">
+        <button class="btn-back-reg" id="btn-back" onclick="prevStep()" style="visibility:hidden;">← Volver</button>
+        <span class="step-counter" id="step-counter">Paso 1 de 3</span>
+        <button class="btn-primary" id="btn-next" onclick="nextStep()" disabled style="padding:12px 28px;">Continuar</button>
+      </div>
+    </div>
+  </div>
+  <script src="js/components.js"></script>
+  <script>
+    let step=1,rolOk=false;
+    const quotes=[
+      {t:'"El que aprende y no piensa pierde el tiempo."',a:'— Confucio'},
+      {t:'"Dime y lo olvido, enséñame y lo recuerdo."',a:'— Benjamin Franklin'},
+      {t:'"El discípulo supera al maestro solo cuando el maestro lo desea."',a:'— Leonardo da Vinci'},
+    ];
+    let qi=0;
+    const qt=document.getElementById('ql-text'),qa=document.getElementById('ql-author');
+    qt.style.transition='opacity 0.6s';qa.style.transition='opacity 0.6s';
+    setInterval(()=>{qi=(qi+1)%quotes.length;qt.style.opacity='0';qa.style.opacity='0';setTimeout(()=>{qt.textContent=quotes[qi].t;qa.textContent=quotes[qi].a;qt.style.opacity='1';qa.style.opacity='1';},500);},5000);
+
+    function selRol(el){document.querySelectorAll('.rol-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');rolOk=true;document.getElementById('btn-next').disabled=false;}
+
+    function updateProgress(){
+      for(let i=1;i<=3;i++){
+        const c=document.getElementById('pc'+i),l=document.getElementById('sl'+i);
+        if(i<step){c.className='p-circle done';c.textContent='✓';}
+        else if(i===step){c.className='p-circle active';c.textContent=i;}
+        else{c.className='p-circle pending';c.textContent=i;}
+        if(l){l.className='step-label'+(i===step?' active':'');}
+        if(i<3){const pl=document.getElementById('pl'+i);if(pl)pl.className='p-line'+(i<step?' done':'');}
+      }
+      document.getElementById('step-counter').textContent='Paso '+step+' de 3';
+      document.getElementById('btn-back').style.visibility=step>1?'visible':'hidden';
+    }
+
+    function nextStep(){
+      if(step<3){
+        document.getElementById('paso'+step).classList.add('hidden');
+        step++;
+        document.getElementById('paso'+step).classList.remove('hidden');
+        const btn=document.getElementById('btn-next');
+        btn.textContent=step===3?'Entrar en Aurea':'Continuar';
+        btn.disabled=step===2;
+        if(step===2){document.querySelectorAll('#paso2 .field-input').forEach(f=>f.addEventListener('input',checkP2));}
+        updateProgress();
+      } else {
+        window.location.href='discover.html';
+      }
+    }
+
+    function checkP2(){
+      const filled=Array.from(document.querySelectorAll('#paso2 .field-input')).filter(i=>i.value.trim()).length;
+      document.getElementById('btn-next').disabled=filled<3;
+    }
+
+    function prevStep(){
+      if(step>1){document.getElementById('paso'+step).classList.add('hidden');step--;document.getElementById('paso'+step).classList.remove('hidden');document.getElementById('btn-next').textContent='Continuar';document.getElementById('btn-next').disabled=step===1&&!rolOk;updateProgress();}
+    }
+
+    const fn=document.getElementById('f-nombre');
+    if(fn)fn.addEventListener('input',function(){const v=this.value.trim();if(v){const i=v[0].toUpperCase();document.getElementById('av-prev').textContent=i+(v.split(' ')[1]?v.split(' ')[1][0].toUpperCase():'');}});
+  </script>
+</body>
+</html>

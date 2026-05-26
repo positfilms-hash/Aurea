@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aurea · La cadena áurea del conocimiento</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .hero{padding:100px 80px 80px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;border-bottom:0.5px solid var(--border);}
+    .hero-eyebrow{font-size:10px;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:var(--text-muted);margin-bottom:28px;}
+    .quote-rotator{min-height:140px;margin-bottom:32px;}
+    .quote-text{font-family:var(--font-serif);font-size:36px;font-weight:500;line-height:1.15;color:var(--text-primary);transition:opacity 0.6s;}
+    .quote-text em{font-style:italic;color:var(--gold);}
+    .quote-author{font-size:11px;font-weight:300;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-ghost);margin-top:14px;transition:opacity 0.6s;}
+    .hero-actions{display:flex;align-items:center;gap:20px;}
+    .maestro-card{background:var(--night-mid);border:0.5px solid var(--border-soft);border-radius:16px;width:100%;max-width:340px;overflow:hidden;}
+    .card-top{background:#2A1F14;padding:24px 24px 18px;display:flex;align-items:center;gap:14px;border-bottom:0.5px solid var(--border);}
+    .card-avatar{width:52px;height:52px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:20px;font-weight:600;color:var(--night);flex-shrink:0;}
+    .card-name{font-family:var(--font-serif);font-size:19px;font-weight:500;color:var(--text-primary);}
+    .card-disc{font-size:10px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-top:3px;}
+    .card-body{padding:18px 24px;}
+    .card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;}
+    .card-tag{font-size:9px;color:var(--text-faint);border:0.5px solid var(--border);padding:2px 8px;border-radius:100px;}
+    .card-bio{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-secondary);line-height:1.6;margin-bottom:18px;}
+    .card-stats{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:0.5px solid var(--border);padding-top:14px;}
+    .stat{text-align:center;}
+    .stat-n{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--gold);}
+    .stat-l{font-size:8px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-faint);margin-top:2px;}
+    .card-footer{padding:14px 24px;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .card-plazas{font-size:11px;color:var(--text-muted);font-weight:300;}
+    .card-plazas span{color:var(--gold);}
+    .btn-sol{font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;background:var(--gold);color:var(--night);border:none;padding:8px 16px;border-radius:4px;cursor:pointer;}
+    .divider-text{padding:48px 80px;display:flex;align-items:center;gap:24px;border-bottom:0.5px solid var(--border);}
+    .divider-line{flex:1;height:0.5px;background:var(--border);}
+    .divider-quote{font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--text-faint);white-space:nowrap;}
+    .how{padding:80px;border-bottom:0.5px solid var(--border);}
+    .how-eyebrow{font-size:10px;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:var(--text-muted);margin-bottom:40px;}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;}
+    .step{border-top:0.5px solid var(--border-soft);padding-top:24px;}
+    .step-n{font-family:var(--font-serif);font-size:48px;font-weight:400;color:var(--border);line-height:1;margin-bottom:16px;}
+    .step-title{font-family:var(--font-serif);font-size:22px;font-weight:500;color:var(--text-primary);margin-bottom:10px;}
+    .step-desc{font-size:13px;font-weight:300;line-height:1.7;color:var(--text-muted);}
+    .disciplines{padding:80px;border-bottom:0.5px solid var(--border);}
+    .disc-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:40px;}
+    .disc-pill{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--text-secondary);border:0.5px solid var(--border);padding:10px 22px;border-radius:100px;cursor:pointer;transition:all 0.25s;}
+    .disc-pill:hover{color:var(--gold);border-color:var(--gold);}
+    .cta-band{padding:100px 80px;text-align:center;}
+    .cta-title{font-family:var(--font-serif);font-size:48px;font-weight:500;color:var(--text-primary);line-height:1.05;margin-bottom:40px;}
+    .cta-title em{color:var(--gold);font-style:italic;}
+    .cta-actions{display:flex;align-items:center;justify-content:center;gap:20px;}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+
+  <section class="hero">
+    <div>
+      <p class="hero-eyebrow">La cadena áurea del conocimiento</p>
+      <div class="quote-rotator">
+        <div class="quote-text" id="qt"></div>
+        <div class="quote-author" id="qa"></div>
+      </div>
+      <div class="hero-actions">
+        <a href="registro.html" class="btn-primary">Empezar ahora</a>
+        <a href="discover.html" class="btn-ghost">Ver maestros</a>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;">
+      <div class="maestro-card">
+        <div class="card-top">
+          <div class="card-avatar">RM</div>
+          <div><div class="card-name">Rafael Montoya</div><div class="card-disc">Filosofía estoica</div></div>
+        </div>
+        <div class="card-body">
+          <div class="card-tags"><span class="card-tag">#presencial · Madrid</span><span class="card-tag">12 años</span><span class="card-tag">Nivel intermedio</span></div>
+          <p class="card-bio">"Enseño a quien viene dispuesto a cambiar su forma de ver el mundo, no a quien busca un curso."</p>
+          <div class="card-stats">
+            <div class="stat"><div class="stat-n">3</div><div class="stat-l">Discípulos</div></div>
+            <div class="stat"><div class="stat-n">4.9</div><div class="stat-l">Reputación</div></div>
+            <div class="stat"><div class="stat-n">1</div><div class="stat-l">Plaza libre</div></div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="card-plazas"><span>1 plaza</span> disponible</span>
+          <button class="btn-sol" onclick="location.href='registro.html'">Solicitar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-text">
+    <div class="divider-line"></div>
+    <span class="divider-quote">El maestro elige al discípulo. El discípulo elige al maestro.</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <section class="how">
+    <p class="how-eyebrow">El proceso</p>
+    <div class="steps">
+      <div class="step"><div class="step-n">01</div><div class="step-title">Crea tu perfil</div><p class="step-desc">Define quién eres, qué sabes y qué buscas. Tu perfil es tu carta de presentación — cuídalo.</p></div>
+      <div class="step"><div class="step-n">02</div><div class="step-title">Encuentra y solicita</div><p class="step-desc">Explora maestros por disciplina, distancia y disponibilidad. Envía una solicitud con tu motivación real.</p></div>
+      <div class="step"><div class="step-n">03</div><div class="step-title">El match decide</div><p class="step-desc">El maestro elige. Si hay afinidad, comienza un periodo de prueba de tres sesiones antes de comprometerse.</p></div>
+    </div>
+  </section>
+
+  <section class="disciplines">
+    <p class="how-eyebrow">Disciplinas</p>
+    <div class="disc-grid">
+      <span class="disc-pill">Filosofía</span><span class="disc-pill">Carpintería</span><span class="disc-pill">Caligrafía</span><span class="disc-pill">Cocina tradicional</span><span class="disc-pill">Estoicismo</span><span class="disc-pill">Cerámica</span><span class="disc-pill">Astronomía</span><span class="disc-pill">Artes marciales</span><span class="disc-pill">Luthería</span><span class="disc-pill">Medicina herbal</span><span class="disc-pill">Pintura al óleo</span><span class="disc-pill">Tejido</span><span class="disc-pill">Meditación</span><span class="disc-pill">Ajedrez</span><span class="disc-pill">Fotografía analógica</span><span class="disc-pill">Encuadernación</span><span class="disc-pill">Y todo lo que sabes.</span>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div style="margin-bottom:32px;"><img src="assets/logo.png" alt="Aurea" style="width:60px;height:60px;object-fit:contain;margin:0 auto;opacity:0.8;"></div>
+    <h2 class="cta-title">Aurea es gratuito.<br><em>Tu conocimiento, no.</em></h2>
+    <div class="cta-actions">
+      <a href="registro.html" class="btn-primary">Registrarme como maestro</a>
+      <a href="discover.html" class="btn-ghost">Buscar un maestro</a>
+    </div>
+  </section>
+
+  <div id="footer-container"></div>
+  <div id="chat-container"></div>
+
+  <script src="js/components.js"></script>
+  <script>
+    document.getElementById('nav-container').innerHTML = renderNavPublic('index');
+    document.getElementById('footer-container').innerHTML = renderFooter();
+    const quotes=[
+      {t:'"El que aprende y no piensa pierde el tiempo. El que piensa y no aprende se pone en peligro."',a:'— Confucio'},
+      {t:'"Dime y lo olvido, enséñame y lo recuerdo, involúcrame y lo aprendo."',a:'— Benjamin Franklin'},
+      {t:'"El discípulo supera al maestro solo cuando el maestro lo desea sinceramente."',a:'— Leonardo da Vinci'},
+      {t:'"En el aprendizaje comprenderás que hay tanto que enseñar."',a:'— Kahlil Gibran'},
+      {t:'"No hay maestro sin discípulo, ni discípulo sin maestro."',a:'— Sócrates'},
+    ];
+    let qi=0;
+    const qt=document.getElementById('qt'),qa=document.getElementById('qa');
+    qt.style.transition='opacity 0.6s';qa.style.transition='opacity 0.6s';
+    function setQ(i,anim){
+      if(anim){qt.style.opacity='0';qa.style.opacity='0';}
+      setTimeout(()=>{qt.innerHTML=quotes[i].t;qa.textContent=quotes[i].a;qt.style.opacity='1';qa.style.opacity='1';},anim?500:0);
+    }
+    setQ(0,false);
+    setInterval(()=>{qi=(qi+1)%quotes.length;setQ(qi,true);},5000);
+  </script>
+</body>
+</html>

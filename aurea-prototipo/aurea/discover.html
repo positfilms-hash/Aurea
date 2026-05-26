@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discover · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    body{overflow:hidden;}
+    .layout{display:grid;grid-template-columns:220px 1fr;height:calc(100vh - 57px);}
+    .sidebar{border-right:0.5px solid var(--border);padding:16px;overflow-y:auto;background:var(--night-soft);}
+    .filter-chips{display:flex;flex-wrap:wrap;gap:4px;}
+    .filter-section{margin-bottom:18px;}
+    .filter-divider{height:0.5px;background:var(--border);margin:0 0 18px;}
+    .hash-input-wrap{position:relative;margin-bottom:6px;}
+    .hash-prefix{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-faint);font-size:11px;}
+    .hash-input{width:100%;background:var(--night-mid);border:0.5px solid var(--border-soft);border-radius:4px;padding:7px 10px 7px 20px;font-size:11px;color:var(--text-primary);outline:none;}
+    .hash-input:focus{border-color:var(--gold);}
+    input[type=range]{width:100%;accent-color:var(--gold);}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+    .toggle-label{font-size:11px;font-weight:300;color:var(--text-muted);}
+    .range-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+    .range-val{font-size:11px;color:var(--gold);}
+    .main-content{display:flex;flex-direction:column;overflow:hidden;}
+    .list-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;flex-shrink:0;border-bottom:0.5px solid var(--border);}
+    .list-title{font-size:10px;font-weight:300;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-faint);}
+    .sort-select{font-size:10px;color:var(--text-muted);background:var(--night-mid);border:0.5px solid var(--border);border-radius:4px;padding:4px 8px;outline:none;cursor:pointer;}
+    .cards-wrap{flex:1;overflow-y:auto;padding:14px 20px;}
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+    .mcard{background:var(--night-mid);border:0.5px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color 0.18s;}
+    .mcard:hover{border-color:var(--gold);}
+    .mcard-top{padding:14px 14px 10px;display:flex;align-items:center;gap:10px;border-bottom:0.5px solid var(--border);}
+    .mavatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:14px;font-weight:600;color:var(--text-primary);flex-shrink:0;}
+    .mname{font-family:var(--font-serif);font-size:14px;font-weight:500;color:var(--text-primary);line-height:1.2;}
+    .mdisc{font-size:9px;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-top:2px;}
+    .mcard-body{padding:10px 14px;}
+    .mtags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px;}
+    .mtag{font-size:8px;color:var(--text-faint);border:0.5px solid var(--border);padding:2px 6px;border-radius:100px;}
+    .mstats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+    .mstat{text-align:center;}
+    .mstat-n{font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--gold);}
+    .mstat-l{font-size:7px;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-faint);margin-top:1px;}
+    .mcard-footer{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:0.5px solid var(--border);}
+    .mdist{font-size:9px;color:var(--text-faint);}
+    .mplaza{font-size:9px;font-weight:400;}
+    .mplaza.open{color:var(--gold);}
+    .mplaza.wait{color:var(--text-faint);}
+    .pagination{display:flex;align-items:center;justify-content:center;gap:5px;padding:12px;border-top:0.5px solid var(--border);flex-shrink:0;}
+    .pg-btn{font-size:10px;font-weight:300;color:var(--text-muted);border:0.5px solid var(--border);background:none;padding:6px 11px;border-radius:4px;cursor:pointer;transition:all 0.18s;}
+    .pg-btn:hover{color:var(--gold);border-color:var(--gold);}
+    .pg-btn.active{color:var(--night);background:var(--gold);border-color:var(--gold);}
+    .pg-btn:disabled{opacity:0.3;cursor:default;}
+    .pg-info{font-size:10px;color:var(--text-faint);margin:0 2px;}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="filter-section"><span class="section-label">Buscar</span><input class="field-input" type="text" placeholder="Nombre, disciplina…" style="font-size:11px;padding:7px 10px;"></div>
+      <div class="filter-divider"></div>
+      <div class="filter-section"><span class="section-label">Categoría</span><div class="filter-chips"><span class="chip on">Todas</span><span class="chip">Filosofía</span><span class="chip">Artes</span><span class="chip">Oficios</span><span class="chip">Deportes</span><span class="chip">Espiritualidad</span><span class="chip">Ciencia</span><span class="chip">Lenguas</span></div></div>
+      <div class="filter-divider"></div>
+      <div class="filter-section"><span class="section-label">Subcategoría</span><div class="filter-chips"><span class="chip on">Todas</span><span class="chip">Estoicismo</span><span class="chip">Budismo</span><span class="chip">Pintura</span><span class="chip">Cerámica</span><span class="chip">Carpintería</span><span class="chip">Luthería</span><span class="chip">Caligrafía</span></div></div>
+      <div class="filter-divider"></div>
+      <div class="filter-section"><span class="section-label">Hashtags</span><div class="hash-input-wrap"><span class="hash-prefix">#</span><input class="hash-input" type="text" placeholder="paciente, online…" id="hash-in"></div><div class="filter-chips" id="hash-chips"><span class="chip on">#presencial</span><span class="chip">#online</span><span class="chip">#principiantes</span><span class="chip">#avanzado</span><span class="chip">#paciente</span><span class="chip">#riguroso</span></div></div>
+      <div class="filter-divider"></div>
+      <div class="filter-section"><span class="section-label">Distancia máxima</span><div class="range-row"><span style="font-size:9px;color:var(--text-faint);">0 km</span><span class="range-val" id="dist-val">50 km</span><span style="font-size:9px;color:var(--text-faint);">200 km</span></div><input type="range" min="0" max="200" value="50" oninput="document.getElementById('dist-val').textContent=this.value+' km'"></div>
+      <div class="filter-divider"></div>
+      <div class="filter-section"><span class="section-label">Formato</span><div class="toggle-row"><span class="toggle-label">Presencial</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><span class="toggle-label">Online</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div></div>
+      <div class="filter-divider"></div>
+      <div class="filter-section"><span class="section-label">Disponibilidad</span><div class="filter-chips"><span class="chip on">Con plazas</span><span class="chip">Lista espera</span><span class="chip">Todos</span></div></div>
+      <div class="filter-divider"></div>
+      <div class="filter-section"><span class="section-label">Reputación mínima</span><div class="range-row"><span style="font-size:9px;color:var(--text-faint);">0</span><span class="range-val" id="rep-val">4.0</span><span style="font-size:9px;color:var(--text-faint);">5.0</span></div><input type="range" min="0" max="50" value="40" oninput="document.getElementById('rep-val').textContent=(this.value/10).toFixed(1)"></div>
+    </aside>
+    <div class="main-content">
+      <div class="list-header"><span class="list-title" id="list-title">Mostrando 1–12 de 28 maestros</span><select class="sort-select"><option>Ordenar: distancia</option><option>Ordenar: reputación</option><option>Ordenar: plazas</option></select></div>
+      <div class="cards-wrap"><div class="cards" id="cards-grid"></div></div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+  <div id="chat-container"></div>
+  <script src="js/components.js"></script>
+  <script>
+    document.getElementById('nav-container').innerHTML = renderNavAuth('discover');
+    const ALL=[
+      {i:'RM',n:'Rafael M.',d:'Filosofía estoica',tags:['#presencial','#riguroso','#avanzado'],rep:'4.9',pl:'1',dist:'2.4 km',open:true,bg:'#C8973A'},
+      {i:'CL',n:'Carmen L.',d:'Cerámica',tags:['#presencial','#paciente','#principiantes'],rep:'4.7',pl:'2',dist:'5.1 km',open:true,bg:'#7A4F2A'},
+      {i:'AO',n:'Andrés O.',d:'Astronomía',tags:['#online','#teórico','#riguroso'],rep:'5.0',pl:'1',dist:'8.7 km',open:true,bg:'#4A3A2A'},
+      {i:'LV',n:'Lucía V.',d:'Caligrafía',tags:['#presencial','#práctico','#paciente'],rep:'4.8',pl:'3',dist:'12 km',open:true,bg:'#854F0B'},
+      {i:'ES',n:'Elena S.',d:'Medicina herbal',tags:['#presencial','#práctico','#principiantes'],rep:'4.6',pl:'2',dist:'18 km',open:true,bg:'#3B6D11'},
+      {i:'MT',n:'Miguel T.',d:'Ajedrez',tags:['#online','#intensivo','#avanzado'],rep:'4.9',pl:'—',dist:'Online',open:false,bg:'#534AB7'},
+      {i:'PR',n:'Patricia R.',d:'Pintura al óleo',tags:['#presencial','#paciente','#práctico'],rep:'4.5',pl:'1',dist:'22 km',open:true,bg:'#993556'},
+      {i:'JB',n:'Javier B.',d:'Luthería',tags:['#presencial','#riguroso','#avanzado'],rep:'5.0',pl:'—',dist:'31 km',open:false,bg:'#185FA5'},
+      {i:'MG',n:'Marta G.',d:'Tejido',tags:['#presencial','#paciente','#principiantes'],rep:'4.4',pl:'2',dist:'35 km',open:true,bg:'#0F6E56'},
+      {i:'DR',n:'David R.',d:'Fotografía analógica',tags:['#presencial','#práctico','#avanzado'],rep:'4.7',pl:'1',dist:'38 km',open:true,bg:'#712B13'},
+      {i:'AI',n:'Ana I.',d:'Encuadernación',tags:['#presencial','#teórico','#principiantes'],rep:'4.3',pl:'3',dist:'44 km',open:true,bg:'#3C3489'},
+      {i:'PF',n:'Pedro F.',d:'Meditación zen',tags:['#online','#paciente','#principiantes'],rep:'4.8',pl:'2',dist:'Online',open:true,bg:'#633806'},
+      {i:'SV',n:'Sara V.',d:'Estoicismo aplicado',tags:['#online','#teórico','#avanzado'],rep:'4.6',pl:'1',dist:'Online',open:true,bg:'#3B6D11'},
+      {i:'MH',n:'Marcos H.',d:'Carpintería',tags:['#presencial','#práctico','#principiantes'],rep:'4.5',pl:'2',dist:'52 km',open:true,bg:'#854F0B'},
+      {i:'IT',n:'Isabel T.',d:'Lengua griega',tags:['#online','#riguroso','#avanzado'],rep:'4.9',pl:'1',dist:'Online',open:true,bg:'#534AB7'},
+      {i:'RN',n:'Roberto N.',d:'Artes marciales',tags:['#presencial','#intensivo','#avanzado'],rep:'4.7',pl:'—',dist:'61 km',open:false,bg:'#993C1D'},
+      {i:'BM',n:'Beatriz M.',d:'Cocina tradicional',tags:['#presencial','#práctico','#principiantes'],rep:'4.4',pl:'3',dist:'67 km',open:true,bg:'#7A4F2A'},
+      {i:'FG',n:'Fernando G.',d:'Astronomía',tags:['#online','#teórico','#principiantes'],rep:'4.2',pl:'2',dist:'Online',open:true,bg:'#185FA5'},
+      {i:'NC',n:'Nuria C.',d:'Pintura acuarela',tags:['#presencial','#paciente','#principiantes'],rep:'4.6',pl:'1',dist:'74 km',open:true,bg:'#D4537E'},
+      {i:'AL',n:'Alberto L.',d:'Filosofía budista',tags:['#online','#teórico','#avanzado'],rep:'4.8',pl:'2',dist:'Online',open:true,bg:'#0F6E56'},
+      {i:'CP',n:'Clara P.',d:'Vitral',tags:['#presencial','#práctico','#principiantes'],rep:'4.3',pl:'2',dist:'82 km',open:true,bg:'#378ADD'},
+      {i:'JM',n:'Juan M.',d:'Escultura',tags:['#presencial','#práctico','#avanzado'],rep:'4.7',pl:'1',dist:'88 km',open:true,bg:'#7A4F2A'},
+      {i:'PL',n:'Paula L.',d:'Lengua árabe',tags:['#online','#riguroso','#principiantes'],rep:'4.5',pl:'3',dist:'Online',open:true,bg:'#854F0B'},
+      {i:'MR',n:'Miguel R.',d:'Orfebrería',tags:['#presencial','#riguroso','#avanzado'],rep:'4.9',pl:'—',dist:'95 km',open:false,bg:'#C8973A'},
+      {i:'TV',n:'Teresa V.',d:'Danza flamenca',tags:['#presencial','#intensivo','#principiantes'],rep:'4.6',pl:'2',dist:'101 km',open:true,bg:'#993556'},
+      {i:'OM',n:'Óscar M.',d:'Jardinería zen',tags:['#presencial','#paciente','#principiantes'],rep:'4.4',pl:'1',dist:'112 km',open:true,bg:'#3B6D11'},
+      {i:'VR',n:'Valentina R.',d:'Astronomía árabe',tags:['#online','#teórico','#avanzado'],rep:'4.7',pl:'2',dist:'Online',open:true,bg:'#534AB7'},
+      {i:'HG',n:'Hugo G.',d:'Relojería',tags:['#presencial','#riguroso','#avanzado'],rep:'5.0',pl:'1',dist:'138 km',open:true,bg:'#185FA5'},
+    ];
+    const PER=12;let page=1;const total=ALL.length;const totalPgs=Math.ceil(total/PER);
+    function cardHTML(m){const plLabel=m.open?(m.pl+' plaza'+(m.pl!=='1'&&m.pl!=='—'?'s':'')):'Lista de espera';return `<div class="mcard" onclick="window.location.href='perfil-maestro.html'"><div class="mcard-top"><div class="mavatar" style="background:${m.bg};">${m.i}</div><div><div class="mname">${m.n}</div><div class="mdisc">${m.d}</div></div></div><div class="mcard-body"><div class="mtags">${m.tags.map(t=>`<span class="mtag">${t}</span>`).join('')}</div><div class="mstats"><div class="mstat"><div class="mstat-n">${m.rep}</div><div class="mstat-l">Reputación</div></div><div class="mstat"><div class="mstat-n">${m.pl}</div><div class="mstat-l">Plazas</div></div></div><div class="mcard-footer"><span class="mdist">${m.dist}</span><span class="mplaza ${m.open?'open':'wait'}">${plLabel}</span></div></div></div>`;}
+    function renderPage(p){page=p;const s=(p-1)*PER,e=Math.min(s+PER,total);document.getElementById('cards-grid').innerHTML=ALL.slice(s,e).map(cardHTML).join('');document.getElementById('list-title').textContent=`Mostrando ${s+1}–${e} de ${total} maestros`;renderPag();}
+    function renderPag(){const pg=document.getElementById('pagination');let h=`<button class="pg-btn" onclick="renderPage(${page-1})" ${page===1?'disabled':''}>←</button>`;for(let i=1;i<=totalPgs;i++){if(i===1||i===totalPgs||Math.abs(i-page)<=1)h+=`<button class="pg-btn ${i===page?'active':''}" onclick="renderPage(${i})">${i}</button>`;else if(Math.abs(i-page)===2)h+=`<span class="pg-info">…</span>`;}h+=`<button class="pg-btn" onclick="renderPage(${page+1})" ${page===totalPgs?'disabled':''}>→</button>`;pg.innerHTML=h;}
+    document.querySelectorAll('.filter-chips .chip').forEach(c=>{c.addEventListener('click',function(){const isHash=this.parentElement.id==='hash-chips';if(isHash)this.classList.toggle('on');else{this.parentElement.querySelectorAll('.chip').forEach(s=>s.classList.remove('on'));this.classList.add('on');}});});
+    document.getElementById('hash-in').addEventListener('keydown',function(e){if(e.key==='Enter'&&this.value.trim()){const v=this.value.trim().replace(/^#/,'');const c=document.createElement('span');c.className='chip on';c.textContent='#'+v;c.addEventListener('click',function(){this.classList.toggle('on');});document.getElementById('hash-chips').appendChild(c);this.value='';}});
+    renderPage(1);
+  </script>
+</body>
+</html>

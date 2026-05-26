@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil de discípulo · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    body{overflow:hidden;background:var(--sand);}
+    .layout{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 57px);}
+    .col-left{border-right:0.5px solid var(--sand-dark);padding:28px 24px;display:flex;flex-direction:column;gap:22px;background:var(--sand-mid);overflow-y:auto;}
+    .profile-header{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;}
+    .big-avatar{width:88px;height:88px;border-radius:50%;background:var(--mahogany);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:34px;font-weight:600;color:var(--sand);}
+    .profile-name{font-family:var(--font-serif);font-size:26px;font-weight:500;color:var(--night);line-height:1.1;}
+    .profile-disc{font-size:10px;font-weight:300;letter-spacing:0.18em;text-transform:uppercase;color:var(--mahogany);margin-top:4px;}
+    .profile-location{font-size:11px;font-weight:300;color:var(--mahogany);opacity:0.6;margin-top:4px;}
+    .stat-box{background:rgba(255,255,255,0.4);border:0.5px solid var(--sand-dark);border-radius:8px;padding:12px;text-align:center;}
+    .stat-n{font-family:var(--font-serif);font-size:24px;font-weight:500;color:var(--night);}
+    .stat-l{font-size:8px;font-weight:300;letter-spacing:0.12em;text-transform:uppercase;color:var(--mahogany);margin-top:3px;}
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .const-wrap{background:rgba(255,255,255,0.4);border:0.5px solid var(--sand-dark);border-radius:10px;padding:18px;text-align:center;}
+    .const-n{font-family:var(--font-serif);font-size:40px;font-weight:500;color:var(--night);line-height:1;}
+    .const-bar-bg{height:6px;background:var(--sand-dark);border-radius:100px;overflow:hidden;margin:10px 0;}
+    .const-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,#7A4F2A,#C8973A);}
+    .const-sub{font-size:10px;font-weight:300;color:var(--mahogany);}
+    .tag{font-size:10px;color:var(--mahogany);border:0.5px solid var(--sand-dark);padding:4px 10px;border-radius:100px;background:rgba(255,255,255,0.3);}
+    .tags-wrap{display:flex;flex-wrap:wrap;gap:5px;}
+    .avail-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--sand-dark);}
+    .avail-row:last-child{border-bottom:none;}
+    .avail-label{font-size:11px;font-weight:300;color:var(--mahogany);}
+    .avail-val{font-size:11px;font-weight:400;color:var(--night);}
+    .action-btns{display:flex;flex-direction:column;gap:8px;}
+    .btn-ac{font-family:var(--font-serif);font-size:17px;font-style:italic;font-weight:500;color:var(--night);background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));border:none;padding:14px;border-radius:100px;cursor:pointer;box-shadow:0 4px 12px #C8973A33;transition:opacity 0.2s;width:100%;}
+    .btn-ac:hover{opacity:0.85;}
+    .btn-re{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--mahogany);background:none;border:0.5px solid var(--sand-dark);padding:14px;border-radius:100px;cursor:pointer;transition:all 0.2s;width:100%;}
+    .btn-re:hover{color:var(--red);border-color:var(--red);}
+    .col-right{padding:28px 32px;display:flex;flex-direction:column;gap:28px;overflow-y:auto;background:var(--sand);}
+    .bio-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--night);margin-bottom:12px;}
+    .bio-text{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--mahogany);line-height:1.7;}
+    .divider-sand{height:0.5px;background:var(--sand-dark);}
+    .hist-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--sand-dark);}
+    .hist-item:last-child{border-bottom:none;}
+    .hist-disc{font-size:12px;font-weight:400;color:var(--night);}
+    .hist-sub{font-size:10px;font-weight:300;color:var(--mahogany);}
+    .hist-badge{font-size:8px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;padding:3px 8px;border-radius:100px;margin-left:auto;flex-shrink:0;white-space:nowrap;}
+    .hb-complete{color:var(--green);background:#1A2A12;border:0.5px solid #3B6D1144;}
+    .hb-partial{color:var(--mahogany);background:rgba(200,151,58,0.1);border:0.5px solid var(--border-gold);}
+    .review-item{background:rgba(255,255,255,0.5);border:0.5px solid var(--sand-dark);border-radius:8px;padding:16px;margin-bottom:10px;}
+    .review-author{font-size:12px;font-weight:400;color:var(--night);}
+    .review-disc{font-size:10px;font-weight:300;color:var(--mahogany);margin-bottom:6px;}
+    .review-text{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--mahogany);line-height:1.6;}
+    .msg-mot{background:rgba(255,255,255,0.5);border:0.5px solid var(--sand-dark);border-radius:10px;padding:16px;}
+    .msg-mot-label{font-size:9px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--mahogany);margin-bottom:8px;}
+    .msg-mot-text{font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--night);line-height:1.7;}
+  </style>
+</head>
+<body>
+  <nav class="nav" style="background:var(--sand-mid);border-bottom:0.5px solid var(--sand-dark);">
+    <a class="nav-logo" href="discover.html"><img src="assets/logo.png" alt="Aurea"><span class="nav-wordmark">Aurea</span></a>
+    <div class="nav-links">
+      <a class="nav-link" href="discover.html">Discover</a>
+      <a class="nav-link" href="relaciones.html">Mis relaciones</a>
+      <a class="nav-link active" href="solicitudes.html" style="color:var(--gold);">Mis solicitudes</a>
+      <a class="nav-link" href="perfil.html">Mi perfil</a>
+      <a class="nav-link" href="dona.html">Dona</a>
+    </div>
+    <div class="nav-avatar" style="background:rgba(255,255,255,0.3);border-color:var(--mahogany);color:var(--night);">RM</div>
+  </nav>
+
+  <div class="layout">
+    <div class="col-left">
+      <div class="profile-header">
+        <div class="big-avatar">JM</div>
+        <div><div class="profile-name">Javier Molina</div><div class="profile-disc">Filosofía estoica</div><div class="profile-location">Madrid · Presencial</div></div>
+      </div>
+      <div class="const-wrap">
+        <span class="section-label" style="color:var(--mahogany);">Constancia</span>
+        <div class="const-n">82</div>
+        <div class="const-bar-bg"><div class="const-bar" style="width:82%;"></div></div>
+        <div class="const-sub">de 100 puntos · Alta</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-n">1</div><div class="stat-l">Prácticas activas</div></div>
+        <div class="stat-box"><div class="stat-n">0</div><div class="stat-l">Abandonos</div></div>
+      </div>
+      <div><span class="section-label" style="color:var(--mahogany);">Hashtags</span><div class="tags-wrap"><span class="tag">#presencial</span><span class="tag">#comprometido</span><span class="tag">#principiante</span></div></div>
+      <div><span class="section-label" style="color:var(--mahogany);">Disponibilidad</span><div class="avail-row"><span class="avail-label">Días</span><span class="avail-val">Martes y jueves</span></div><div class="avail-row"><span class="avail-label">Horas / semana</span><span class="avail-val">3–4 h</span></div><div class="avail-row"><span class="avail-label">Nivel</span><span class="avail-val">Principiante</span></div></div>
+      <div class="action-btns">
+        <button class="btn-ac" onclick="location.href='solicitudes.html'">Aceptar solicitud</button>
+        <button class="btn-re" onclick="location.href='solicitudes.html'">Rechazar solicitud</button>
+      </div>
+    </div>
+    <div class="col-right">
+      <div><div class="bio-title">Su mensaje de motivación</div><div class="msg-mot"><div class="msg-mot-label">Por qué quiere aprender contigo</div><p class="msg-mot-text">"Llevo dos años leyendo a Marco Aurelio de forma autodidacta pero siento que me falta alguien que me corrija cuando me equivoco en la práctica. No busco un curso, busco a alguien que ya haya pasado por lo que yo estoy intentando."</p></div></div>
+      <div class="divider-sand"></div>
+      <div><div class="bio-title">Sobre Javier</div><p class="bio-text">"Me dedico a la ingeniería de software pero desde hace dos años siento que me falta una dimensión de sentido más profunda. El estoicismo me está ayudando a encontrarla."</p></div>
+      <div class="divider-sand"></div>
+      <div><span class="section-label" style="color:var(--mahogany);">Historial de prácticas</span><div class="hist-item"><div><div class="hist-disc">Meditación vipassana</div><div class="hist-sub">Maestro: Carmen L. · 4 meses</div></div><span class="hist-badge hb-complete">✓ Completada</span></div><div class="hist-item"><div><div class="hist-disc">Astronomía básica</div><div class="hist-sub">Maestro: Andrés O. · 2 meses</div></div><span class="hist-badge hb-partial">En curso</span></div></div>
+      <div class="divider-sand"></div>
+      <div><span class="section-label" style="color:var(--mahogany);">Referencias de maestros</span><div class="review-item"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><span class="review-author">Carmen Leal — Meditación</span><span style="font-size:11px;color:var(--gold);">★★★★★</span></div><div class="review-disc">4 meses · Relación finalizada</div><p class="review-text">"Javier es serio y disciplinado. Nunca faltó a una sesión sin avisar con antelación."</p></div></div>
+    </div>
+  </div>
+
+  <div id="chat-container"></div>
+  <script src="js/components.js"></script>
+  <script>
+    // Chat flotante solo
+    const c=document.getElementById('chat-container');
+    if(c){c.innerHTML=renderChatWidget()+renderMediador();}
+  </script>
+</body>
+</html>

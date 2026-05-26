@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dona · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .hero{padding:64px 80px;border-bottom:0.5px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+    .hero-title{font-family:var(--font-serif);font-size:52px;font-weight:500;color:var(--text-primary);line-height:1.05;margin-bottom:20px;}
+    .hero-title em{font-style:italic;color:var(--gold);}
+    .hero-sub{font-size:13px;font-weight:300;color:var(--text-muted);line-height:1.9;}
+    .hero-sub p{margin-bottom:12px;}
+    .dona-card{background:var(--night-mid);border:0.5px solid var(--border);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:22px;}
+    .amounts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+    .amount-btn{background:var(--night-soft);border:0.5px solid var(--border);border-radius:8px;padding:16px 8px;text-align:center;cursor:pointer;transition:all 0.18s;}
+    .amount-btn:hover,.amount-btn.on{border-color:var(--gold);background:var(--night-deep);}
+    .amount-n{font-family:var(--font-serif);font-size:24px;font-weight:500;color:var(--gold);}
+    .amount-label{font-size:9px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-faint);margin-top:4px;}
+    .custom-wrap{display:flex;align-items:center;background:var(--night-soft);border:0.5px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color 0.2s;}
+    .custom-wrap:focus-within{border-color:var(--gold);}
+    .custom-prefix{font-family:var(--font-serif);font-size:18px;color:var(--text-faint);padding:0 14px;}
+    .custom-input{flex:1;background:none;border:none;font-family:var(--font-serif);font-size:18px;color:var(--text-primary);outline:none;padding:12px 0;}
+    .custom-input::placeholder{color:var(--text-ghost);}
+    .freq-toggle{display:flex;background:var(--night-soft);border:0.5px solid var(--border);border-radius:100px;padding:3px;gap:2px;}
+    .freq-btn{flex:1;font-size:10px;font-weight:400;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);background:none;border:none;padding:7px;border-radius:100px;cursor:pointer;transition:all 0.22s;text-align:center;}
+    .freq-btn.active{background:var(--gold);color:var(--night);}
+    .pay-methods{display:flex;gap:8px;}
+    .pay-btn{flex:1;background:var(--night-soft);border:0.5px solid var(--border);border-radius:8px;padding:12px 8px;text-align:center;cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;align-items:center;gap:5px;}
+    .pay-btn:hover,.pay-btn.on{border-color:var(--border-gold);}
+    .pay-label{font-size:10px;font-weight:300;color:var(--text-muted);}
+    .pay-btn.on .pay-label{color:var(--gold);}
+    .dona-nota{font-size:10px;font-weight:300;color:var(--text-ghost);text-align:center;font-style:italic;font-family:var(--font-serif);}
+    .sostiene{padding:56px 80px;}
+    .sostiene-title{font-family:var(--font-serif);font-size:36px;font-weight:500;color:var(--text-primary);margin-bottom:32px;line-height:1.1;}
+    .sostiene-title em{color:var(--gold);font-style:italic;}
+    .sostiene-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+    .sostiene-item{border-top:0.5px solid var(--border);padding-top:20px;}
+    .sostiene-icon{font-size:24px;margin-bottom:12px;}
+    .sostiene-item-title{font-family:var(--font-serif);font-size:17px;font-weight:500;color:var(--text-primary);margin-bottom:6px;}
+    .sostiene-item-text{font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.7;}
+    .success-overlay{position:fixed;inset:0;background:#1C1410EE;display:none;align-items:center;justify-content:center;z-index:100;}
+    .success-modal{background:var(--night-mid);border:0.5px solid var(--border-gold);border-radius:16px;padding:40px;max-width:360px;text-align:center;display:flex;flex-direction:column;gap:16px;}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Apoya el proyecto</div>
+      <h1 class="hero-title">Aurea vive<br>porque <em>tú</em><br>lo sostienes.</h1>
+      <div class="hero-sub">
+        <p>Aurea es y será siempre gratuito. Ni maestros ni discípulos pagan nada.</p>
+        <p>Pero mantener la plataforma, los servidores, el equipo y los agentes de IA tiene un coste real. Si Aurea te ha aportado algo, tu donación ayuda a que siga existiendo.</p>
+        <p>No hay recompensas ni suscripciones. Solo gratitud.</p>
+      </div>
+    </div>
+    <div class="dona-card">
+      <div><div style="font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);margin-bottom:4px;">Elige tu aportación</div><div style="font-size:11px;font-weight:300;color:var(--text-muted);">Cada euro mantiene la cadena viva.</div></div>
+      <div class="amounts">
+        <div class="amount-btn" onclick="selAmount(this,'1')"><div class="amount-n">1€</div><div class="amount-label">Un café</div></div>
+        <div class="amount-btn on" onclick="selAmount(this,'10')"><div class="amount-n">10€</div><div class="amount-label">Un mes</div></div>
+        <div class="amount-btn" onclick="selAmount(this,'100')"><div class="amount-n">100€</div><div class="amount-label">Mecenas</div></div>
+        <div class="amount-btn" onclick="selAmount(this,'custom')"><div class="amount-n">✎</div><div class="amount-label">Otro</div></div>
+      </div>
+      <div class="custom-wrap" id="custom-wrap" style="display:none;"><span class="custom-prefix">€</span><input class="custom-input" type="number" placeholder="Cantidad" min="1"></div>
+      <div>
+        <div class="section-label" style="margin-bottom:8px;">Frecuencia</div>
+        <div class="freq-toggle">
+          <button class="freq-btn active" onclick="selFreq(this)">Una vez</button>
+          <button class="freq-btn" onclick="selFreq(this)">Mensual</button>
+        </div>
+      </div>
+      <div>
+        <div class="section-label" style="margin-bottom:8px;">Método de pago</div>
+        <div class="pay-methods">
+          <div class="pay-btn on" onclick="selPay(this)">
+            <svg width="32" height="22" viewBox="0 0 32 22" fill="none"><rect x="0.5" y="0.5" width="31" height="21" rx="3.5" stroke="#C8973A" stroke-opacity="0.4" fill="none"/><rect y="5" width="32" height="6" fill="#C8973A" opacity="0.3"/><rect x="4" y="14" width="3" height="2" rx="1" fill="#C8973A"/></svg>
+            <span class="pay-label">Tarjeta</span>
+          </div>
+          <div class="pay-btn" onclick="selPay(this)">
+            <svg width="32" height="22" viewBox="0 0 32 22" fill="none"><rect x="0.5" y="0.5" width="31" height="21" rx="3.5" stroke="#7A6048" stroke-opacity="0.4" fill="none"/><text x="16" y="14" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="700"><tspan fill="#003087">Pay</tspan><tspan fill="#009cde">Pal</tspan></text></svg>
+            <span class="pay-label">PayPal</span>
+          </div>
+          <div class="pay-btn" onclick="selPay(this)">
+            <svg width="32" height="22" viewBox="0 0 32 22" fill="none"><rect x="0.5" y="0.5" width="31" height="21" rx="3.5" stroke="#7A6048" stroke-opacity="0.4" fill="none"/><circle cx="11" cy="11" r="5" fill="#00ADEF" opacity="0.7"/><circle cx="21" cy="11" r="5" fill="#5C2D91" opacity="0.7"/></svg>
+            <span class="pay-label">Bizum</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="donar()" style="width:100%;">Donar ahora</button>
+      <div class="dona-nota">Pago seguro · Sin suscripción oculta · Puedes cancelar cuando quieras</div>
+    </div>
+  </div>
+  <div class="sostiene">
+    <h2 class="sostiene-title">Tu donación<br><em>sostiene esto</em></h2>
+    <div class="sostiene-grid">
+      <div class="sostiene-item"><div class="sostiene-icon">🖥</div><div class="sostiene-item-title">Infraestructura</div><div class="sostiene-item-text">Servidores, base de datos y la videollamada nativa que hace posible el periodo de prueba.</div></div>
+      <div class="sostiene-item"><div class="sostiene-icon">🤖</div><div class="sostiene-item-title">Agentes de IA</div><div class="sostiene-item-text">El asistente de ayuda y el mediador de incidencias tienen un coste real por uso.</div></div>
+      <div class="sostiene-item"><div class="sostiene-icon">👥</div><div class="sostiene-item-title">Equipo humano</div><div class="sostiene-item-text">Las incidencias, la verificación de maestros y la moderación requieren personas reales.</div></div>
+    </div>
+  </div>
+  <div id="footer-container"></div>
+  <div id="chat-container"></div>
+  <div class="success-overlay" id="success-overlay" style="display:none;align-items:center;justify-content:center;">
+    <div class="success-modal">
+      <div style="font-size:40px;">✦</div>
+      <div style="font-family:var(--font-serif);font-size:26px;font-weight:500;color:var(--text-primary);">Gracias.</div>
+      <div style="font-size:13px;font-weight:300;color:var(--text-muted);line-height:1.7;">Tu aportación mantiene la cadena viva. Aurea seguirá siendo gratuito gracias a personas como tú.</div>
+      <button class="btn-ghost" onclick="document.getElementById('success-overlay').style.display='none'">Cerrar</button>
+    </div>
+  </div>
+  <script src="js/components.js"></script>
+  <script>
+    document.getElementById('nav-container').innerHTML = renderNavPublic('dona');
+    document.getElementById('footer-container').innerHTML = renderFooter();
+    function selAmount(el,val){document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');document.getElementById('custom-wrap').style.display=val==='custom'?'flex':'none';}
+    function selFreq(el){document.querySelectorAll('.freq-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
+    function selPay(el){document.querySelectorAll('.pay-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
+    function donar(){const o=document.getElementById('success-overlay');o.style.display='flex';}
+  </script>
+</body>
+</html>
