@@ -73,56 +73,268 @@
   <div class="layout">
     <div class="col-left">
       <div class="profile-header">
-        <div class="big-avatar">RM</div>
-        <div><div class="profile-name">Rafael Montoya</div><div class="profile-disc">Filosofía estoica</div><div class="profile-location">Madrid · Presencial y online</div></div>
-        <span class="badge-v">✦ Verificado por Aurea</span>
+        <div class="big-avatar" id="p-avatar">RM</div>
+        <div>
+          <div class="profile-name"    id="p-nombre">Rafael Montoya</div>
+          <div class="profile-disc"    id="p-disc">Filosofía estoica</div>
+          <div class="profile-location" id="p-ubicacion">Madrid · Presencial y online</div>
+        </div>
+        <span class="badge-v" id="p-verified">✦ Verificado por Aurea</span>
       </div>
       <div class="stats-grid">
-        <div class="stat-box"><div class="stat-n">4.9</div><div class="stat-l">Reputación</div></div>
-        <div class="stat-box"><div class="stat-n">12</div><div class="stat-l">Años exp.</div></div>
-        <div class="stat-box"><div class="stat-n">3</div><div class="stat-l">Discípulos</div></div>
-        <div class="stat-box"><div class="stat-n">1</div><div class="stat-l">Plaza libre</div></div>
+        <div class="stat-box"><div class="stat-n" id="s-rep">4.9</div><div class="stat-l">Reputación</div></div>
+        <div class="stat-box"><div class="stat-n" id="s-anos">12</div><div class="stat-l">Años exp.</div></div>
+        <div class="stat-box"><div class="stat-n" id="s-disc-n">3</div><div class="stat-l">Discípulos</div></div>
+        <div class="stat-box"><div class="stat-n" id="s-plaza">1</div><div class="stat-l">Plaza libre</div></div>
       </div>
-      <div><span class="section-label">Hashtags</span><div class="tags-wrap"><span class="tag gold">#presencial</span><span class="tag gold">#riguroso</span><span class="tag gold">#avanzado</span><span class="tag">#online</span><span class="tag">#teórico</span></div></div>
-      <div><span class="section-label">Disponibilidad</span><div class="avail-row"><span class="avail-label">Días</span><span class="avail-val">Mar y jue</span></div><div class="avail-row"><span class="avail-label">Horas semanales</span><span class="avail-val">3–4 h</span></div><div class="avail-row"><span class="avail-label">Nivel requerido</span><span class="avail-val">Intermedio</span></div></div>
+      <div>
+        <span class="section-label">Hashtags</span>
+        <div class="tags-wrap" id="p-hashtags">
+          <span class="tag gold">#presencial</span><span class="tag gold">#riguroso</span>
+          <span class="tag gold">#avanzado</span><span class="tag">#online</span><span class="tag">#teórico</span>
+        </div>
+      </div>
+      <div>
+        <span class="section-label">Disponibilidad</span>
+        <div class="avail-row"><span class="avail-label">Días</span><span class="avail-val" id="av-dias">Mar y jue</span></div>
+        <div class="avail-row"><span class="avail-label">Horas semanales</span><span class="avail-val" id="av-horas">3–4 h</span></div>
+        <div class="avail-row"><span class="avail-label">Nivel requerido</span><span class="avail-val" id="av-nivel">Intermedio</span></div>
+      </div>
       <div style="text-align:center;">
-        <div id="btn-plaza" class="btn-circle" onclick="openSolicitud()"><div class="btn-circle-label">Enviar<br>solicitud</div></div>
+        <div id="btn-plaza" class="btn-circle" onclick="window.openSolicitud()"><div class="btn-circle-label">Enviar<br>solicitud</div></div>
         <div id="btn-wait" class="btn-circle wait hidden"><div class="btn-circle-label">Lista de<br>espera</div></div>
       </div>
     </div>
     <div class="col-right">
-      <div><div class="bio-title">Sobre este maestro</div><p class="bio-text">"Llevo doce años estudiando y enseñando filosofía estoica, no como curiosidad académica sino como práctica diaria. No busco estudiantes, busco discípulos que quieran comprometerse de verdad."</p></div>
+      <div>
+        <div class="bio-title">Sobre este maestro</div>
+        <p class="bio-text" id="p-bio">"Llevo doce años estudiando y enseñando filosofía estoica, no como curiosidad académica sino como práctica diaria. No busco estudiantes, busco discípulos que quieran comprometerse de verdad."</p>
+      </div>
       <div class="divider"></div>
-      <div><span class="section-label">Requisitos mínimos</span><div class="req-item"><span class="req-icon">✦</span><span class="req-text">Haber leído al menos un texto estoico antes de la primera sesión</span></div><div class="req-item"><span class="req-icon">✦</span><span class="req-text">Constancia mínima de 60 puntos</span></div><div class="req-item"><span class="req-icon">✦</span><span class="req-text">Disponibilidad mínima de 3 horas semanales</span></div><div class="req-item"><span class="req-icon">✦</span><span class="req-text">Mensaje de motivación obligatorio al solicitar</span></div></div>
+      <div id="sec-requisitos">
+        <span class="section-label">Requisitos mínimos</span>
+        <div class="req-item"><span class="req-icon">✦</span><span class="req-text">Haber leído al menos un texto estoico antes de la primera sesión</span></div>
+        <div class="req-item"><span class="req-icon">✦</span><span class="req-text">Constancia mínima de 60 puntos</span></div>
+        <div class="req-item"><span class="req-icon">✦</span><span class="req-text">Disponibilidad mínima de 3 horas semanales</span></div>
+        <div class="req-item"><span class="req-icon">✦</span><span class="req-text">Mensaje de motivación obligatorio al solicitar</span></div>
+      </div>
       <div class="divider"></div>
-      <div><span class="section-label">Trayectoria</span><div class="tl-item"><span class="tl-year">2012–hoy</span><div><div class="tl-title">Práctica y estudio independiente del estoicismo</div><div class="tl-sub">Marco Aurelio, Epicteto, Séneca</div></div></div><div class="tl-item"><span class="tl-year">2020</span><div><div class="tl-title">Licenciatura en Filosofía — UCM</div><div class="tl-sub">Especialidad en filosofía clásica y helenística</div></div></div><div class="tl-item"><span class="tl-year">2018</span><div><div class="tl-title">Retiro de prácticas avanzadas</div><div class="tl-sub">Grecia · 3 meses de inmersión filosófica</div></div></div></div>
+      <div id="sec-trayectoria">
+        <span class="section-label">Trayectoria</span>
+        <div class="tl-item"><span class="tl-year">2012–hoy</span><div><div class="tl-title">Práctica y estudio independiente del estoicismo</div><div class="tl-sub">Marco Aurelio, Epicteto, Séneca</div></div></div>
+        <div class="tl-item"><span class="tl-year">2020</span><div><div class="tl-title">Licenciatura en Filosofía — UCM</div><div class="tl-sub">Especialidad en filosofía clásica y helenística</div></div></div>
+        <div class="tl-item"><span class="tl-year">2018</span><div><div class="tl-title">Retiro de prácticas avanzadas</div><div class="tl-sub">Grecia · 3 meses de inmersión filosófica</div></div></div>
+      </div>
       <div class="divider"></div>
-      <div><span class="section-label">Reseñas de ex-discípulos</span><div class="review-item"><div class="review-header"><span class="review-author">Claudia F.</span><span class="review-stars">★★★★★</span></div><div class="review-disc">Filosofía estoica · 2 años</div><p class="review-text">"Rafael no enseña filosofía, la vive. Uno de los maestros más honestos que he tenido."</p></div><div class="review-item"><div class="review-header"><span class="review-author">Tomás A.</span><span class="review-stars">★★★★★</span></div><div class="review-disc">Filosofía estoica · 14 meses</div><p class="review-text">"Exige mucho, pero siempre desde el respeto. Cambió mi forma de ver las cosas."</p></div></div>
+      <div id="sec-resenas">
+        <span class="section-label">Reseñas de ex-discípulos</span>
+        <div class="review-item"><div class="review-header"><span class="review-author">Claudia F.</span><span class="review-stars">★★★★★</span></div><div class="review-disc">Filosofía estoica · 2 años</div><p class="review-text">"Rafael no enseña filosofía, la vive. Uno de los maestros más honestos que he tenido."</p></div>
+        <div class="review-item"><div class="review-header"><span class="review-author">Tomás A.</span><span class="review-stars">★★★★★</span></div><div class="review-disc">Filosofía estoica · 14 meses</div><p class="review-text">"Exige mucho, pero siempre desde el respeto. Cambió mi forma de ver las cosas."</p></div>
+      </div>
       <div class="divider"></div>
-      <div><span class="section-label">Discípulos actuales</span><div class="disc-row"><div class="disc-avatar" style="background:#7A4F2A;">JM</div><div><div class="disc-name">Javier M.</div><div class="disc-sub">Filosofía estoica</div></div><span class="disc-since">8 meses</span></div><div class="disc-row"><div class="disc-avatar" style="background:#3B6D11;">LP</div><div><div class="disc-name">Laura P.</div><div class="disc-sub">Filosofía estoica</div></div><span class="disc-since">5 meses</span></div></div>
+      <div id="sec-discipulos">
+        <span class="section-label">Discípulos actuales</span>
+        <div class="disc-row"><div class="disc-avatar" style="background:#7A4F2A;">JM</div><div><div class="disc-name">Javier M.</div><div class="disc-sub">Filosofía estoica</div></div><span class="disc-since">8 meses</span></div>
+        <div class="disc-row"><div class="disc-avatar" style="background:#3B6D11;">LP</div><div><div class="disc-name">Laura P.</div><div class="disc-sub">Filosofía estoica</div></div><span class="disc-since">5 meses</span></div>
+      </div>
     </div>
   </div>
 
   <!-- Modal solicitud -->
   <div class="overlay" id="modal-sol">
     <div class="modal" style="width:460px;">
-      <div class="modal-title">Solicitar a Rafael Montoya</div>
-      <div class="modal-sub">Este maestro exige un mensaje de motivación. Cuéntale por qué quieres aprender filosofía estoica con él y qué puedes aportarle como discípulo.</div>
+      <div class="modal-title" id="p-modal-title">Solicitar a Rafael Montoya</div>
+      <div class="modal-sub"  id="p-modal-sub">Este maestro exige un mensaje de motivación. Cuéntale por qué quieres aprender filosofía estoica con él y qué puedes aportarle como discípulo.</div>
       <div style="height:10px;"></div>
       <div class="field-wrap"><span class="field-label">Tu mensaje de motivación</span><textarea class="modal-ta" id="mot-text" placeholder="Escribe aquí tu motivación sincera…"></textarea></div>
-      <div class="success-send" id="sol-success"><div style="font-size:24px;margin-bottom:8px;">✦</div><div style="font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--text-primary);margin-bottom:4px;">Solicitud enviada</div><div style="font-size:11px;color:var(--text-muted);">Rafael revisará tu perfil y te responderá pronto.</div></div>
-      <div class="modal-actions" id="sol-actions"><button class="btn-mb" onclick="closeModals()">Cancelar</button><button class="btn-ms" onclick="sendSol()">Enviar solicitud</button></div>
+      <div class="success-send" id="sol-success">
+        <div style="font-size:24px;margin-bottom:8px;">✦</div>
+        <div style="font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--text-primary);margin-bottom:4px;">Solicitud enviada</div>
+        <div style="font-size:11px;color:var(--text-muted);" id="sol-success-sub">Rafael revisará tu perfil y te responderá pronto.</div>
+      </div>
+      <div class="modal-actions" id="sol-actions">
+        <button class="btn-mb" onclick="window.closeModals()">Cancelar</button>
+        <button class="btn-ms" onclick="window.sendSol()">Enviar solicitud</button>
+      </div>
     </div>
   </div>
 
   <div id="chat-container"></div>
   <script src="js/components.js"></script>
-  <script>
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { getSession } from './js/auth.js';
+
     document.getElementById('nav-container').innerHTML = renderNavAuth('discover');
-    function openSolicitud(){document.getElementById('modal-sol').classList.add('open');}
-    function closeModals(){document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('open'));}
-    function sendSol(){const v=document.getElementById('mot-text').value.trim();if(!v)return;document.getElementById('sol-actions').style.display='none';document.getElementById('sol-success').classList.add('show');}
-    document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)closeModals();}));
+
+    // — Modales (expuestos globalmente para onclick) —
+    window.openSolicitud = () => document.getElementById('modal-sol').classList.add('open');
+    window.closeModals   = () => document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open'));
+    document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) window.closeModals(); }));
+
+    let _maestroId   = null;
+    let _disciplina  = '';
+    let _nombreCompleto = 'este maestro';
+
+    window.sendSol = async function() {
+      const texto = document.getElementById('mot-text').value.trim();
+      if (!texto) return;
+
+      const session = await getSession();
+      if (session && _maestroId) {
+        // Insertar solicitud real en Supabase
+        await supabase.from('solicitudes').insert({
+          discipulo_id: session.user.id,
+          maestro_id:   _maestroId,
+          disciplina:   _disciplina,
+          motivacion:   texto,
+        });
+      }
+
+      document.getElementById('sol-actions').style.display = 'none';
+      document.getElementById('sol-success').classList.add('show');
+      document.getElementById('sol-success-sub').textContent =
+        _nombreCompleto + ' revisará tu perfil y te responderá pronto.';
+    };
+
+    // — Cargar perfil desde Supabase si hay ?id= en la URL —
+    const params    = new URLSearchParams(window.location.search);
+    const maestroId = params.get('id');
+
+    if (maestroId) {
+      _maestroId = maestroId;
+      cargarPerfil(maestroId);
+    }
+
+    async function cargarPerfil(id) {
+      const [perfilRes, trayRes, resenasRes, relacionesRes] = await Promise.all([
+        supabase
+          .from('maestro_perfiles')
+          .select(`disciplina, hashtags, experiencia_anos, formato,
+                   disponibilidad_dias, horas_semanales, max_discipulos,
+                   acepta_solicitudes, constancia_minima, motivacion_obligatoria,
+                   nivel_requerido, requisitos_libres, reputacion,
+                   profiles (nombre, apellido, avatar_color, bio, ubicacion, verified)`)
+          .eq('id', id)
+          .single(),
+        supabase
+          .from('trayectoria')
+          .select('periodo, titulo, descripcion')
+          .eq('maestro_id', id)
+          .order('orden'),
+        supabase
+          .from('resenas')
+          .select('estrellas, texto, disciplina, duracion_meses, discipulo_id')
+          .eq('maestro_id', id)
+          .order('created_at', { ascending: false })
+          .limit(5),
+        supabase
+          .from('relaciones')
+          .select('discipulo_id', { count: 'exact' })
+          .eq('maestro_id', id)
+          .in('estado', ['prueba', 'consolidada']),
+      ]);
+
+      if (perfilRes.error || !perfilRes.data) return; // mantener demo si falla
+
+      const m = perfilRes.data;
+      const p = m.profiles;
+      const nombre   = p?.nombre   || '';
+      const apellido = p?.apellido || '';
+      const fullName = (nombre + ' ' + apellido).trim();
+      _nombreCompleto = fullName || 'este maestro';
+      _disciplina     = m.disciplina;
+
+      // — Columna izquierda —
+      const av = document.getElementById('p-avatar');
+      av.textContent         = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '??';
+      av.style.background    = p?.avatar_color || '#C8973A';
+      document.getElementById('p-nombre').textContent   = fullName;
+      document.getElementById('p-disc').textContent     = m.disciplina;
+      const fmtLabel = { presencial:'Presencial', online:'Online', ambos:'Presencial y online' };
+      document.getElementById('p-ubicacion').textContent =
+        (p?.ubicacion || '') + (m.formato ? ' · ' + (fmtLabel[m.formato] || '') : '');
+
+      if (!p?.verified) document.getElementById('p-verified').style.display = 'none';
+
+      document.getElementById('s-rep').textContent    = m.reputacion != null ? Number(m.reputacion).toFixed(1) : '—';
+      document.getElementById('s-anos').textContent   = m.experiencia_anos ?? '—';
+      document.getElementById('s-disc-n').textContent = relacionesRes.count ?? '—';
+      const plazas = m.acepta_solicitudes
+        ? Math.max(0, (m.max_discipulos || 0) - (relacionesRes.count || 0))
+        : 0;
+      document.getElementById('s-plaza').textContent  = plazas;
+
+      if (m.hashtags?.length) {
+        document.getElementById('p-hashtags').innerHTML =
+          m.hashtags.map(t => `<span class="tag gold">${t}</span>`).join('');
+      }
+      document.getElementById('av-dias').textContent  = m.disponibilidad_dias || '—';
+      document.getElementById('av-horas').textContent = m.horas_semanales     || '—';
+      const nivel = m.nivel_requerido;
+      document.getElementById('av-nivel').textContent =
+        nivel ? nivel[0].toUpperCase() + nivel.slice(1) : 'Sin requisito';
+
+      if (!m.acepta_solicitudes || plazas === 0) {
+        document.getElementById('btn-plaza').classList.add('hidden');
+        document.getElementById('btn-wait').classList.remove('hidden');
+      }
+
+      // — Columna derecha —
+      if (p?.bio) document.getElementById('p-bio').textContent = '"' + p.bio + '"';
+
+      // Requisitos
+      const reqs = [];
+      if (m.constancia_minima > 0)    reqs.push(`Constancia mínima de ${m.constancia_minima} puntos`);
+      if (m.motivacion_obligatoria)   reqs.push('Mensaje de motivación obligatorio al solicitar');
+      if (m.nivel_requerido)          reqs.push(`Nivel mínimo: ${m.nivel_requerido}`);
+      if (m.requisitos_libres?.length) reqs.push(...m.requisitos_libres);
+      if (reqs.length) {
+        document.getElementById('sec-requisitos').innerHTML =
+          `<span class="section-label">Requisitos mínimos</span>` +
+          reqs.map(r => `<div class="req-item"><span class="req-icon">✦</span><span class="req-text">${r}</span></div>`).join('');
+      }
+
+      // Trayectoria
+      if (!trayRes.error && trayRes.data?.length) {
+        document.getElementById('sec-trayectoria').innerHTML =
+          `<span class="section-label">Trayectoria</span>` +
+          trayRes.data.map(t =>
+            `<div class="tl-item"><span class="tl-year">${t.periodo}</span>
+             <div><div class="tl-title">${t.titulo}</div>
+             ${t.descripcion ? `<div class="tl-sub">${t.descripcion}</div>` : ''}</div></div>`
+          ).join('');
+      }
+
+      // Reseñas
+      if (!resenasRes.error && resenasRes.data?.length) {
+        document.getElementById('sec-resenas').innerHTML =
+          `<span class="section-label">Reseñas de ex-discípulos</span>` +
+          resenasRes.data.map(r =>
+            `<div class="review-item">
+               <div class="review-header">
+                 <span class="review-author">Ex-discípulo</span>
+                 <span class="review-stars">${'★'.repeat(r.estrellas)}</span>
+               </div>
+               <div class="review-disc">${r.disciplina}${r.duracion_meses ? ' · ' + r.duracion_meses + ' meses' : ''}</div>
+               <p class="review-text">"${r.texto}"</p>
+             </div>`
+          ).join('');
+      }
+
+      // Discípulos actuales — por ahora solo el conteo
+      document.getElementById('sec-discipulos').innerHTML =
+        `<span class="section-label">Discípulos actuales</span>` +
+        (relacionesRes.count > 0
+          ? `<div style="font-size:13px;font-weight:300;color:var(--text-muted);padding:12px 0;">${relacionesRes.count} discípulo${relacionesRes.count !== 1 ? 's' : ''} activo${relacionesRes.count !== 1 ? 's' : ''}</div>`
+          : `<div style="font-size:13px;font-weight:300;color:var(--text-faint);padding:12px 0;">Ningún discípulo activo aún</div>`);
+
+      // Modal
+      document.getElementById('p-modal-title').textContent = `Solicitar a ${fullName}`;
+      document.getElementById('p-modal-sub').textContent   = m.motivacion_obligatoria
+        ? `Este maestro exige un mensaje de motivación. Cuéntale por qué quieres aprender ${m.disciplina} con él/ella.`
+        : `Escribe un mensaje para ${fullName} presentándote como discípulo.`;
+    }
   </script>
 </body>
 </html>
