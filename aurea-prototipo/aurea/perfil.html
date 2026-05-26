@@ -112,22 +112,199 @@
   </div>
   <div id="chat-container"></div>
   <script src="js/components.js"></script>
-  <script>
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { requireAuth } from './js/auth.js';
+
     document.getElementById('nav-container').innerHTML = renderNavAuth('perfil');
-    const CONTENT={
-      maestro:`<div><div class="bio-title">Sobre mí</div><p class="bio-text">"Llevo doce años estudiando y enseñando filosofía estoica, no como curiosidad académica sino como práctica diaria. No busco estudiantes, busco discípulos que quieran comprometerse de verdad."</p></div><div class="divider"></div><div><span class="section-label">Trayectoria</span><div class="tl-item"><span class="tl-year">2012–hoy</span><div><div class="tl-title">Práctica y estudio independiente del estoicismo</div><div class="tl-sub">Marco Aurelio, Epicteto, Séneca</div></div></div><div class="tl-item"><span class="tl-year">2020</span><div><div class="tl-title">Licenciatura en Filosofía — UCM</div><div class="tl-sub">Especialidad en filosofía clásica y helenística</div></div></div></div><div class="divider"></div><div><span class="section-label">Reseñas de ex-discípulos</span><div class="review-item"><div class="review-header"><span class="review-author">Claudia F.</span><span class="review-stars">★★★★★</span></div><div class="review-disc">Filosofía estoica · 2 años</div><p class="review-text">"Rafael no enseña filosofía, la vive. Uno de los maestros más honestos que he tenido."</p></div></div><div class="divider"></div><div><span class="section-label">Discípulos actuales</span><div class="disc-row"><div class="disc-avatar" style="background:#7A4F2A;">JM</div><div class="disc-info"><div class="disc-name">Javier M.</div><div class="disc-sub">Filosofía estoica</div></div><span class="disc-since">Desde hace 8 meses</span></div><div class="disc-row"><div class="disc-avatar" style="background:#3B6D11;">LP</div><div class="disc-info"><div class="disc-name">Laura P.</div><div class="disc-sub">Filosofía estoica</div></div><span class="disc-since">Desde hace 5 meses</span></div></div>`,
-      discipulo:`<div><div class="bio-title">Por qué aprendo</div><p class="bio-text">"Llevo años acumulando conocimiento de forma autodidacta, pero sé que hay cosas que solo se aprenden de otra persona."</p></div><div class="divider"></div><div><span class="section-label">Disciplinas activas</span><div class="disc-row"><div class="disc-avatar" style="background:#534AB7;">AO</div><div class="disc-info"><div class="disc-name">Andrés Ortega</div><div class="disc-sub">Astronomía · Maestro aceptado</div></div><span class="disc-since">Desde hace 85 días</span></div></div><div class="divider"></div><div><span class="section-label">Referencias de mis maestros</span><div class="review-item"><div class="review-header"><span class="review-author">Andrés Ortega — Astronomía</span><span class="review-stars">★★★★★</span></div><div class="review-disc">85 días · Relación activa</div><p class="review-text">"Rafael es curioso, riguroso y viene a cada sesión habiendo hecho el trabajo."</p></div></div>`
-    };
-    function setRole(role,btn){
-      document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('active'));
+
+    // — Estado global —
+    let _profile = null, _maestro = null;
+    let _tray = [], _resenas = [], _relM = [], _relD = [];
+
+    // — setRole expuesto globalmente para los onclick —
+    window.setRole = function(role, btn) {
+      document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      const esMaestro=role==='maestro';
-      document.getElementById('role-label').textContent=esMaestro?'Maestro · Filosofía estoica':'Discípulo · Astronomía';
-      ['stats-maestro','tags-maestro','avail-maestro'].forEach(id=>document.getElementById(id).classList.toggle('hidden',!esMaestro));
-      ['stats-discipulo','tags-discipulo','avail-discipulo'].forEach(id=>document.getElementById(id).classList.toggle('hidden',esMaestro));
-      document.getElementById('col-right').innerHTML=CONTENT[role];
+      const esMaestro = role === 'maestro';
+      const disc = _maestro?.disciplina || '';
+      const rol  = _profile?.rol || 'discipulo';
+      document.getElementById('role-label').textContent = esMaestro
+        ? `Maestro${disc ? ' · ' + disc : ''}`
+        : `Discípulo${disc && rol === 'ambos' ? ' · buscando ' + disc : ''}`;
+      ['stats-maestro','tags-maestro','avail-maestro'].forEach(id =>
+        document.getElementById(id).classList.toggle('hidden', !esMaestro));
+      ['stats-discipulo','tags-discipulo','avail-discipulo'].forEach(id =>
+        document.getElementById(id).classList.toggle('hidden', esMaestro));
+      document.getElementById('col-right').innerHTML = esMaestro ? buildMaestroHTML() : buildDiscipuloHTML();
+    };
+
+    function días(fecha) {
+      return fecha ? Math.round((Date.now() - new Date(fecha)) / 86400000) : '?';
     }
-    setRole('maestro',document.querySelector('.role-btn.active'));
+    function ini(p) {
+      return ((p?.nombre||'')[0] + (p?.apellido||'')[0]).toUpperCase() || '?';
+    }
+    function nombreCompleto(p) {
+      return ((p?.nombre||'') + ' ' + (p?.apellido||'')).trim() || '—';
+    }
+
+    function buildMaestroHTML() {
+      const bio = _profile?.frase || '';
+      const bioHTML = bio
+        ? `<p class="bio-text">"${bio}"</p>`
+        : `<p class="bio-text" style="color:var(--text-faint);font-style:normal;font-size:13px;">Sin descripción todavía. <a href="perfil-edicion.html" style="color:var(--gold);">Añadir</a></p>`;
+
+      const trayHTML = _tray.length
+        ? _tray.map(t => `
+            <div class="tl-item">
+              <span class="tl-year">${t.periodo || '—'}</span>
+              <div><div class="tl-title">${t.titulo}</div>${t.descripcion ? `<div class="tl-sub">${t.descripcion}</div>` : ''}</div>
+            </div>`).join('')
+        : `<p style="font-size:12px;color:var(--text-faint);padding:8px 0;">Sin trayectoria añadida. <a href="perfil-edicion.html" style="color:var(--gold);">Añadir</a></p>`;
+
+      const resenasHTML = _resenas.length
+        ? _resenas.map(r => `
+            <div class="review-item">
+              <div class="review-header">
+                <span class="review-author">Ex-discípulo</span>
+                <span class="review-stars">${'★'.repeat(Math.min(r.estrellas || 5, 5))}</span>
+              </div>
+              <div class="review-disc">${r.disciplina || ''}${r.duracion_meses ? ' · ' + r.duracion_meses + ' meses' : ''}</div>
+              <p class="review-text">"${r.texto}"</p>
+            </div>`).join('')
+        : `<p style="font-size:12px;color:var(--text-faint);padding:8px 0;">Sin reseñas todavía.</p>`;
+
+      const discHTML = _relM.length
+        ? _relM.map(r => {
+            const p = r.profiles || {};
+            const d = días(r.fecha_inicio);
+            return `<div class="disc-row">
+              <div class="disc-avatar" style="background:${p.avatar_color || 'var(--gold)'};">${ini(p)}</div>
+              <div class="disc-info"><div class="disc-name">${nombreCompleto(p)}</div><div class="disc-sub">${r.disciplina || ''}</div></div>
+              <span class="disc-since">Hace ${d} días</span>
+            </div>`;
+          }).join('')
+        : `<p style="font-size:12px;color:var(--text-faint);padding:8px 0;">Sin discípulos activos aún.</p>`;
+
+      return `
+        <div><div class="bio-title">Sobre mí</div>${bioHTML}</div>
+        <div class="divider"></div>
+        <div><span class="section-label">Trayectoria</span>${trayHTML}</div>
+        <div class="divider"></div>
+        <div><span class="section-label">Reseñas de ex-discípulos</span>${resenasHTML}</div>
+        <div class="divider"></div>
+        <div><span class="section-label">Discípulos actuales</span>${discHTML}</div>`;
+    }
+
+    function buildDiscipuloHTML() {
+      const bio = _profile?.frase || '';
+      const bioHTML = bio
+        ? `<p class="bio-text">"${bio}"</p>`
+        : `<p class="bio-text" style="color:var(--text-faint);font-style:normal;font-size:13px;">Añade tu motivación en <a href="perfil-edicion.html" style="color:var(--gold);">tu perfil</a>.</p>`;
+
+      const discHTML = _relD.length
+        ? _relD.map(r => {
+            const d = días(r.fecha_inicio);
+            const badge = r.estado === 'prueba' ? 'Periodo de prueba' : 'Maestro aceptado';
+            return `<div class="disc-row">
+              <div class="disc-avatar" style="background:var(--gold);">M</div>
+              <div class="disc-info">
+                <div class="disc-name">${r.disciplina || 'Disciplina'}</div>
+                <div class="disc-sub">${badge}</div>
+              </div>
+              <span class="disc-since">Hace ${d} días</span>
+            </div>`;
+          }).join('')
+        : `<p style="font-size:12px;color:var(--text-faint);padding:8px 0;">Sin disciplinas activas. <a href="discover.html" style="color:var(--gold);">Busca un maestro</a></p>`;
+
+      return `
+        <div><div class="bio-title">Por qué aprendo</div>${bioHTML}</div>
+        <div class="divider"></div>
+        <div><span class="section-label">Disciplinas activas</span>${discHTML}</div>`;
+    }
+
+    // — Carga de datos —
+    async function init() {
+      const session = await requireAuth();
+      if (!session) return;
+      const uid = session.user.id;
+
+      const [pRes, mRes] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', uid).single(),
+        supabase.from('maestro_perfiles').select('*').eq('perfil_id', uid).single(),
+      ]);
+
+      _profile = pRes.data;
+      _maestro  = mRes.error ? null : mRes.data;
+
+      if (!_profile) return;
+
+      // Columna izquierda: datos básicos
+      const nombre = _profile.nombre || '', apellido = _profile.apellido || '';
+      const initials = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
+      const av = document.querySelector('.big-avatar');
+      av.innerHTML = initials + '<div class="avatar-overlay">📷</div>';
+      av.style.background = _profile.avatar_color || 'var(--gold)';
+      document.querySelector('.profile-name').textContent = (nombre + ' ' + apellido).trim();
+      document.querySelector('.profile-location').textContent = _profile.ubicacion || '';
+
+      // Cargar datos secundarios en paralelo
+      const fetches = _maestro
+        ? [
+            supabase.from('trayectoria').select('periodo, titulo, descripcion').eq('maestro_id', _maestro.id).order('orden'),
+            supabase.from('resenas').select('estrellas, texto, disciplina, duracion_meses').eq('maestro_id', _maestro.id).limit(5),
+            supabase.from('relaciones')
+              .select('disciplina, fecha_inicio, estado, profiles!discipulo_id(nombre, apellido, avatar_color)')
+              .eq('maestro_id', _maestro.id).in('estado', ['prueba','consolidada']),
+          ]
+        : [
+            Promise.resolve({ data: [] }),
+            Promise.resolve({ data: [] }),
+            Promise.resolve({ data: [] }),
+          ];
+
+      fetches.push(
+        supabase.from('relaciones')
+          .select('disciplina, fecha_inicio, estado')
+          .eq('discipulo_id', uid)
+          .in('estado', ['prueba','consolidada'])
+      );
+
+      const [tRes, rRes, rmRes, rdRes] = await Promise.all(fetches);
+      _tray    = tRes.data  || [];
+      _resenas = rRes.data  || [];
+      _relM    = rmRes.data || [];
+      _relD    = rdRes.data || [];
+
+      // Stats de maestro
+      if (_maestro) {
+        const activeCount = _relM.length;
+        const plazas = Math.max(0, (_maestro.max_discipulos || 4) - activeCount);
+        document.getElementById('stats-maestro').innerHTML = `
+          <div class="stat-box"><div class="stat-n">${_maestro.reputacion != null ? Number(_maestro.reputacion).toFixed(1) : '—'}</div><div class="stat-l">Reputación</div></div>
+          <div class="stat-box"><div class="stat-n">${_maestro.experiencia_anos ?? '—'}</div><div class="stat-l">Años exp.</div></div>
+          <div class="stat-box"><div class="stat-n">${activeCount}</div><div class="stat-l">Discípulos</div></div>
+          <div class="stat-box"><div class="stat-n">${plazas}</div><div class="stat-l">Plaza${plazas !== 1 ? 's' : ''} libre${plazas !== 1 ? 's' : ''}</div></div>`;
+        if (_maestro.hashtags?.length) {
+          document.querySelector('#tags-maestro .tags-wrap').innerHTML =
+            _maestro.hashtags.map(t => `<span class="tag gold">${t}</span>`).join('');
+        }
+      }
+
+      // Visibilidad del toggle según rol
+      const rol = _profile.rol || 'discipulo';
+      const btns = document.querySelectorAll('.role-btn');
+      if (rol === 'maestro')   btns[1].style.display = 'none';
+      if (rol === 'discipulo') btns[0].style.display = 'none';
+
+      // Vista inicial según rol
+      const startRole = rol === 'discipulo' ? 'discipulo' : 'maestro';
+      const activeBtn = startRole === 'maestro' ? btns[0] : btns[1];
+      window.setRole(startRole, activeBtn);
+    }
+
+    init();
   </script>
 </body>
 </html>

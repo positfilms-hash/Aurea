@@ -107,19 +107,213 @@
 
   <div id="chat-container"></div>
   <script src="js/components.js"></script>
-  <script>
-    document.getElementById('nav-container').innerHTML = renderNavAuth('relaciones');
-    document.querySelectorAll('.filter-chips .chip-side,.sidebar .chip-side').forEach(c=>{c.addEventListener('click',function(){this.parentElement.querySelectorAll('.chip-side').forEach(s=>s.classList.remove('on'));this.classList.add('on');});});
-    function openMediador(nombre){openMediador(nombre);}
-    function openFinalizar(nombre){document.getElementById('fin-sub').textContent=`Esta acción cerrará tu relación con ${nombre} de forma definitiva.`;document.getElementById('overlay-fin').classList.add('open');}
-    function closeModals(){document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('open'));}
-    document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)closeModals();}));
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { requireAuth } from './js/auth.js';
 
-    // Sobreescribir openMediador para usar el del modal nativo
-    window.openMediador = function(nombre){
-      document.getElementById('inc-sub').textContent=`Describe lo ocurrido con ${nombre}. El equipo de Aurea lo revisará de forma confidencial.`;
+    document.getElementById('nav-container').innerHTML = renderNavAuth('relaciones');
+
+    // — Modales —
+    function closeModals() { document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open')); }
+    document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) closeModals(); }));
+
+    window.closeModals   = closeModals;
+    window.openMediador  = function(nombre) {
+      document.getElementById('inc-sub').textContent = `Describe lo ocurrido con ${nombre}. El equipo de Aurea lo revisará de forma confidencial.`;
       document.getElementById('overlay-inc').classList.add('open');
     };
+    window.openFinalizar = function(relId, nombre) {
+      document.getElementById('fin-sub').textContent = `Esta acción cerrará tu relación con ${nombre} de forma definitiva.`;
+      document.getElementById('overlay-fin').dataset.relId = relId;
+      document.getElementById('overlay-fin').dataset.nombre = nombre;
+      document.getElementById('overlay-fin').classList.add('open');
+    };
+
+    // Botón confirmar finalización
+    document.querySelector('.btn-modal-end').addEventListener('click', async () => {
+      const relId = document.getElementById('overlay-fin').dataset.relId;
+      if (relId) {
+        await supabase.from('relaciones').update({ estado: 'finalizada' }).eq('id', relId);
+        closeModals();
+        await cargarRelaciones();
+      }
+    });
+
+    // — Filtro chips —
+    let _filtroEstado = 'todas';
+    let _filtroRol    = 'todos';
+    let _allRels = [];
+
+    const _rSections = document.querySelectorAll('.filter-chips');
+    // Sección 0: Estado
+    _rSections[0]?.querySelectorAll('.chip-side').forEach(c => {
+      c.addEventListener('click', function() {
+        _rSections[0].querySelectorAll('.chip-side').forEach(s => s.classList.remove('on'));
+        this.classList.add('on');
+        const t = this.textContent.trim().toLowerCase();
+        _filtroEstado = t.startsWith('consolidada') ? 'consolidada'
+          : t.startsWith('en prueba') || t.startsWith('prueba') ? 'prueba'
+          : t.startsWith('finalizada') ? 'finalizada'
+          : 'todas';
+        renderRelaciones();
+      });
+    });
+    // Sección 1: Rol
+    _rSections[1]?.querySelectorAll('.chip-side').forEach(c => {
+      c.addEventListener('click', function() {
+        _rSections[1].querySelectorAll('.chip-side').forEach(s => s.classList.remove('on'));
+        this.classList.add('on');
+        const t = this.textContent.trim().toLowerCase();
+        _filtroRol = t.includes('maestro') ? 'maestro'
+          : (t.includes('discípulo') || t.includes('discipulo')) ? 'discipulo'
+          : 'todos';
+        renderRelaciones();
+      });
+    });
+    // Sección 2+: solo feedback visual
+    _rSections.forEach((sec, i) => {
+      if (i < 2) return;
+      sec.querySelectorAll('.chip-side').forEach(c => {
+        c.addEventListener('click', function() {
+          sec.querySelectorAll('.chip-side').forEach(s => s.classList.remove('on'));
+          this.classList.add('on');
+        });
+      });
+    });
+
+    function diasDesde(fecha) {
+      return fecha ? Math.round((Date.now() - new Date(fecha)) / 86400000) : null;
+    }
+    function tiempoDesde(dias) {
+      if (dias === null) return '—';
+      if (dias < 30) return `Hace ${dias} días`;
+      if (dias < 365) return `Hace ${Math.round(dias/30)} meses`;
+      return `Hace ${Math.round(dias/365)} años`;
+    }
+
+    function renderRelaciones() {
+      let rels = _allRels;
+      if (_filtroEstado !== 'todas') rels = rels.filter(r => r.estado === _filtroEstado);
+      if (_filtroRol !== 'todos')    rels = rels.filter(r => r._rol === _filtroRol);
+
+      const lista = document.querySelector('.list');
+      if (!rels.length) {
+        lista.innerHTML = `<div style="padding:40px;text-align:center;font-size:13px;color:var(--text-faint);">No hay relaciones${_filtroEstado !== 'todas' ? ' en este estado' : ''} todavía.</div>`;
+        return;
+      }
+
+      const BADGE_MAP = {
+        consolidada: '<span class="estado-badge badge-nueva">✦ Consolidada</span>',
+        prueba:      '<span class="estado-badge badge-prueba">⏳ En prueba</span>',
+        finalizada:  '<span class="estado-badge badge-vista">— Finalizada</span>',
+      };
+
+      lista.innerHTML = rels.map(r => {
+        const p = r._persona || {};
+        const nombre = ((p.nombre||'') + ' ' + (p.apellido||'')).trim() || 'Persona';
+        const initials = ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?';
+        const bg = p.avatar_color || 'var(--mahogany)';
+        const dias = diasDesde(r.fecha_inicio);
+        const esFinalizada = r.estado === 'finalizada';
+        const rolLabel = r._rol === 'maestro' ? 'Discípulo' : 'Maestro';
+        const disc = r.disciplina || r._disciplina || '—';
+
+        const actionsHTML = esFinalizada ? '' : (r.estado === 'prueba'
+          ? `<button class="btn-small" onclick="location.href='periodo-prueba.html'">Chat</button>`
+          : `<button class="btn-small">Chat</button>
+             <button class="btn-small warn" onclick="window.openMediador('${nombre}')">Incidencia</button>
+             <button class="btn-small danger" onclick="window.openFinalizar('${r.id}','${nombre}')">Finalizar</button>`);
+
+        return `
+          <div class="rel-row${esFinalizada ? ' faded' : ''}">
+            <div class="ind ${r.estado}"></div>
+            <div class="avatar" style="background:${esFinalizada ? 'var(--border)' : bg};">${initials}</div>
+            <div>
+              <div class="rel-nombre">${nombre}</div>
+              <div class="rel-disc">${disc}</div>
+              <div class="rel-rol">${rolLabel} ${r.estado === 'prueba' ? '· En periodo de prueba' : r.estado === 'finalizada' ? '· Finalizado' : '· Aceptado'}</div>
+            </div>
+            ${BADGE_MAP[r.estado] || ''}
+            <div>
+              <div class="rel-desde">${r.fecha_inicio ? new Date(r.fecha_inicio).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}) : '—'}</div>
+              <div class="rel-duracion">${tiempoDesde(dias)}</div>
+            </div>
+            <div class="rel-actions">${actionsHTML}</div>
+          </div>`;
+      }).join('');
+    }
+
+    function actualizarContadoresRel() {
+      const counts = { consolidada:0, prueba:0, finalizada:0, maestro:0, discipulo:0 };
+      _allRels.forEach(r => {
+        if (counts[r.estado] !== undefined) counts[r.estado]++;
+        if (counts[r._rol]   !== undefined) counts[r._rol]++;
+      });
+      // Sub-header
+      document.querySelector('.content-sub').textContent =
+        `${_allRels.length} relaciones · ${counts.consolidada} consolidadas · ${counts.prueba} en prueba · ${counts.finalizada} finalizadas`;
+      // Plazas bar
+      const plazaItems = document.querySelectorAll('.plaza-n');
+      if (plazaItems[0]) plazaItems[0].textContent = `${counts.maestro} como maestro`;
+      if (plazaItems[1]) plazaItems[1].textContent = `${counts.discipulo} como discípulo`;
+    }
+
+    async function cargarRelaciones() {
+      const session = await requireAuth();
+      if (!session) return;
+      const uid = session.user.id;
+
+      // Perfil de maestro del usuario (puede no tener)
+      const { data: maestro } = await supabase
+        .from('maestro_perfiles')
+        .select('id, disciplina')
+        .eq('perfil_id', uid)
+        .single();
+
+      const fetches = [];
+
+      // Relaciones como maestro
+      if (maestro) {
+        fetches.push(
+          supabase.from('relaciones')
+            .select('id, disciplina, estado, fecha_inicio, discipulo_id, profiles!discipulo_id(nombre, apellido, avatar_color)')
+            .eq('maestro_id', maestro.id)
+        );
+      } else {
+        fetches.push(Promise.resolve({ data: [] }));
+      }
+
+      // Relaciones como discípulo
+      fetches.push(
+        supabase.from('relaciones')
+          .select('id, disciplina, estado, fecha_inicio, maestro_id')
+          .eq('discipulo_id', uid)
+      );
+
+      const [rMRes, rDRes] = await Promise.all(fetches);
+
+      const relsMaestro = (rMRes.data || []).map(r => ({
+        ...r,
+        _rol: 'maestro',
+        _persona: r.profiles || {},
+        _disciplina: r.disciplina || maestro?.disciplina || '—',
+      }));
+
+      const relsDisc = (rDRes.data || []).map(r => ({
+        ...r,
+        _rol: 'discipulo',
+        _persona: {},   // sin datos del maestro en esta query simple
+        _disciplina: r.disciplina || '—',
+      }));
+
+      _allRels = [...relsMaestro, ...relsDisc].sort((a, b) =>
+        new Date(b.fecha_inicio || 0) - new Date(a.fecha_inicio || 0));
+
+      renderRelaciones();
+      actualizarContadoresRel();
+    }
+
+    cargarRelaciones();
   </script>
 </body>
 </html>

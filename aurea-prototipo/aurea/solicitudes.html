@@ -78,36 +78,218 @@
   </div>
   <div id="chat-container"></div>
   <script src="js/components.js"></script>
-  <script>
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { requireAuth } from './js/auth.js';
+
     document.getElementById('nav-container').innerHTML = renderNavAuth('solicitudes');
-    const DATA=[
-      {i:'JM',n:'Javier M.',d:'Filosofía estoica',loc:'Madrid · Presencial',c:82,fecha:'Hace 2 días',estado:'nueva',bg:'#7A4F2A'},
-      {i:'AP',n:'Ana P.',d:'Filosofía estoica',loc:'Online',c:91,fecha:'Hace 3 días',estado:'nueva',bg:'#3B6D11'},
-      {i:'CR',n:'Carlos R.',d:'Filosofía estoica',loc:'Madrid · Presencial',c:67,fecha:'Hace 4 días',estado:'nueva',bg:'#534AB7'},
-      {i:'LG',n:'Laura G.',d:'Filosofía estoica',loc:'Online',c:78,fecha:'Hace 6 días',estado:'vista',bg:'#993556'},
-      {i:'MF',n:'Marcos F.',d:'Filosofía estoica',loc:'Madrid · Presencial',c:55,fecha:'Hace 1 semana',estado:'vista',bg:'#185FA5'},
-      {i:'SL',n:'Sofía L.',d:'Filosofía estoica',loc:'Barcelona · Presencial',c:88,fecha:'Hace 1 semana',estado:'aceptada',bg:'#854F0B'},
-      {i:'DR',n:'Diego R.',d:'Filosofía estoica',loc:'Online',c:44,fecha:'Hace 10 días',estado:'rechazada',bg:'#0F6E56'},
-      {i:'NV',n:'Nuria V.',d:'Filosofía estoica',loc:'Madrid · Presencial',c:73,fecha:'Hace 12 días',estado:'aceptada',bg:'#712B13'},
-    ];
-    const LABEL={nueva:'Nueva',vista:'Vista',aceptada:'Aceptada',rechazada:'Rechazada'};
-    const ICON={nueva:'✦',vista:'◎',aceptada:'✓',rechazada:'✕'};
-    const BADGE={nueva:'badge-nueva',vista:'badge-vista',aceptada:'badge-aceptada',rechazada:'badge-rechazada'};
-    function acciones(e){
-      if(e==='aceptada')return`<span style="font-size:10px;font-style:italic;font-family:var(--font-serif);color:var(--green);">En periodo de prueba</span>`;
-      if(e==='rechazada')return`<span style="font-size:10px;font-style:italic;font-family:var(--font-serif);color:var(--red);">Solicitud rechazada</span>`;
-      return`<button class="btn-small" onclick="location.href='perfil-discipulo.html'">Ver perfil</button><button class="btn-ac">Aceptar</button><button class="btn-re">✕</button>`;
+
+    const LABEL = { nueva:'Nueva', vista:'Vista', aceptada:'Aceptada', rechazada:'Rechazada' };
+    const ICON  = { nueva:'✦', vista:'◎', aceptada:'✓', rechazada:'✕' };
+    const BADGE = { nueva:'badge-nueva', vista:'badge-vista', aceptada:'badge-aceptada', rechazada:'badge-rechazada' };
+
+    let _maestroId = null;
+    let _maxDisc   = 4;
+    let _allSols   = [];
+    let _filtroEstado = 'todas';
+
+    // — Filtro de chips: solo la sección Estado (primera) afecta el filtro real —
+    const _sections = document.querySelectorAll('.filter-chips');
+    _sections[0]?.querySelectorAll('.chip-side').forEach(c => {
+      c.addEventListener('click', function() {
+        _sections[0].querySelectorAll('.chip-side').forEach(s => s.classList.remove('on'));
+        this.classList.add('on');
+        const t = this.textContent.trim().toLowerCase();
+        _filtroEstado = t.startsWith('nueva') ? 'nueva'
+          : t.startsWith('vista') ? 'vista'
+          : t.startsWith('aceptada') ? 'aceptada'
+          : t.startsWith('rechazada') ? 'rechazada'
+          : 'todas';
+        renderLista();
+      });
+    });
+    // Resto de chips: solo feedback visual
+    _sections.forEach((sec, i) => {
+      if (i === 0) return;
+      sec.querySelectorAll('.chip-side').forEach(c => {
+        c.addEventListener('click', function() {
+          sec.querySelectorAll('.chip-side').forEach(s => s.classList.remove('on'));
+          this.classList.add('on');
+        });
+      });
+    });
+
+    function fechaRelativa(iso) {
+      const d = Math.round((Date.now() - new Date(iso)) / 86400000);
+      if (d === 0) return 'Hoy';
+      if (d === 1) return 'Ayer';
+      if (d < 7)  return `Hace ${d} días`;
+      if (d < 14) return 'Hace 1 semana';
+      return `Hace ${Math.round(d/7)} semanas`;
     }
-    document.getElementById('lista').innerHTML=DATA.map(s=>`
-      <div class="sol-row">
-        <div class="ind ${s.estado}"></div>
-        <div class="avatar" style="background:${s.bg};">${s.i}</div>
-        <div><div class="sol-nombre">${s.n}</div><div class="sol-disc">${s.d}</div><div class="sol-loc">${s.loc}</div></div>
-        <div class="const-wrap"><div class="const-top"><span class="const-n">${s.c}</span><span style="font-size:9px;color:var(--text-ghost);">/ 100</span></div><div class="const-bar-bg"><div class="const-bar" style="width:${s.c}%;"></div></div></div>
-        <div><div class="sol-fecha">${s.fecha}</div><span class="estado-badge ${BADGE[s.estado]}">${ICON[s.estado]} ${LABEL[s.estado]}</span></div>
-        <div class="sol-actions">${acciones(s.estado)}</div>
-      </div>`).join('');
-    document.querySelectorAll('.filter-chips .chip-side').forEach(c=>{c.addEventListener('click',function(){this.parentElement.querySelectorAll('.chip-side').forEach(s=>s.classList.remove('on'));this.classList.add('on');});});
+
+    function acciones(sol) {
+      if (sol.estado === 'aceptada') return `<span style="font-size:10px;font-style:italic;font-family:var(--font-serif);color:var(--green);">En periodo de prueba</span>`;
+      if (sol.estado === 'rechazada') return `<span style="font-size:10px;font-style:italic;font-family:var(--font-serif);color:var(--red);">Solicitud rechazada</span>`;
+      return `<button class="btn-small" onclick="verPerfil('${sol.discipulo_id}')">Ver perfil</button>
+              <button class="btn-ac" onclick="aceptar('${sol.id}','${sol.discipulo_id}','${sol.disciplina || ''}')">Aceptar</button>
+              <button class="btn-re" onclick="rechazar('${sol.id}')">✕</button>`;
+    }
+
+    function renderLista() {
+      const sols = _filtroEstado === 'todas'
+        ? _allSols
+        : _allSols.filter(s => s.estado === _filtroEstado);
+
+      const lista = document.getElementById('lista');
+      if (!sols.length) {
+        lista.innerHTML = `<div style="padding:40px;text-align:center;font-size:13px;color:var(--text-faint);">
+          No hay solicitudes${_filtroEstado !== 'todas' ? ' en este estado' : ''}.
+        </div>`;
+        return;
+      }
+
+      lista.innerHTML = sols.map(s => {
+        const p = s.profiles || {};
+        const nombre = ((p.nombre || '') + ' ' + (p.apellido || '')).trim() || 'Discípulo';
+        const initials = ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?';
+        const bg = p.avatar_color || 'var(--mahogany)';
+        const loc = p.ubicacion || '—';
+        const fecha = fechaRelativa(s.created_at);
+        const constancia = 0; // sin datos de constancia aún
+        return `
+          <div class="sol-row">
+            <div class="ind ${s.estado}"></div>
+            <div class="avatar" style="background:${bg};">${initials}</div>
+            <div>
+              <div class="sol-nombre">${nombre}</div>
+              <div class="sol-disc">${s.disciplina || '—'}</div>
+              <div class="sol-loc">${loc}</div>
+            </div>
+            <div class="const-wrap">
+              <div class="const-top"><span class="const-n">${constancia}</span><span style="font-size:9px;color:var(--text-ghost);">/ 100</span></div>
+              <div class="const-bar-bg"><div class="const-bar" style="width:${constancia}%;"></div></div>
+            </div>
+            <div>
+              <div class="sol-fecha">${fecha}</div>
+              <span class="estado-badge ${BADGE[s.estado]}">${ICON[s.estado]} ${LABEL[s.estado]}</span>
+            </div>
+            <div class="sol-actions">${acciones(s)}</div>
+          </div>`;
+      }).join('');
+    }
+
+    function actualizarContadores() {
+      const counts = { todas: _allSols.length, nueva: 0, vista: 0, aceptada: 0, rechazada: 0 };
+      _allSols.forEach(s => { if (counts[s.estado] !== undefined) counts[s.estado]++; });
+
+      // Actualizar sub-header
+      const activas = counts.nueva + counts.vista;
+      document.querySelector('.content-sub').textContent =
+        `${_allSols.length} solicitudes · ${activas} sin responder`;
+
+      // Actualizar chips (aproximado por posición)
+      const chips = document.querySelectorAll('.filter-chips .chip-side');
+      const labels = ['todas', 'nueva', 'vista', 'aceptada', 'rechazada'];
+      chips.forEach((c, i) => {
+        const cSpan = c.querySelector('.chip-count');
+        if (cSpan && labels[i]) {
+          cSpan.textContent = counts[labels[i]] ?? '';
+        }
+      });
+
+      // Plazas bar
+      const activos = counts.aceptada;
+      const libres  = Math.max(0, _maxDisc - activos);
+      document.querySelector('.plaza-n').textContent = `${activos} / ${_maxDisc}`;
+      document.querySelectorAll('.plaza-n')[1].textContent = String(libres);
+    }
+
+    // — Acciones —
+    window.verPerfil = function(discipuloId) {
+      location.href = `perfil-discipulo.html?id=${discipuloId}`;
+    };
+
+    window.aceptar = async function(solId, discipuloId, disciplina) {
+      const { error: e1 } = await supabase.from('solicitudes').update({ estado: 'aceptada' }).eq('id', solId);
+      if (e1) { alert('Error al aceptar. Inténtalo de nuevo.'); return; }
+      const { error: e2 } = await supabase.from('relaciones').insert({
+        maestro_id:   _maestroId,
+        discipulo_id: discipuloId,
+        disciplina:   disciplina || '',
+        estado:       'prueba',
+        fecha_inicio: new Date().toISOString().split('T')[0],
+      });
+      if (e2) console.warn('Error al crear relación:', e2.message);
+      await cargarSolicitudes();
+    };
+
+    window.rechazar = async function(solId) {
+      await supabase.from('solicitudes').update({ estado: 'rechazada' }).eq('id', solId);
+      await cargarSolicitudes();
+    };
+
+    // — Marcar como vista al cargar —
+    async function marcarVistas(solIds) {
+      if (!solIds.length) return;
+      await supabase.from('solicitudes')
+        .update({ estado: 'vista' })
+        .in('id', solIds)
+        .eq('estado', 'nueva');
+    }
+
+    async function cargarSolicitudes() {
+      if (!_maestroId) return;
+      const { data, error } = await supabase
+        .from('solicitudes')
+        .select(`id, disciplina, motivacion, estado, created_at, discipulo_id,
+                 profiles!discipulo_id(nombre, apellido, avatar_color, ubicacion)`)
+        .eq('maestro_id', _maestroId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        document.getElementById('lista').innerHTML =
+          `<div style="padding:40px;text-align:center;color:var(--text-faint);">Error al cargar solicitudes.</div>`;
+        return;
+      }
+
+      _allSols = data || [];
+      renderLista();
+      actualizarContadores();
+
+      // Marcar nuevas como vistas en background
+      const nuevasIds = _allSols.filter(s => s.estado === 'nueva').map(s => s.id);
+      marcarVistas(nuevasIds);
+    }
+
+    // — Init —
+    async function init() {
+      const session = await requireAuth();
+      if (!session) return;
+      const uid = session.user.id;
+
+      const { data: maestro, error } = await supabase
+        .from('maestro_perfiles')
+        .select('id, disciplina, max_discipulos')
+        .eq('perfil_id', uid)
+        .single();
+
+      if (error || !maestro) {
+        document.getElementById('lista').innerHTML = `
+          <div style="padding:60px;text-align:center;">
+            <div style="font-family:var(--font-serif);font-size:20px;color:var(--text-secondary);margin-bottom:12px;">No eres maestro</div>
+            <div style="font-size:12px;color:var(--text-faint);">Esta sección es para maestros que reciben solicitudes de discípulos.</div>
+          </div>`;
+        return;
+      }
+
+      _maestroId = maestro.id;
+      _maxDisc   = maestro.max_discipulos || 4;
+      document.querySelector('.content-title').textContent = 'Solicitudes recibidas';
+      await cargarSolicitudes();
+    }
+
+    init();
   </script>
 </body>
 </html>
