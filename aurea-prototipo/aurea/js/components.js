@@ -3,7 +3,7 @@ const LOGO_URL = 'assets/logo.png';
 
 function renderNavPublic(active=''){
   const pages=[{id:'index',label:'Inicio',href:'index.html'},{id:'como-funciona',label:'Cómo funciona',href:'como-funciona.html'},{id:'contacto',label:'Contacto',href:'contacto.html'},{id:'dona',label:'Dona',href:'dona.html'}];
-  return `<nav class="nav"><a class="nav-logo" href="index.html"><img src="${LOGO_URL}" alt="Aurea"><span class="nav-wordmark">Aurea</span></a><div class="nav-links">${pages.map(p=>`<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('')}</div><a class="nav-cta${active==='registro'?' active':''}" href="registro.html">Registro</a></nav>`;
+  return `<nav class="nav"><a class="nav-logo" href="index.html"><img src="${LOGO_URL}" alt="Aurea"><span class="nav-wordmark">Aurea</span></a><div class="nav-links">${pages.map(p=>`<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('')}</div><a class="nav-link" href="login.html" style="font-size:11px;letter-spacing:0.08em;">Entrar</a><a class="nav-cta${active==='registro'?' active':''}" href="registro.html">Registro</a></nav>`;
 }
 
 function renderNavAuth(active='',user='RM'){
