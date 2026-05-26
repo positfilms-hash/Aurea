@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   // Raíz de los archivos HTML/CSS/JS
   root: 'aurea-prototipo/aurea',
-  // Buscar el archivo .env en la raíz del proyecto (donde está el package.json)
-  // envDir es relativo a root: ../../ sube dos niveles hasta la raíz
-  envDir: '../../',
+  // process.cwd() devuelve la carpeta desde donde se ejecuta npm run dev
+  // que siempre es la raíz del proyecto, donde vive el .env
+  envDir: process.cwd(),
 });
