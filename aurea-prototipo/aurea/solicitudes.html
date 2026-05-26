@@ -218,7 +218,7 @@
         discipulo_id: discipuloId,
         disciplina:   disciplina || '',
         estado:       'prueba',
-        fecha_inicio: new Date().toISOString().split('T')[0],
+        // iniciada_at usa default now() — no hace falta enviarlo
       });
       if (e2) console.warn('Error al crear relación:', e2.message);
       await cargarSolicitudes();
@@ -271,7 +271,7 @@
       const { data: maestro, error } = await supabase
         .from('maestro_perfiles')
         .select('id, disciplina, max_discipulos')
-        .eq('perfil_id', uid)
+        .eq('id', uid)
         .single();
 
       if (error || !maestro) {

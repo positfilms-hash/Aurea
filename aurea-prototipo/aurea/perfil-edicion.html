@@ -76,14 +76,62 @@
       <div class="tab-panel active" id="tab-perfil">
         <div class="section-title">Información del perfil</div>
         <div class="edit-grid">
-          <div class="avatar-section"><div class="edit-avatar">RM</div><div><button class="btn-ghost" style="padding:8px 16px;margin-bottom:6px;">Subir foto</button><div style="font-size:10px;font-weight:300;color:var(--text-ghost);">JPG o PNG · Máx 2MB</div></div></div>
-          <div class="edit-row"><div class="edit-field"><span class="edit-label">Nombre</span><input class="edit-input" type="text" value="Rafael"></div><div class="edit-field"><span class="edit-label">Apellido</span><input class="edit-input" type="text" value="Montoya"></div></div>
-          <div class="edit-field"><span class="edit-label">Disciplina principal</span><input class="edit-input" type="text" value="Filosofía estoica"></div>
-          <div class="edit-row"><div class="edit-field"><span class="edit-label">Categoría</span><select class="edit-input" style="cursor:pointer;"><option selected>Filosofía</option><option>Artes</option><option>Oficios</option><option>Deportes</option></select></div><div class="edit-field"><span class="edit-label">Ubicación</span><input class="edit-input" type="text" value="Madrid, España"></div></div>
-          <div class="edit-field"><span class="edit-label">Bio (se mostrará en cursiva)</span><textarea class="edit-textarea" placeholder="Escribe tu bio…">Llevo doce años estudiando y enseñando filosofía estoica, no como curiosidad académica sino como práctica diaria. No busco estudiantes, busco discípulos que quieran comprometerse de verdad.</textarea></div>
-          <div class="edit-row"><div class="edit-field"><span class="edit-label">Formato</span><select class="edit-input" style="cursor:pointer;"><option selected>Presencial y online</option><option>Presencial</option><option>Online</option></select></div><div class="edit-field"><span class="edit-label">Disponibilidad</span><input class="edit-input" type="text" value="Martes y jueves, 3–4h semana"></div></div>
-          <div class="edit-field"><span class="edit-label">Hashtags (separados por comas)</span><input class="edit-input" type="text" value="#presencial, #riguroso, #avanzado, #online, #teórico"></div>
-          <div class="edit-row"><div class="edit-field"><span class="edit-label">Número máximo de discípulos</span><select class="edit-input" style="cursor:pointer;"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select></div><div class="edit-field"><span class="edit-label">Radio presencial (km)</span><input class="edit-input" type="number" value="30"></div></div>
+          <div class="avatar-section">
+            <div class="edit-avatar" id="ea-avatar">?</div>
+            <div>
+              <div style="font-size:11px;font-weight:300;color:var(--text-faint);line-height:1.6;">El avatar usa tus iniciales.<br>Soporte de foto próximamente.</div>
+            </div>
+          </div>
+          <div class="edit-row">
+            <div class="edit-field"><span class="edit-label">Nombre</span><input class="edit-input" id="f-nombre" type="text" placeholder="Tu nombre"></div>
+            <div class="edit-field"><span class="edit-label">Apellido</span><input class="edit-input" id="f-apellido" type="text" placeholder="Tu apellido"></div>
+          </div>
+          <div class="edit-field"><span class="edit-label">Ubicación</span><input class="edit-input" id="f-ubicacion" type="text" placeholder="Madrid, España"></div>
+          <div class="edit-field"><span class="edit-label">Frase / bio (se mostrará en cursiva)</span><textarea class="edit-textarea" id="f-frase" placeholder="Una frase sobre ti y por qué enseñas…"></textarea></div>
+          <div id="sec-maestro">
+            <div class="edit-field" style="margin-bottom:18px;"><span class="edit-label">Disciplina principal</span><input class="edit-input" id="f-disciplina" type="text" placeholder="Filosofía estoica"></div>
+            <div class="edit-row" style="margin-bottom:18px;">
+              <div class="edit-field"><span class="edit-label">Categoría</span>
+                <select class="edit-input" id="f-categoria" style="cursor:pointer;">
+                  <option value="Filosofía">Filosofía</option><option value="Artes">Artes</option>
+                  <option value="Oficios">Oficios</option><option value="Deportes">Deportes</option>
+                  <option value="Espiritualidad">Espiritualidad</option><option value="Ciencia">Ciencia</option>
+                  <option value="Lenguas">Lenguas</option><option value="Otra">Otra</option>
+                </select>
+              </div>
+              <div class="edit-field"><span class="edit-label">Formato</span>
+                <select class="edit-input" id="f-formato" style="cursor:pointer;">
+                  <option value="ambos">Presencial y online</option>
+                  <option value="presencial">Solo presencial</option>
+                  <option value="online">Solo online</option>
+                </select>
+              </div>
+            </div>
+            <div class="edit-row" style="margin-bottom:18px;">
+              <div class="edit-field"><span class="edit-label">Años de experiencia</span><input class="edit-input" id="f-anos" type="number" min="0" max="60" placeholder="10"></div>
+              <div class="edit-field"><span class="edit-label">Radio presencial (km)</span><input class="edit-input" id="f-radio" type="number" min="0" placeholder="30"></div>
+            </div>
+            <div class="edit-row" style="margin-bottom:18px;">
+              <div class="edit-field"><span class="edit-label">Días disponibles</span><input class="edit-input" id="f-dias" type="text" placeholder="Martes y jueves"></div>
+              <div class="edit-field"><span class="edit-label">Horas semanales</span><input class="edit-input" id="f-horas" type="text" placeholder="3–4 h"></div>
+            </div>
+            <div class="edit-row" style="margin-bottom:18px;">
+              <div class="edit-field"><span class="edit-label">Máximo de discípulos</span>
+                <select class="edit-input" id="f-max-disc" style="cursor:pointer;">
+                  <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                  <option value="4" selected>4</option><option value="5">5</option>
+                  <option value="6">6</option><option value="8">8</option><option value="10">10</option>
+                </select>
+              </div>
+              <div class="edit-field"><span class="edit-label">Aceptar solicitudes</span>
+                <select class="edit-input" id="f-acepta" style="cursor:pointer;">
+                  <option value="true">Sí, acepto solicitudes</option>
+                  <option value="false">No (en pausa)</option>
+                </select>
+              </div>
+            </div>
+            <div class="edit-field"><span class="edit-label">Hashtags (separados por comas)</span><input class="edit-input" id="f-hashtags" type="text" placeholder="#presencial, #riguroso, #avanzado"></div>
+          </div>
         </div>
       </div>
 
@@ -102,19 +150,30 @@
         <div class="section-title">Requisitos mínimos</div>
         <div class="edit-grid">
           <div class="req-block">
-            <div><span class="edit-label">Constancia mínima del discípulo</span><div class="toggle-label-sub" style="margin-bottom:10px;">Valor actual: <strong id="const-val" style="color:var(--gold);">60</strong> / 100</div><input type="range" min="0" max="100" value="60" oninput="document.getElementById('const-val').textContent=this.value"><div class="range-labels"><span>Sin límite</span><span>Exigente (100)</span></div></div>
+            <div><span class="edit-label">Constancia mínima del discípulo</span>
+              <div class="toggle-label-sub" style="margin-bottom:10px;">Valor actual: <strong id="const-val" style="color:var(--gold);">0</strong> / 100</div>
+              <input type="range" id="f-constancia" min="0" max="100" value="0" oninput="document.getElementById('const-val').textContent=this.value">
+              <div class="range-labels"><span>Sin límite</span><span>Exigente (100)</span></div>
+            </div>
           </div>
           <div class="req-block">
-            <div class="toggle-row"><div><div class="toggle-desc">Mensaje de motivación obligatorio</div><div class="toggle-label-sub">El discípulo debe escribir un texto para solicitar</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle-row">
+              <div><div class="toggle-desc">Mensaje de motivación obligatorio</div><div class="toggle-label-sub">El discípulo debe escribir un texto para solicitar</div></div>
+              <div class="toggle on" id="f-motivacion" onclick="this.classList.toggle('on')"></div>
+            </div>
           </div>
           <div class="req-block">
-            <div class="toggle-row"><div><div class="toggle-desc">Nivel mínimo requerido</div></div><select class="edit-input" style="width:auto;padding:6px 10px;cursor:pointer;"><option>Sin requisito</option><option selected>Principiante</option><option>Intermedio</option><option>Avanzado</option></select></div>
+            <div class="toggle-row">
+              <div><div class="toggle-desc">Nivel mínimo requerido</div></div>
+              <select class="edit-input" id="f-nivel" style="width:auto;padding:6px 10px;cursor:pointer;">
+                <option value="">Sin requisito</option>
+                <option value="principiante">Principiante</option>
+                <option value="intermedio">Intermedio</option>
+                <option value="avanzado">Avanzado</option>
+              </select>
+            </div>
           </div>
-          <div class="req-block">
-            <div class="toggle-row"><div><div class="toggle-desc">Formato obligatorio</div></div><select class="edit-input" style="width:auto;padding:6px 10px;cursor:pointer;"><option selected>Sin restricción</option><option>Solo presencial</option><option>Solo online</option></select></div>
-          </div>
-          <div class="edit-field"><span class="edit-label">Requisitos libres (un requisito por línea)</span><textarea class="edit-textarea" style="height:90px;">Haber leído al menos un texto estoico antes de la primera sesión
-Disponibilidad mínima de 3 horas semanales</textarea></div>
+          <div class="edit-field"><span class="edit-label">Requisitos libres (uno por línea)</span><textarea class="edit-textarea" id="f-req-libres" style="height:90px;" placeholder="Haber leído al menos un texto de la disciplina&#10;Disponibilidad mínima de 3 horas semanales"></textarea></div>
         </div>
       </div>
     </div>
@@ -122,12 +181,235 @@ Disponibilidad mínima de 3 horas semanales</textarea></div>
 
   <div id="chat-container"></div>
   <script src="js/components.js"></script>
-  <script>
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { requireAuth } from './js/auth.js';
+
     document.getElementById('nav-container').innerHTML = renderNavAuth('perfil');
-    function showTab(id,btn){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');btn.classList.add('active');}
-    function guardar(){const btn=document.querySelector('.btn-save');btn.textContent='✓ Guardado';btn.style.background='var(--green)';setTimeout(()=>{btn.textContent='Guardar cambios';btn.style.background='var(--gold)';},2000);}
-    let tlCount=3;
-    function addTL(){const d=document.createElement('div');d.className='tl-block';d.innerHTML=`<div class="tl-block-header"><span class="tl-block-title">Entrada ${tlCount++}</span><button class="btn-del" onclick="this.closest('.tl-block').remove()">Eliminar</button></div><div style="display:flex;flex-direction:column;gap:10px;"><div class="edit-field"><span class="edit-label">Año o periodo</span><input class="edit-input" type="text" placeholder="2022"></div><div class="edit-field"><span class="edit-label">Título</span><input class="edit-input" type="text" placeholder="Título o nombre del hito"></div><div class="edit-field"><span class="edit-label">Descripción</span><input class="edit-input" type="text" placeholder="Descripción breve (opcional)"></div></div>`;document.getElementById('tl-list').appendChild(d);}
+
+    let _uid = null, _esMaestro = false;
+
+    // — Tabs —
+    window.showTab = function(id, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active');
+      btn.classList.add('active');
+    };
+
+    // — Trayectoria —
+    let _tlCount = 1;
+    window.addTL = function() {
+      const d = document.createElement('div');
+      d.className = 'tl-block';
+      d.innerHTML = `
+        <div class="tl-block-header">
+          <span class="tl-block-title">Entrada ${_tlCount++}</span>
+          <button class="btn-del" onclick="this.closest('.tl-block').remove()">Eliminar</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="edit-field"><span class="edit-label">Año o periodo</span><input class="edit-input tl-periodo" type="text" placeholder="2022"></div>
+          <div class="edit-field"><span class="edit-label">Título</span><input class="edit-input tl-titulo" type="text" placeholder="Título o nombre del hito"></div>
+          <div class="edit-field"><span class="edit-label">Descripción</span><input class="edit-input tl-descripcion" type="text" placeholder="Descripción breve (opcional)"></div>
+        </div>`;
+      document.getElementById('tl-list').appendChild(d);
+    };
+
+    function crearBloqueTL(t, n) {
+      const d = document.createElement('div');
+      d.className = 'tl-block';
+      d.innerHTML = `
+        <div class="tl-block-header">
+          <span class="tl-block-title">Entrada ${n}</span>
+          <button class="btn-del" onclick="this.closest('.tl-block').remove()">Eliminar</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="edit-field"><span class="edit-label">Año o periodo</span><input class="edit-input tl-periodo" type="text" value="${t.periodo || ''}" placeholder="2022"></div>
+          <div class="edit-field"><span class="edit-label">Título</span><input class="edit-input tl-titulo" type="text" value="${t.titulo || ''}" placeholder="Título o nombre del hito"></div>
+          <div class="edit-field"><span class="edit-label">Descripción</span><input class="edit-input tl-descripcion" type="text" value="${t.descripcion || ''}" placeholder="Descripción breve (opcional)"></div>
+        </div>`;
+      return d;
+    }
+
+    // — Guardar —
+    window.guardar = async function() {
+      const btn = document.querySelector('.btn-save');
+      btn.textContent = 'Guardando…';
+      btn.style.opacity = '0.6';
+      btn.disabled = true;
+
+      try {
+        const nombre   = document.getElementById('f-nombre')?.value.trim()   || '';
+        const apellido = document.getElementById('f-apellido')?.value.trim()  || '';
+        const ubicacion = document.getElementById('f-ubicacion')?.value.trim() || '';
+        const frase     = document.getElementById('f-frase')?.value.trim()    || '';
+
+        // 1. Actualizar profiles
+        const { error: pErr } = await supabase.from('profiles')
+          .update({ nombre, apellido, ubicacion, frase })
+          .eq('id', _uid);
+        if (pErr) throw pErr;
+
+        // 2. Actualizar maestro_perfiles (si es maestro)
+        if (_esMaestro) {
+          const disciplina = document.getElementById('f-disciplina')?.value.trim() || '';
+          const categoria  = document.getElementById('f-categoria')?.value  || 'Otra';
+          const formato    = document.getElementById('f-formato')?.value    || 'ambos';
+          const anosStr    = document.getElementById('f-anos')?.value;
+          const radioStr   = document.getElementById('f-radio')?.value;
+          const dias       = document.getElementById('f-dias')?.value.trim() || '';
+          const horas      = document.getElementById('f-horas')?.value.trim() || '';
+          const maxDisc    = parseInt(document.getElementById('f-max-disc')?.value) || 4;
+          const acepta     = document.getElementById('f-acepta')?.value === 'true';
+          const hashtagsRaw = document.getElementById('f-hashtags')?.value || '';
+          const hashtags   = hashtagsRaw.split(',').map(h => h.trim()).filter(Boolean);
+
+          const constancia = parseInt(document.getElementById('f-constancia')?.value) || 0;
+          const motivacion = document.getElementById('f-motivacion')?.classList.contains('on');
+          const nivel      = document.getElementById('f-nivel')?.value || null;
+          const reqLibresRaw = document.getElementById('f-req-libres')?.value || '';
+          const reqLibres  = reqLibresRaw.split('\n').map(r => r.trim()).filter(Boolean);
+
+          const { error: mErr } = await supabase.from('maestro_perfiles')
+            .update({
+              disciplina, categoria, formato,
+              experiencia_anos:     anosStr   ? parseInt(anosStr)  : null,
+              radio_km:             radioStr  ? parseInt(radioStr) : null,
+              disponibilidad_dias:  dias  || null,
+              horas_semanales:      horas || null,
+              max_discipulos:       maxDisc,
+              acepta_solicitudes:   acepta,
+              hashtags,
+              constancia_minima:    constancia,
+              motivacion_obligatoria: motivacion,
+              nivel_requerido:      nivel || null,
+              requisitos_libres:    reqLibres,
+            })
+            .eq('id', _uid);
+          if (mErr) throw mErr;
+
+          // 3. Trayectoria: borrar todas las existentes y reinsertar
+          await supabase.from('trayectoria').delete().eq('maestro_id', _uid);
+          const bloques = document.querySelectorAll('#tl-list .tl-block');
+          const items = [];
+          bloques.forEach((b, i) => {
+            const periodo = b.querySelector('.tl-periodo')?.value.trim();
+            const titulo  = b.querySelector('.tl-titulo')?.value.trim();
+            if (periodo && titulo) {
+              items.push({
+                maestro_id:  _uid,
+                periodo,
+                titulo,
+                descripcion: b.querySelector('.tl-descripcion')?.value.trim() || null,
+                orden:       i,
+              });
+            }
+          });
+          if (items.length) {
+            const { error: tErr } = await supabase.from('trayectoria').insert(items);
+            if (tErr) console.warn('Error guardando trayectoria:', tErr.message);
+          }
+        }
+
+        // Actualizar avatar de la barra superior
+        document.getElementById('ea-avatar').textContent =
+          ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
+
+        btn.textContent = '✓ Guardado';
+        btn.style.background = 'var(--green)';
+        btn.style.opacity = '1';
+        btn.disabled = false;
+        setTimeout(() => {
+          btn.textContent = 'Guardar cambios';
+          btn.style.background = 'var(--gold)';
+        }, 2500);
+
+      } catch (err) {
+        console.error('Error al guardar:', err);
+        btn.textContent = '✕ Error al guardar';
+        btn.style.background = 'var(--red)';
+        btn.style.opacity = '1';
+        btn.disabled = false;
+        setTimeout(() => {
+          btn.textContent = 'Guardar cambios';
+          btn.style.background = 'var(--gold)';
+        }, 3000);
+      }
+    };
+
+    // — Carga inicial —
+    async function init() {
+      const session = await requireAuth();
+      if (!session) return;
+      _uid = session.user.id;
+
+      const [pRes, mRes] = await Promise.all([
+        supabase.from('profiles').select('nombre, apellido, ubicacion, frase, rol').eq('id', _uid).single(),
+        supabase.from('maestro_perfiles').select('*').eq('id', _uid).single(),
+      ]);
+
+      const p = pRes.data;
+      const m = mRes.error ? null : mRes.data;
+      _esMaestro = !!m;
+
+      if (p) {
+        // Perfil básico
+        const nombre   = p.nombre   || '';
+        const apellido = p.apellido || '';
+        document.getElementById('f-nombre').value    = nombre;
+        document.getElementById('f-apellido').value  = apellido;
+        document.getElementById('f-ubicacion').value = p.ubicacion || '';
+        document.getElementById('f-frase').value     = p.frase     || '';
+        document.getElementById('ea-avatar').textContent =
+          ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
+      }
+
+      if (!m) {
+        // No es maestro: ocultar sección maestro y tabs que no aplican
+        document.getElementById('sec-maestro')?.style && (document.getElementById('sec-maestro').style.display = 'none');
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          if (b.textContent.includes('Trayectoria') || b.textContent.includes('Requisitos'))
+            b.style.display = 'none';
+        });
+      } else {
+        // Maestro: rellenar campos de maestro
+        document.getElementById('f-disciplina').value = m.disciplina || '';
+        document.getElementById('f-categoria').value  = m.categoria  || 'Otra';
+        document.getElementById('f-formato').value    = m.formato    || 'ambos';
+        if (m.experiencia_anos != null) document.getElementById('f-anos').value  = m.experiencia_anos;
+        if (m.radio_km         != null) document.getElementById('f-radio').value = m.radio_km;
+        document.getElementById('f-dias').value  = m.disponibilidad_dias || '';
+        document.getElementById('f-horas').value = m.horas_semanales    || '';
+        document.getElementById('f-max-disc').value = String(m.max_discipulos || 4);
+        document.getElementById('f-acepta').value   = m.acepta_solicitudes ? 'true' : 'false';
+        document.getElementById('f-hashtags').value = (m.hashtags || []).join(', ');
+
+        // Requisitos
+        const constancia = m.constancia_minima || 0;
+        const rangeEl = document.getElementById('f-constancia');
+        rangeEl.value = constancia;
+        document.getElementById('const-val').textContent = constancia;
+
+        const motivEl = document.getElementById('f-motivacion');
+        if (!m.motivacion_obligatoria) motivEl.classList.remove('on');
+
+        document.getElementById('f-nivel').value = m.nivel_requerido || '';
+        document.getElementById('f-req-libres').value = (m.requisitos_libres || []).join('\n');
+
+        // Trayectoria
+        const { data: tray } = await supabase
+          .from('trayectoria').select('periodo, titulo, descripcion').eq('maestro_id', _uid).order('orden');
+        const list = document.getElementById('tl-list');
+        list.innerHTML = '';
+        (tray || []).forEach((t, i) => {
+          _tlCount = i + 2;
+          list.appendChild(crearBloqueTL(t, i + 1));
+        });
+        if (!tray?.length) window.addTL(); // al menos un bloque vacío
+      }
+    }
+
+    init();
   </script>
 </body>
 </html>

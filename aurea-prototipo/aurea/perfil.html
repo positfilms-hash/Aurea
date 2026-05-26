@@ -178,7 +178,7 @@
       const discHTML = _relM.length
         ? _relM.map(r => {
             const p = r.profiles || {};
-            const d = días(r.fecha_inicio);
+            const d = días(r.iniciada_at);
             return `<div class="disc-row">
               <div class="disc-avatar" style="background:${p.avatar_color || 'var(--gold)'};">${ini(p)}</div>
               <div class="disc-info"><div class="disc-name">${nombreCompleto(p)}</div><div class="disc-sub">${r.disciplina || ''}</div></div>
@@ -205,7 +205,7 @@
 
       const discHTML = _relD.length
         ? _relD.map(r => {
-            const d = días(r.fecha_inicio);
+            const d = días(r.iniciada_at);
             const badge = r.estado === 'prueba' ? 'Periodo de prueba' : 'Maestro aceptado';
             return `<div class="disc-row">
               <div class="disc-avatar" style="background:var(--gold);">M</div>
@@ -232,7 +232,7 @@
 
       const [pRes, mRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', uid).single(),
-        supabase.from('maestro_perfiles').select('*').eq('perfil_id', uid).single(),
+        supabase.from('maestro_perfiles').select('*').eq('id', uid).single(),
       ]);
 
       _profile = pRes.data;
@@ -255,7 +255,7 @@
             supabase.from('trayectoria').select('periodo, titulo, descripcion').eq('maestro_id', _maestro.id).order('orden'),
             supabase.from('resenas').select('estrellas, texto, disciplina, duracion_meses').eq('maestro_id', _maestro.id).limit(5),
             supabase.from('relaciones')
-              .select('disciplina, fecha_inicio, estado, profiles!discipulo_id(nombre, apellido, avatar_color)')
+              .select('disciplina, iniciada_at, estado, profiles!discipulo_id(nombre, apellido, avatar_color)')
               .eq('maestro_id', _maestro.id).in('estado', ['prueba','consolidada']),
           ]
         : [
@@ -266,7 +266,7 @@
 
       fetches.push(
         supabase.from('relaciones')
-          .select('disciplina, fecha_inicio, estado')
+          .select('disciplina, iniciada_at, estado')
           .eq('discipulo_id', uid)
           .in('estado', ['prueba','consolidada'])
       );

@@ -213,7 +213,7 @@
         const nombre = ((p.nombre||'') + ' ' + (p.apellido||'')).trim() || 'Persona';
         const initials = ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?';
         const bg = p.avatar_color || 'var(--mahogany)';
-        const dias = diasDesde(r.fecha_inicio);
+        const dias = diasDesde(r.iniciada_at);
         const esFinalizada = r.estado === 'finalizada';
         const rolLabel = r._rol === 'maestro' ? 'Discípulo' : 'Maestro';
         const disc = r.disciplina || r._disciplina || '—';
@@ -235,7 +235,7 @@
             </div>
             ${BADGE_MAP[r.estado] || ''}
             <div>
-              <div class="rel-desde">${r.fecha_inicio ? new Date(r.fecha_inicio).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}) : '—'}</div>
+              <div class="rel-desde">${r.iniciada_at ? new Date(r.iniciada_at).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}) : '—'}</div>
               <div class="rel-duracion">${tiempoDesde(dias)}</div>
             </div>
             <div class="rel-actions">${actionsHTML}</div>
@@ -267,7 +267,7 @@
       const { data: maestro } = await supabase
         .from('maestro_perfiles')
         .select('id, disciplina')
-        .eq('perfil_id', uid)
+        .eq('id', uid)
         .single();
 
       const fetches = [];
@@ -276,7 +276,7 @@
       if (maestro) {
         fetches.push(
           supabase.from('relaciones')
-            .select('id, disciplina, estado, fecha_inicio, discipulo_id, profiles!discipulo_id(nombre, apellido, avatar_color)')
+            .select('id, disciplina, estado, iniciada_at, discipulo_id, profiles!discipulo_id(nombre, apellido, avatar_color)')
             .eq('maestro_id', maestro.id)
         );
       } else {
@@ -286,7 +286,7 @@
       // Relaciones como discípulo
       fetches.push(
         supabase.from('relaciones')
-          .select('id, disciplina, estado, fecha_inicio, maestro_id')
+          .select('id, disciplina, estado, iniciada_at, maestro_id')
           .eq('discipulo_id', uid)
       );
 
@@ -307,7 +307,7 @@
       }));
 
       _allRels = [...relsMaestro, ...relsDisc].sort((a, b) =>
-        new Date(b.fecha_inicio || 0) - new Date(a.fecha_inicio || 0));
+        new Date(b.iniciada_at || 0) - new Date(a.iniciada_at || 0));
 
       renderRelaciones();
       actualizarContadoresRel();
