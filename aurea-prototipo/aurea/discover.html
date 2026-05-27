@@ -9,7 +9,7 @@
   <style>
     body{overflow:hidden;}
     .layout{display:grid;grid-template-columns:220px 1fr;}
-    .sidebar{border-right:0.5px solid var(--border);padding:16px;overflow-y:auto;background:var(--night-soft);height:calc(var(--real-vh) - var(--nav-height));}
+    .sidebar{border-right:0.5px solid var(--border);padding:16px;overflow-y:auto;background:var(--night-soft);height:calc(var(--real-vh) - var(--nav-height) - 36px);}
     .filter-chips{display:flex;flex-wrap:wrap;gap:4px;}
     .filter-section{margin-bottom:18px;}
     .filter-divider{height:0.5px;background:var(--border);margin:0 0 18px;}
@@ -22,7 +22,8 @@
     .toggle-label{font-size:11px;font-weight:300;color:var(--text-muted);}
     .range-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
     .range-val{font-size:11px;color:var(--gold);}
-    .main-content{display:flex;flex-direction:column;overflow:hidden;height:calc(var(--real-vh) - var(--nav-height));}
+    .main-content{display:flex;flex-direction:column;overflow:hidden;height:calc(var(--real-vh) - var(--nav-height) - 36px);}
+    .page-footer-bar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:36px;border-top:0.5px solid var(--border);background:var(--night-soft);}
     .list-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;flex-shrink:0;border-bottom:0.5px solid var(--border);}
     .list-title{font-size:10px;font-weight:300;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-faint);}
     .sort-select{font-size:10px;color:var(--text-muted);background:var(--night-mid);border:0.5px solid var(--border);border-radius:4px;padding:4px 8px;outline:none;cursor:pointer;}
@@ -78,6 +79,14 @@
       <div class="list-header"><span class="list-title" id="list-title">Mostrando 1–12 de 28 maestros</span><select class="sort-select"><option>Ordenar: distancia</option><option>Ordenar: reputación</option><option>Ordenar: plazas</option></select></div>
       <div class="cards-wrap"><div class="cards" id="cards-grid"></div></div>
       <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+  <div class="page-footer-bar">
+    <span class="footer-copy">© 2026 Aurea · Todos los derechos reservados</span>
+    <div class="footer-legal">
+      <a class="footer-legal-link" href="privacidad.html">Política de privacidad</a>
+      <a class="footer-legal-link" href="privacidad.html">Términos y condiciones</a>
+      <a class="footer-legal-link" href="privacidad.html">Cookies</a>
     </div>
   </div>
   <div id="chat-container"></div>
