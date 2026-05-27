@@ -85,7 +85,16 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
 
-    document.getElementById('nav-container').innerHTML = renderNavAuth('discover');
+    // Nav inteligente: público si no hay sesión, auth si la hay
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const { data: p } = await supabase.from('profiles')
+        .select('nombre, apellido').eq('id', session.user.id).single();
+      const ini = p ? ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?' : '?';
+      document.getElementById('nav-container').innerHTML = renderNavAuth('discover', ini);
+    } else {
+      document.getElementById('nav-container').innerHTML = renderNavPublic('');
+    }
 
     // — Datos de demostración (fallback si la BD está vacía) —
     const DEMO = [

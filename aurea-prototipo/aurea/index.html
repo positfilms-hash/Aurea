@@ -160,5 +160,17 @@
   <script>
     document.getElementById('modal-empezar').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
   </script>
+
+  <!-- Nav inteligente: si hay sesión activa, sustituye el nav público -->
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const { data: p } = await supabase.from('profiles')
+        .select('nombre, apellido').eq('id', session.user.id).single();
+      const ini = p ? ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?' : '?';
+      document.getElementById('nav-container').innerHTML = renderNavAuth('', ini);
+    }
+  </script>
 </body>
 </html>
