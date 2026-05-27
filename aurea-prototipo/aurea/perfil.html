@@ -208,14 +208,24 @@
       const discHTML = _relD.length
         ? _relD.map(r => {
             const d = días(r.iniciada_at);
-            const badge = r.estado === 'prueba' ? 'Periodo de prueba' : 'Maestro aceptado';
+            const badge = r.estado === 'prueba' ? '⏳ Periodo de prueba' : '✦ Activa';
+            const p = r.profiles || {};
+            const maestroIni = ini(p) || 'M';
+            const maestroBg  = p.avatar_color || 'var(--gold)';
+            const maestroNom = nombreCompleto(p);
+            const chatBtn = r.id
+              ? `<button onclick="location.href='periodo-prueba.html?id=${r.id}'"
+                   style="font-family:var(--font-serif);font-size:12px;font-style:italic;color:var(--gold);background:none;border:0.5px solid var(--border-gold);padding:6px 14px;border-radius:100px;cursor:pointer;white-space:nowrap;margin-left:8px;transition:background 0.18s;"
+                   onmouseover="this.style.background='rgba(200,151,58,0.08)'" onmouseout="this.style.background='none'">Chat →</button>`
+              : '';
             return `<div class="disc-row">
-              <div class="disc-avatar" style="background:var(--gold);">M</div>
+              <div class="disc-avatar" style="background:${maestroBg};">${maestroIni}</div>
               <div class="disc-info">
                 <div class="disc-name">${r.disciplina || 'Disciplina'}</div>
-                <div class="disc-sub">${badge}</div>
+                <div class="disc-sub">${badge}${maestroNom ? ' · ' + maestroNom : ''}</div>
               </div>
               <span class="disc-since">Hace ${d} días</span>
+              ${chatBtn}
             </div>`;
           }).join('')
         : `<p style="font-size:12px;color:var(--text-faint);padding:8px 0;">Sin disciplinas activas. <a href="discover.html" style="color:var(--gold);">Busca un maestro</a></p>`;
@@ -274,7 +284,7 @@
 
       fetches.push(
         supabase.from('relaciones')
-          .select('disciplina, iniciada_at, estado')
+          .select('id, disciplina, iniciada_at, estado, profiles!maestro_id(nombre, apellido, avatar_color)')
           .eq('discipulo_id', uid)
           .in('estado', ['prueba','consolidada'])
       );
