@@ -139,6 +139,57 @@
             </div>
             <div class="edit-field"><span class="edit-label">Hashtags (separados por comas)</span><input class="edit-input" id="f-hashtags" type="text" placeholder="#presencial, #riguroso, #avanzado"></div>
           </div>
+
+          <!-- DISCÍPULO -->
+          <div id="sec-discipulo" style="display:none;">
+            <div style="height:0.5px;background:var(--border);margin:8px 0 20px;"></div>
+            <div class="edit-row" style="margin-bottom:18px;">
+              <div class="edit-field">
+                <span class="edit-label">Disciplina que buscas</span>
+                <input class="edit-input" id="fd-disciplina" type="text" placeholder="Filosofía estoica">
+              </div>
+              <div class="edit-field">
+                <span class="edit-label">Categoría</span>
+                <select class="edit-input" id="fd-categoria" style="cursor:pointer;">
+                  <option value="Filosofía">Filosofía</option><option value="Artes">Artes</option>
+                  <option value="Oficios">Oficios</option><option value="Deportes">Deportes</option>
+                  <option value="Espiritualidad">Espiritualidad</option><option value="Ciencia">Ciencia</option>
+                  <option value="Lenguas">Lenguas</option><option value="Otra">Otra</option>
+                </select>
+              </div>
+            </div>
+            <div class="edit-row" style="margin-bottom:18px;">
+              <div class="edit-field">
+                <span class="edit-label">Nivel actual</span>
+                <select class="edit-input" id="fd-nivel" style="cursor:pointer;">
+                  <option value="principiante">Principiante</option>
+                  <option value="intermedio">Intermedio</option>
+                  <option value="avanzado">Avanzado</option>
+                </select>
+              </div>
+              <div class="edit-field">
+                <span class="edit-label">Máximo de prácticas activas</span>
+                <select class="edit-input" id="fd-max-practicas" style="cursor:pointer;">
+                  <option value="1">1</option><option value="2">2</option>
+                  <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+                </select>
+              </div>
+            </div>
+            <div class="edit-row" style="margin-bottom:18px;">
+              <div class="edit-field">
+                <span class="edit-label">Días disponibles</span>
+                <input class="edit-input" id="fd-dias" type="text" placeholder="Lunes y miércoles">
+              </div>
+              <div class="edit-field">
+                <span class="edit-label">Horas semanales</span>
+                <input class="edit-input" id="fd-horas" type="text" placeholder="2–3 h">
+              </div>
+            </div>
+            <div class="edit-field">
+              <span class="edit-label">Hashtags del discípulo (separados por comas)</span>
+              <input class="edit-input" id="fd-hashtags" type="text" placeholder="#presencial, #comprometido, #principiante">
+            </div>
+          </div>
         </div>
       </div>
 
@@ -201,7 +252,7 @@
 
     document.getElementById('nav-container').innerHTML = renderNavAuth('perfil');
 
-    let _uid = null, _esMaestro = false;
+    let _uid = null, _esMaestro = false, _esDiscipulo = false;
 
     // — Geolocalización —
     window.usarGeolocalizacion = function() {
@@ -306,7 +357,31 @@
           .eq('id', _uid);
         if (pErr) throw pErr;
 
-        // 2. Actualizar maestro_perfiles (si es maestro)
+        // 2a. Actualizar discipulo_perfiles (si es discípulo)
+        if (_esDiscipulo) {
+          const disciplinaBuscada = document.getElementById('fd-disciplina')?.value.trim() || '';
+          const categoriaDisc     = document.getElementById('fd-categoria')?.value  || 'Otra';
+          const nivelDisc         = document.getElementById('fd-nivel')?.value       || 'principiante';
+          const maxPracticas      = parseInt(document.getElementById('fd-max-practicas')?.value) || 3;
+          const diasDisc          = document.getElementById('fd-dias')?.value.trim()  || '';
+          const horasDisc         = document.getElementById('fd-horas')?.value.trim() || '';
+          const hashtagsDiscRaw   = document.getElementById('fd-hashtags')?.value || '';
+          const hashtagsDisc      = hashtagsDiscRaw.split(',').map(h => h.trim()).filter(Boolean);
+
+          const { error: dErr } = await supabase.from('discipulo_perfiles').upsert({
+            id:                  _uid,
+            disciplina_buscada:  disciplinaBuscada || null,
+            categoria:           categoriaDisc,
+            nivel:               nivelDisc,
+            disponibilidad_dias: diasDisc  || null,
+            horas_semanales:     horasDisc || null,
+            max_practicas:       maxPracticas,
+            hashtags:            hashtagsDisc,
+          });
+          if (dErr) throw dErr;
+        }
+
+        // 2b. Actualizar maestro_perfiles (si es maestro)
         if (_esMaestro) {
           const disciplina = document.getElementById('f-disciplina')?.value.trim() || '';
           const categoria  = document.getElementById('f-categoria')?.value  || 'Otra';
@@ -412,14 +487,17 @@
       if (!session) return;
       _uid = session.user.id;
 
-      const [pRes, mRes] = await Promise.all([
+      const [pRes, mRes, dRes] = await Promise.all([
         supabase.from('profiles').select('nombre, apellido, ubicacion, frase, rol').eq('id', _uid).single(),
         supabase.from('maestro_perfiles').select('*').eq('id', _uid).single(),
+        supabase.from('discipulo_perfiles').select('*').eq('id', _uid).maybeSingle(),
       ]);
 
       const p = pRes.data;
       const m = mRes.error ? null : mRes.data;
-      _esMaestro = !!m;
+      const d = dRes.data  || null;
+      _esMaestro   = !!m;
+      _esDiscipulo = p?.rol === 'discipulo' || p?.rol === 'ambos';
 
       if (p) {
         // Perfil básico
@@ -433,9 +511,23 @@
         document.getElementById('ea-avatar').textContent = initials;
       }
 
+      // — Sección discípulo —
+      if (_esDiscipulo) {
+        document.getElementById('sec-discipulo').style.display = '';
+        if (d) {
+          document.getElementById('fd-disciplina').value   = d.disciplina_buscada  || '';
+          document.getElementById('fd-categoria').value    = d.categoria            || 'Otra';
+          document.getElementById('fd-nivel').value        = d.nivel                || 'principiante';
+          document.getElementById('fd-max-practicas').value = String(d.max_practicas || 3);
+          document.getElementById('fd-dias').value         = d.disponibilidad_dias  || '';
+          document.getElementById('fd-horas').value        = d.horas_semanales      || '';
+          document.getElementById('fd-hashtags').value     = (d.hashtags || []).join(', ');
+        }
+      }
+
       if (!m) {
         // No es maestro: ocultar sección maestro y tabs que no aplican
-        document.getElementById('sec-maestro')?.style && (document.getElementById('sec-maestro').style.display = 'none');
+        document.getElementById('sec-maestro').style.display = 'none';
         document.querySelectorAll('.tab-btn').forEach(b => {
           if (b.textContent.includes('Trayectoria') || b.textContent.includes('Requisitos'))
             b.style.display = 'none';

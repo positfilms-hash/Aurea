@@ -121,7 +121,7 @@
     document.getElementById('nav-container').innerHTML = renderNavAuth('perfil', '');
 
     // — Estado global —
-    let _profile = null, _maestro = null;
+    let _profile = null, _maestro = null, _discipulo = null;
     let _tray = [], _resenas = [], _relM = [], _relD = [];
 
     // — setRole expuesto globalmente para los onclick —
@@ -230,8 +230,18 @@
           }).join('')
         : `<p style="font-size:12px;color:var(--text-faint);padding:8px 0;">Sin disciplinas activas. <a href="discover.html" style="color:var(--gold);">Busca un maestro</a></p>`;
 
+      const buscandoHTML = _discipulo?.disciplina_buscada
+        ? `<div class="divider"></div>
+           <div>
+             <span class="section-label">Busco maestro en</span>
+             <div style="font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--gold);margin-top:6px;">${_discipulo.disciplina_buscada}</div>
+             ${_discipulo.categoria ? `<div style="font-size:10px;color:var(--text-faint);margin-top:4px;text-transform:uppercase;letter-spacing:0.1em;">${_discipulo.categoria} · ${_discipulo.nivel || 'principiante'}</div>` : ''}
+           </div>`
+        : '';
+
       return `
         <div><div class="bio-title">Por qué aprendo</div>${bioHTML}</div>
+        ${buscandoHTML}
         <div class="divider"></div>
         <div><span class="section-label">Disciplinas activas</span>${discHTML}</div>`;
     }
@@ -289,11 +299,28 @@
           .in('estado', ['prueba','consolidada'])
       );
 
-      const [tRes, rRes, rmRes, rdRes] = await Promise.all(fetches);
-      _tray    = tRes.data  || [];
-      _resenas = rRes.data  || [];
-      _relM    = rmRes.data || [];
-      _relD    = rdRes.data || [];
+      fetches.push(
+        supabase.from('discipulo_perfiles').select('*').eq('id', uid).maybeSingle()
+      );
+
+      const [tRes, rRes, rmRes, rdRes, dRes] = await Promise.all(fetches);
+      _tray      = tRes.data  || [];
+      _resenas   = rRes.data  || [];
+      _relM      = rmRes.data || [];
+      _relD      = rdRes.data || [];
+      _discipulo = dRes.data  || null;
+
+      // Actualizar columna izquierda discípulo con datos reales
+      if (_discipulo) {
+        if (_discipulo.hashtags?.length) {
+          document.querySelector('#tags-discipulo .tags-wrap').innerHTML =
+            _discipulo.hashtags.map(t => `<span class="tag gold">${t}</span>`).join('');
+        }
+        const avRows = document.querySelectorAll('#avail-discipulo .avail-val');
+        if (avRows[0] && _discipulo.disponibilidad_dias) avRows[0].textContent = _discipulo.disponibilidad_dias;
+        if (avRows[1] && _discipulo.horas_semanales)     avRows[1].textContent = _discipulo.horas_semanales;
+        if (avRows[2]) avRows[2].textContent = `${_relD.length} / ${_discipulo.max_practicas || 3}`;
+      }
 
       // Stats de maestro
       if (_maestro) {
