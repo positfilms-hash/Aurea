@@ -116,7 +116,7 @@
     import { supabase } from './js/supabase.js';
     import { requireAuth } from './js/auth.js';
 
-    document.getElementById('nav-container').innerHTML = renderNavAuth('perfil');
+    document.getElementById('nav-container').innerHTML = renderNavAuth('perfil', '');
 
     // — Estado global —
     let _profile = null, _maestro = null;
@@ -226,6 +226,7 @@
 
     // — Carga de datos —
     async function init() {
+      try {
       const session = await requireAuth();
       if (!session) return;
       const uid = session.user.id;
@@ -238,7 +239,11 @@
       _profile = pRes.data;
       _maestro  = mRes.error ? null : mRes.data;
 
-      if (!_profile) return;
+      if (!_profile) {
+        document.getElementById('col-right').innerHTML =
+          `<div style="padding:40px;font-size:13px;color:var(--text-faint);">No se pudo cargar el perfil. <a href="perfil-edicion.html" style="color:var(--gold);">Completa tu perfil aquí</a>.</div>`;
+        return;
+      }
 
       // Columna izquierda: datos básicos
       const nombre = _profile.nombre || '', apellido = _profile.apellido || '';
@@ -248,6 +253,10 @@
       av.style.background = _profile.avatar_color || 'var(--gold)';
       document.querySelector('.profile-name').textContent = (nombre + ' ' + apellido).trim();
       document.querySelector('.profile-location').textContent = _profile.ubicacion || '';
+
+      // Actualizar iniciales del nav-avatar
+      const navAv = document.querySelector('.nav-avatar');
+      if (navAv) navAv.textContent = initials;
 
       // Cargar datos secundarios en paralelo
       const fetches = _maestro
@@ -302,6 +311,12 @@
       const startRole = rol === 'discipulo' ? 'discipulo' : 'maestro';
       const activeBtn = startRole === 'maestro' ? btns[0] : btns[1];
       window.setRole(startRole, activeBtn);
+
+      } catch (err) {
+        console.error('Error cargando perfil:', err);
+        document.getElementById('col-right').innerHTML =
+          `<div style="padding:40px;font-size:13px;color:var(--text-faint);">Error al cargar el perfil. <a href="javascript:location.reload()" style="color:var(--gold);">Reintentar</a></div>`;
+      }
     }
 
     init();

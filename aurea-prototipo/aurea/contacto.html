@@ -39,24 +39,11 @@
       <div><div class="eyebrow" style="margin-bottom:16px;">Contacto</div><h1 class="page-title">¿Qué<br><em>necesitas?</em></h1></div>
       <p class="page-sub">Aurea es un proyecto pequeño y humano. Detrás hay personas reales que leen cada mensaje.</p>
       <div>
-        <div class="contact-item"><span class="contact-icon">✉</span><div><div class="contact-label">Email general</div><div class="contact-val">hola@aurea.app</div><div class="contact-sub">Respondemos en 24–48 horas</div></div></div>
-        <div class="contact-item"><span class="contact-icon">⚖</span><div><div class="contact-label">Incidencias y moderación</div><div class="contact-val">incidencias@aurea.app</div><div class="contact-sub">Para conflictos entre usuarios que requieren revisión humana</div></div></div>
-        <div class="contact-item"><span class="contact-icon">📰</span><div><div class="contact-label">Prensa y colaboraciones</div><div class="contact-val">prensa@aurea.app</div><div class="contact-sub">Medios, podcasts, colaboraciones institucionales</div></div></div>
+        <div class="contact-item"><span class="contact-icon">✉</span><div><div class="contact-label">Email</div><div class="contact-val">hola@aurea.app</div><div class="contact-sub">Respondemos en 24–48 horas</div></div></div>
       </div>
     </div>
     <div class="col-right">
       <div class="form-title">Envíanos un mensaje</div>
-      <div>
-        <span class="section-label" style="margin-bottom:8px;">Motivo</span>
-        <div class="motivo-chips">
-          <span class="chip on" onclick="selMotivo(this)">Consulta general</span>
-          <span class="chip" onclick="selMotivo(this)">Sugerencia</span>
-          <span class="chip" onclick="selMotivo(this)">Incidencia</span>
-          <span class="chip" onclick="selMotivo(this)">Prensa</span>
-          <span class="chip" onclick="selMotivo(this)">Colaboración</span>
-          <span class="chip" onclick="selMotivo(this)">Otro</span>
-        </div>
-      </div>
       <div class="field-row">
         <div class="field-wrap"><span class="field-label">Nombre</span><input class="field-input" type="text" placeholder="Tu nombre"></div>
         <div class="field-wrap"><span class="field-label">Email</span><input class="field-input" type="email" placeholder="tu@correo.com"></div>
@@ -76,7 +63,6 @@
   <script>
     document.getElementById('nav-container').innerHTML = renderNavPublic('contacto');
     document.getElementById('footer-container').innerHTML = renderFooter();
-    function selMotivo(el){document.querySelectorAll('.motivo-chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
     function enviar(){document.getElementById('btn-enviar').style.display='none';document.getElementById('success').classList.add('show');}
   </script>
 </body>

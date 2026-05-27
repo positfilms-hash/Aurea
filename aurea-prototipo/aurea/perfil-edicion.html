@@ -86,7 +86,13 @@
             <div class="edit-field"><span class="edit-label">Nombre</span><input class="edit-input" id="f-nombre" type="text" placeholder="Tu nombre"></div>
             <div class="edit-field"><span class="edit-label">Apellido</span><input class="edit-input" id="f-apellido" type="text" placeholder="Tu apellido"></div>
           </div>
-          <div class="edit-field"><span class="edit-label">Ubicación</span><input class="edit-input" id="f-ubicacion" type="text" placeholder="Madrid, España"></div>
+          <div class="edit-field">
+            <span class="edit-label">Ubicación</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input class="edit-input" id="f-ubicacion" type="text" placeholder="Madrid, España" style="flex:1;">
+              <button type="button" onclick="usarGeolocalizacion()" title="Usar mi ubicación actual" style="flex-shrink:0;background:var(--night-soft);border:0.5px solid var(--border);border-radius:6px;padding:10px 12px;font-size:13px;color:var(--text-muted);cursor:pointer;transition:all 0.2s;white-space:nowrap;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">📍 Ubicación</button>
+            </div>
+          </div>
           <div class="edit-field"><span class="edit-label">Frase / bio (se mostrará en cursiva)</span><textarea class="edit-textarea" id="f-frase" placeholder="Una frase sobre ti y por qué enseñas…"></textarea></div>
           <div id="sec-maestro">
             <div class="edit-field" style="margin-bottom:18px;"><span class="edit-label">Disciplina principal</span><input class="edit-input" id="f-disciplina" type="text" placeholder="Filosofía estoica"></div>
@@ -139,8 +145,7 @@
       <div class="tab-panel" id="tab-trayectoria">
         <div class="section-title">Trayectoria</div>
         <div id="tl-list">
-          <div class="tl-block"><div class="tl-block-header"><span class="tl-block-title">Entrada 1</span><button class="btn-del" onclick="this.closest('.tl-block').remove()">Eliminar</button></div><div style="display:flex;flex-direction:column;gap:10px;"><div class="edit-field"><span class="edit-label">Año o periodo</span><input class="edit-input" type="text" value="2012–hoy" placeholder="2018 / 2015–2020"></div><div class="edit-field"><span class="edit-label">Título</span><input class="edit-input" type="text" value="Práctica y estudio independiente del estoicismo"></div><div class="edit-field"><span class="edit-label">Descripción</span><input class="edit-input" type="text" value="Marco Aurelio, Epicteto, Séneca"></div></div></div>
-          <div class="tl-block"><div class="tl-block-header"><span class="tl-block-title">Entrada 2</span><button class="btn-del" onclick="this.closest('.tl-block').remove()">Eliminar</button></div><div style="display:flex;flex-direction:column;gap:10px;"><div class="edit-field"><span class="edit-label">Año o periodo</span><input class="edit-input" type="text" value="2020"></div><div class="edit-field"><span class="edit-label">Título</span><input class="edit-input" type="text" value="Licenciatura en Filosofía — UCM"></div><div class="edit-field"><span class="edit-label">Descripción</span><input class="edit-input" type="text" value="Especialidad en filosofía clásica y helenística"></div></div></div>
+          <!-- Rellenado dinámicamente desde Supabase -->
         </div>
         <button class="btn-add" onclick="addTL()">+ Añadir entrada</button>
       </div>
@@ -188,6 +193,39 @@
     document.getElementById('nav-container').innerHTML = renderNavAuth('perfil');
 
     let _uid = null, _esMaestro = false;
+
+    // — Geolocalización —
+    window.usarGeolocalizacion = function() {
+      if (!navigator.geolocation) {
+        alert('Tu navegador no soporta geolocalización.');
+        return;
+      }
+      const btn = document.querySelector('[onclick="usarGeolocalizacion()"]');
+      if (btn) { btn.textContent = '⏳ Buscando…'; btn.disabled = true; }
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const { latitude: lat, longitude: lon } = pos.coords;
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=es`
+            );
+            const data = await res.json();
+            const ciudad = data.address?.city || data.address?.town || data.address?.village || '';
+            const pais   = data.address?.country || '';
+            const loc    = [ciudad, pais].filter(Boolean).join(', ');
+            document.getElementById('f-ubicacion').value = loc || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+          } catch {
+            alert('No se pudo obtener la ubicación. Intenta más tarde.');
+          } finally {
+            if (btn) { btn.textContent = '📍 Ubicación'; btn.disabled = false; }
+          }
+        },
+        () => {
+          alert('No se pudo acceder a tu ubicación. Comprueba los permisos del navegador.');
+          if (btn) { btn.textContent = '📍 Ubicación'; btn.disabled = false; }
+        }
+      );
+    };
 
     // — Tabs —
     window.showTab = function(id, btn) {
@@ -360,8 +398,11 @@
         document.getElementById('f-apellido').value  = apellido;
         document.getElementById('f-ubicacion').value = p.ubicacion || '';
         document.getElementById('f-frase').value     = p.frase     || '';
-        document.getElementById('ea-avatar').textContent =
-          ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
+        const initials = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
+        document.getElementById('ea-avatar').textContent = initials;
+        // Actualizar iniciales del nav-avatar
+        const navAv = document.querySelector('.nav-avatar');
+        if (navAv) navAv.textContent = initials;
       }
 
       if (!m) {

@@ -115,6 +115,18 @@
   <script>
     document.getElementById('nav-container').innerHTML = renderNavPublic('dona');
     document.getElementById('footer-container').innerHTML = renderFooter();
+  </script>
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const { data: p } = await supabase.from('profiles')
+        .select('nombre, apellido').eq('id', session.user.id).single();
+      const ini = p ? ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?' : '?';
+      document.getElementById('nav-container').innerHTML = renderNavAuth('dona', ini);
+    }
+  </script>
+  <script>
     function selAmount(el,val){document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');document.getElementById('custom-wrap').style.display=val==='custom'?'flex':'none';}
     function selFreq(el){document.querySelectorAll('.freq-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
     function selPay(el){document.querySelectorAll('.pay-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
