@@ -254,9 +254,6 @@
       document.querySelector('.profile-name').textContent = (nombre + ' ' + apellido).trim();
       document.querySelector('.profile-location').textContent = _profile.ubicacion || '';
 
-      // Actualizar iniciales del nav-avatar
-      const navAv = document.querySelector('.nav-avatar');
-      if (navAv) navAv.textContent = initials;
 
       // Cargar datos secundarios en paralelo
       const fetches = _maestro
