@@ -7,22 +7,21 @@
   <title>Mis relaciones · Aurea</title>
   <link rel="stylesheet" href="css/global.css">
   <style>
-    body{overflow:hidden;}
-    .layout{display:grid;grid-template-columns:200px 1fr;height:calc(100vh - 57px);}
-    .sidebar{border-right:0.5px solid var(--border);padding:20px 16px;display:flex;flex-direction:column;gap:18px;background:var(--night-soft);overflow-y:auto;}
+    .layout{display:grid;grid-template-columns:200px 1fr;}
+    .sidebar{align-self:start;position:sticky;top:var(--nav-height);height:calc(var(--real-vh) - var(--nav-height));border-right:0.5px solid var(--border);padding:20px 16px;display:flex;flex-direction:column;gap:18px;background:var(--night-soft);overflow-y:auto;}
     .filter-chips{display:flex;flex-direction:column;gap:4px;}
     .chip-side{font-size:11px;font-weight:300;color:var(--text-muted);border:0.5px solid var(--border);padding:7px 12px;border-radius:6px;cursor:pointer;transition:all 0.18s;background:none;text-align:left;display:flex;align-items:center;justify-content:space-between;}
     .chip-side:hover,.chip-side.on{color:var(--gold);border-color:var(--gold);background:var(--night-deep);}
     .chip-count{font-size:10px;color:var(--text-faint);}
     .chip-side.on .chip-count{color:rgba(200,151,58,0.4);}
     .filter-divider{height:0.5px;background:var(--border);}
-    .content{display:flex;flex-direction:column;overflow:hidden;}
+    .content{display:flex;flex-direction:column;}
     .content-header{padding:16px 24px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
     .content-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);}
     .content-sub{font-size:11px;font-weight:300;color:var(--text-faint);margin-top:2px;}
     .col-header{display:grid;grid-template-columns:4px 44px 1fr 110px 110px 1fr;gap:16px;padding:8px 24px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
     .col-h{font-size:8px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-ghost);}
-    .list{flex:1;overflow-y:auto;}
+    .list{}
     .rel-row{display:grid;grid-template-columns:4px 44px 1fr 110px 110px 1fr;gap:16px;padding:14px 24px;border-bottom:0.5px solid var(--border);align-items:center;transition:background 0.15s;cursor:pointer;}
     .rel-row:hover{background:var(--night-mid);}
     .rel-row.faded{opacity:0.5;}
@@ -56,6 +55,7 @@
     .btn-modal-back{font-size:11px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-faint);background:none;border:0.5px solid var(--border);padding:9px 16px;border-radius:100px;cursor:pointer;}
     .btn-modal-warn{font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-primary);background:var(--amber);border:none;padding:9px 16px;border-radius:100px;cursor:pointer;}
     .btn-modal-end{font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-primary);background:var(--red);border:none;padding:9px 16px;border-radius:100px;cursor:pointer;}
+    .page-footer-bar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:36px;border-top:0.5px solid var(--border);background:var(--night-soft);}
   </style>
 </head>
 <body>
@@ -82,6 +82,14 @@
         <div class="plaza-item"><div class="plaza-dot" style="background:var(--gold);"></div><span class="plaza-label">Plazas ocupadas (maestro)</span><span class="plaza-n">3 / 4</span></div>
         <div class="plaza-item"><div class="plaza-dot" style="background:var(--purple);"></div><span class="plaza-label">Prácticas activas (discípulo)</span><span class="plaza-n">2 / 3</span></div>
       </div>
+    </div>
+  </div>
+  <div class="page-footer-bar">
+    <span class="footer-copy">© 2026 Aurea · Todos los derechos reservados</span>
+    <div class="footer-legal">
+      <a class="footer-legal-link" href="privacidad.html">Política de privacidad</a>
+      <a class="footer-legal-link" href="privacidad.html">Términos y condiciones</a>
+      <a class="footer-legal-link" href="privacidad.html">Cookies</a>
     </div>
   </div>
 
