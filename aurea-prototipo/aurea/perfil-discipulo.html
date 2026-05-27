@@ -7,66 +7,55 @@
   <title>Perfil de discípulo · Aurea</title>
   <link rel="stylesheet" href="css/global.css">
   <style>
-    body{background:var(--sand);}
     .layout{display:grid;grid-template-columns:300px 1fr;}
-    .col-left{align-self:start;position:sticky;top:var(--nav-height);height:calc(var(--real-vh) - var(--nav-height));border-right:0.5px solid var(--sand-dark);padding:28px 24px;display:flex;flex-direction:column;gap:22px;background:var(--sand-mid);overflow-y:auto;}
+    .col-left{align-self:start;position:sticky;top:var(--nav-height);height:calc(var(--real-vh) - var(--nav-height));border-right:0.5px solid var(--border);padding:28px 24px;display:flex;flex-direction:column;gap:22px;background:var(--night-soft);overflow-y:auto;}
     .profile-header{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;}
-    .big-avatar{width:88px;height:88px;border-radius:50%;background:var(--mahogany);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:34px;font-weight:600;color:var(--sand);}
-    .profile-name{font-family:var(--font-serif);font-size:26px;font-weight:500;color:var(--night);line-height:1.1;}
-    .profile-disc{font-size:10px;font-weight:300;letter-spacing:0.18em;text-transform:uppercase;color:var(--mahogany);margin-top:4px;}
-    .profile-location{font-size:11px;font-weight:300;color:var(--mahogany);opacity:0.6;margin-top:4px;}
-    .stat-box{background:rgba(255,255,255,0.4);border:0.5px solid var(--sand-dark);border-radius:8px;padding:12px;text-align:center;}
-    .stat-n{font-family:var(--font-serif);font-size:24px;font-weight:500;color:var(--night);}
-    .stat-l{font-size:8px;font-weight:300;letter-spacing:0.12em;text-transform:uppercase;color:var(--mahogany);margin-top:3px;}
+    .big-avatar{width:88px;height:88px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:34px;font-weight:600;color:var(--night);}
+    .profile-name{font-family:var(--font-serif);font-size:26px;font-weight:500;color:var(--text-primary);line-height:1.1;}
+    .profile-disc{font-size:10px;font-weight:300;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-top:4px;}
+    .profile-location{font-size:11px;font-weight:300;color:var(--text-faint);margin-top:4px;}
+    .stat-box{background:var(--night-mid);border:0.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;}
+    .stat-n{font-family:var(--font-serif);font-size:24px;font-weight:500;color:var(--gold);}
+    .stat-l{font-size:8px;font-weight:300;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);margin-top:3px;}
     .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-    .const-wrap{background:rgba(255,255,255,0.4);border:0.5px solid var(--sand-dark);border-radius:10px;padding:18px;text-align:center;}
-    .const-n{font-family:var(--font-serif);font-size:40px;font-weight:500;color:var(--night);line-height:1;}
-    .const-bar-bg{height:6px;background:var(--sand-dark);border-radius:100px;overflow:hidden;margin:10px 0;}
+    .const-wrap{background:var(--night-mid);border:0.5px solid var(--border);border-radius:10px;padding:18px;text-align:center;}
+    .const-n{font-family:var(--font-serif);font-size:40px;font-weight:500;color:var(--gold);line-height:1;}
+    .const-bar-bg{height:6px;background:var(--border);border-radius:100px;overflow:hidden;margin:10px 0;}
     .const-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,#7A4F2A,#C8973A);}
-    .const-sub{font-size:10px;font-weight:300;color:var(--mahogany);}
-    .tag{font-size:10px;color:var(--mahogany);border:0.5px solid var(--sand-dark);padding:4px 10px;border-radius:100px;background:rgba(255,255,255,0.3);}
+    .const-sub{font-size:10px;font-weight:300;color:var(--text-faint);}
+    .tag{font-size:10px;color:var(--text-muted);border:0.5px solid var(--border);padding:4px 10px;border-radius:100px;}
     .tags-wrap{display:flex;flex-wrap:wrap;gap:5px;}
-    .avail-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--sand-dark);}
+    .avail-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);}
     .avail-row:last-child{border-bottom:none;}
-    .avail-label{font-size:11px;font-weight:300;color:var(--mahogany);}
-    .avail-val{font-size:11px;font-weight:400;color:var(--night);}
+    .avail-label{font-size:11px;font-weight:300;color:var(--text-muted);}
+    .avail-val{font-size:11px;font-weight:400;color:var(--text-primary);}
     .action-btns{display:flex;flex-direction:column;gap:8px;}
     .btn-ac{font-family:var(--font-serif);font-size:17px;font-style:italic;font-weight:500;color:var(--night);background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));border:none;padding:14px;border-radius:100px;cursor:pointer;box-shadow:0 4px 12px #C8973A33;transition:opacity 0.2s;width:100%;}
     .btn-ac:hover{opacity:0.85;}
-    .btn-re{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--mahogany);background:none;border:0.5px solid var(--sand-dark);padding:14px;border-radius:100px;cursor:pointer;transition:all 0.2s;width:100%;}
+    .btn-re{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--text-muted);background:none;border:0.5px solid var(--border);padding:14px;border-radius:100px;cursor:pointer;transition:all 0.2s;width:100%;}
     .btn-re:hover{color:var(--red);border-color:var(--red);}
-    .col-right{padding:28px 32px;display:flex;flex-direction:column;gap:28px;background:var(--sand);}
-    .bio-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--night);margin-bottom:12px;}
-    .bio-text{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--mahogany);line-height:1.7;}
-    .divider-sand{height:0.5px;background:var(--sand-dark);}
-    .hist-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--sand-dark);}
+    .col-right{padding:28px 32px;display:flex;flex-direction:column;gap:28px;}
+    .bio-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);margin-bottom:12px;}
+    .bio-text{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--text-secondary);line-height:1.7;}
+    .divider-sand{height:0.5px;background:var(--border);}
+    .hist-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);}
     .hist-item:last-child{border-bottom:none;}
-    .hist-disc{font-size:12px;font-weight:400;color:var(--night);}
-    .hist-sub{font-size:10px;font-weight:300;color:var(--mahogany);}
+    .hist-disc{font-size:12px;font-weight:400;color:var(--text-primary);}
+    .hist-sub{font-size:10px;font-weight:300;color:var(--text-faint);}
     .hist-badge{font-size:8px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;padding:3px 8px;border-radius:100px;margin-left:auto;flex-shrink:0;white-space:nowrap;}
     .hb-complete{color:var(--green);background:#1A2A12;border:0.5px solid #3B6D1144;}
-    .hb-partial{color:var(--mahogany);background:rgba(200,151,58,0.1);border:0.5px solid var(--border-gold);}
-    .review-item{background:rgba(255,255,255,0.5);border:0.5px solid var(--sand-dark);border-radius:8px;padding:16px;margin-bottom:10px;}
-    .review-author{font-size:12px;font-weight:400;color:var(--night);}
-    .review-disc{font-size:10px;font-weight:300;color:var(--mahogany);margin-bottom:6px;}
-    .review-text{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--mahogany);line-height:1.6;}
-    .msg-mot{background:rgba(255,255,255,0.5);border:0.5px solid var(--sand-dark);border-radius:10px;padding:16px;}
-    .msg-mot-label{font-size:9px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--mahogany);margin-bottom:8px;}
-    .msg-mot-text{font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--night);line-height:1.7;}
+    .hb-partial{color:var(--gold);background:rgba(200,151,58,0.1);border:0.5px solid var(--border-gold);}
+    .review-item{background:var(--night-mid);border:0.5px solid var(--border);border-radius:8px;padding:16px;margin-bottom:10px;}
+    .review-author{font-size:12px;font-weight:400;color:var(--text-primary);}
+    .review-disc{font-size:10px;font-weight:300;color:var(--text-faint);margin-bottom:6px;}
+    .review-text{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-muted);line-height:1.6;}
+    .msg-mot{background:var(--night-mid);border:0.5px solid var(--border-gold);border-radius:10px;padding:16px;}
+    .msg-mot-label{font-size:9px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-faint);margin-bottom:8px;}
+    .msg-mot-text{font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--text-primary);line-height:1.7;}
   </style>
 </head>
 <body>
-  <nav class="nav" style="background:var(--sand-mid);border-bottom:0.5px solid var(--sand-dark);">
-    <a class="nav-logo" href="discover.html"><img src="assets/logo.png" alt="Aurea"><span class="nav-wordmark">Aurea</span></a>
-    <div class="nav-links">
-      <a class="nav-link" href="discover.html">Discover</a>
-      <a class="nav-link" href="relaciones.html">Mis relaciones</a>
-      <a class="nav-link active" href="solicitudes.html" style="color:var(--gold);">Mis solicitudes</a>
-      <a class="nav-link" href="perfil.html">Mi perfil</a>
-      <a class="nav-link" href="dona.html">Dona</a>
-    </div>
-    <div class="nav-avatar" id="pd-nav-avatar" style="background:rgba(255,255,255,0.3);border-color:var(--mahogany);color:var(--night);">—</div>
-  </nav>
+  <div id="nav-container"></div>
 
   <div class="layout">
     <div class="col-left">
@@ -79,7 +68,7 @@
         </div>
       </div>
       <div class="const-wrap">
-        <span class="section-label" style="color:var(--mahogany);">Constancia</span>
+        <span class="section-label">Constancia</span>
         <div class="const-n" id="pd-const-n">—</div>
         <div class="const-bar-bg"><div class="const-bar" id="pd-const-bar" style="width:50%;"></div></div>
         <div class="const-sub" id="pd-const-sub">de 100 puntos</div>
@@ -98,7 +87,7 @@
         <div class="bio-title">Su mensaje de motivación</div>
         <div class="msg-mot">
           <div class="msg-mot-label">Por qué quiere aprender contigo</div>
-          <p class="msg-mot-text" id="pd-motivacion" style="color:var(--mahogany);font-style:italic;font-size:14px;">Cargando…</p>
+          <p class="msg-mot-text" id="pd-motivacion" style="font-style:italic;font-size:14px;">Cargando…</p>
         </div>
       </div>
       <div class="divider-sand"></div>
@@ -108,19 +97,25 @@
       </div>
       <div class="divider-sand"></div>
       <div>
-        <span class="section-label" style="color:var(--mahogany);">Historial de prácticas</span>
+        <span class="section-label">Historial de prácticas</span>
         <div id="pd-historial">
-          <p style="font-size:12px;color:var(--mahogany);padding:8px 0;">Cargando…</p>
+          <p style="font-size:12px;color:var(--text-muted);padding:8px 0;">Cargando…</p>
         </div>
       </div>
     </div>
   </div>
 
+  <div id="footer-container"></div>
   <div id="chat-container"></div>
   <script src="js/components.js"></script>
+  <script>
+    document.getElementById('nav-container').innerHTML = renderNavPublic('solicitudes');
+    document.getElementById('footer-container').innerHTML = renderFooter();
+  </script>
   <script type="module">
     import { supabase } from './js/supabase.js';
     import { getSession } from './js/auth.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     const params      = new URLSearchParams(location.search);
     const discipuloId = params.get('id');
@@ -142,7 +137,8 @@
         .from('profiles').select('nombre, apellido').eq('id', session.user.id).single();
       if (me) {
         const i = ((me.nombre||'')[0] + (me.apellido||'')[0]).toUpperCase() || '?';
-        document.getElementById('pd-nav-avatar').textContent = i;
+        document.getElementById('nav-container').innerHTML = renderNavAuth('solicitudes', i);
+        checkNotificaciones();
       }
     }
 
@@ -176,7 +172,7 @@
       const initials = ((nombre[0]||'') + (apellido[0]||'')).toUpperCase() || '?';
 
       document.getElementById('pd-avatar').textContent    = initials;
-      document.getElementById('pd-avatar').style.background = perfil.avatar_color || 'var(--mahogany)';
+      document.getElementById('pd-avatar').style.background = perfil.avatar_color || 'var(--gold)';
       document.getElementById('pd-nombre').textContent    = (nombre + ' ' + apellido).trim();
       document.getElementById('pd-loc').textContent       = perfil.ubicacion || '—';
       document.getElementById('pd-bio-title').textContent = `Sobre ${nombre || 'este discípulo'}`;
@@ -201,7 +197,7 @@
       // Bio
       if (perfil.frase) {
         document.getElementById('pd-bio').textContent = `"${perfil.frase}"`;
-        document.getElementById('pd-bio').style.color = 'var(--mahogany)';
+        document.getElementById('pd-bio').style.color = 'var(--text-secondary)';
       }
     }
 
@@ -213,7 +209,7 @@
       // Si ya fue respondida, deshabilitar botones
       if (_solData.estado === 'aceptada' || _solData.estado === 'rechazada') {
         document.getElementById('pd-actions').innerHTML =
-          `<div style="text-align:center;font-size:12px;color:var(--mahogany);font-family:var(--font-serif);font-style:italic;padding:8px;">
+          `<div style="text-align:center;font-size:12px;color:var(--text-muted);font-family:var(--font-serif);font-style:italic;padding:8px;">
             ${_solData.estado === 'aceptada' ? '✓ Ya aceptaste esta solicitud' : '✕ Ya rechazaste esta solicitud'}
            </div>`;
       }
@@ -245,7 +241,7 @@
               <span class="hist-badge ${badgeClass}" style="${badgeStyle}">${badgeText}</span>
             </div>`;
         }).join('')
-      : `<p style="font-size:12px;color:var(--mahogany);padding:8px 0;">Sin historial de prácticas todavía.</p>`;
+      : `<p style="font-size:12px;color:var(--text-muted);padding:8px 0;">Sin historial de prácticas todavía.</p>`;
 
     // — Acciones aceptar / rechazar —
     window.aceptarDisc = async function() {

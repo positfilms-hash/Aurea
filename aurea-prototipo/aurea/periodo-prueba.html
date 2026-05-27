@@ -165,6 +165,7 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     import { requireAuth } from './js/auth.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     const session = await requireAuth();
     const uid = session.user.id;
@@ -179,6 +180,7 @@
       .select('nombre, apellido').eq('id', uid).single();
     const ini = me ? ((me.nombre||'')[0] + (me.apellido||'')[0]).toUpperCase() || '?' : '?';
     document.getElementById('nav-container').innerHTML = renderNavAuth('relaciones', ini);
+    checkNotificaciones();
 
     // — Cargar relacion con perfiles de ambas partes —
     const { data: rel, error: relErr } = await supabase

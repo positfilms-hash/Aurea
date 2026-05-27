@@ -89,8 +89,10 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     import { requireAuth } from './js/auth.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     document.getElementById('nav-container').innerHTML = renderNavAuth('solicitudes');
+    checkNotificaciones();
 
     const LABEL = { nueva:'Nueva', vista:'Vista', aceptada:'Aceptada', rechazada:'Rechazada' };
     const ICON  = { nueva:'✦', vista:'◎', aceptada:'✓', rechazada:'✕' };
@@ -161,7 +163,7 @@
         const p = s.profiles || {};
         const nombre = ((p.nombre || '') + ' ' + (p.apellido || '')).trim() || 'Discípulo';
         const initials = ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?';
-        const bg = p.avatar_color || 'var(--mahogany)';
+        const bg = p.avatar_color || 'var(--gold)';
         const loc = p.ubicacion || '—';
         const fecha = fechaRelativa(s.created_at);
         const constancia = 0; // sin datos de constancia aún

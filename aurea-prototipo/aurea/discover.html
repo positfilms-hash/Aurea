@@ -92,6 +92,7 @@
   <script src="js/components.js"></script>
   <script type="module">
     import { supabase } from './js/supabase.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     // Nav inteligente: público si no hay sesión, auth si la hay
     const { data: { session } } = await supabase.auth.getSession();
@@ -100,6 +101,7 @@
         .select('nombre, apellido').eq('id', session.user.id).single();
       const ini = p ? ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?' : '?';
       document.getElementById('nav-container').innerHTML = renderNavAuth('discover', ini);
+      checkNotificaciones();
     } else {
       document.getElementById('nav-container').innerHTML = renderNavPublic('');
     }

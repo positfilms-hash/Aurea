@@ -118,6 +118,7 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     import { requireAuth } from './js/auth.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     // — Nav con iniciales reales —
     const session0 = await requireAuth();
@@ -126,6 +127,7 @@
         .select('nombre, apellido').eq('id', session0.user.id).single();
       const ini0 = me0 ? ((me0.nombre||'')[0] + (me0.apellido||'')[0]).toUpperCase() || '?' : '?';
       document.getElementById('nav-container').innerHTML = renderNavAuth('relaciones', ini0);
+      checkNotificaciones();
     }
 
     // — Modales —
@@ -227,7 +229,7 @@
         const p = r._persona || {};
         const nombre = ((p.nombre||'') + ' ' + (p.apellido||'')).trim() || 'Persona';
         const initials = ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?';
-        const bg = p.avatar_color || 'var(--mahogany)';
+        const bg = p.avatar_color || 'var(--gold)';
         const dias = diasDesde(r.iniciada_at);
         const esFinalizada = r.estado === 'finalizada';
         const rolLabel = r._rol === 'maestro' ? 'Discípulo' : 'Maestro';
@@ -301,7 +303,7 @@
       // Relaciones como discípulo
       fetches.push(
         supabase.from('relaciones')
-          .select('id, disciplina, estado, iniciada_at, maestro_id')
+          .select('id, disciplina, estado, iniciada_at, maestro_id, profiles!maestro_id(nombre, apellido, avatar_color)')
           .eq('discipulo_id', uid)
       );
 
@@ -317,7 +319,7 @@
       const relsDisc = (rDRes.data || []).map(r => ({
         ...r,
         _rol: 'discipulo',
-        _persona: {},   // sin datos del maestro en esta query simple
+        _persona: r.profiles || {},
         _disciplina: r.disciplina || '—',
       }));
 
