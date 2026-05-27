@@ -8,8 +8,9 @@
   <link rel="stylesheet" href="css/global.css">
   <style>
     body{overflow:hidden;height:100vh;display:flex;flex-direction:column;}
-    .page{flex:1;min-height:0;display:grid;grid-template-columns:300px 1fr;grid-template-rows:1fr;overflow:hidden;}
-    .col-left{border-right:0.5px solid var(--border);padding:28px 24px;display:flex;flex-direction:column;gap:22px;background:var(--night-soft);overflow-y:auto;min-height:0;}
+    .page{flex:1;min-height:0;display:flex;overflow:hidden;}
+    .col-left{width:300px;flex-shrink:0;border-right:0.5px solid var(--border);padding:28px 24px;display:flex;flex-direction:column;gap:22px;background:var(--night-soft);overflow-y:auto;}
+
 
     .role-toggle{display:flex;background:var(--night-mid);border:0.5px solid var(--border);border-radius:100px;padding:3px;gap:2px;}
     .role-btn{flex:1;font-size:10px;font-weight:400;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);background:none;border:none;padding:7px 12px;border-radius:100px;cursor:pointer;transition:all 0.22s;text-align:center;}
@@ -40,7 +41,7 @@
     .constancia-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,#A67828,#C8973A);}
     .constancia-n{font-family:var(--font-serif);font-size:40px;font-weight:500;color:var(--gold);line-height:1;}
     .constancia-sub{font-size:11px;font-weight:300;color:var(--text-faint);margin-top:4px;}
-    .col-right{padding:28px 32px;display:flex;flex-direction:column;gap:28px;overflow-y:auto;min-height:0;}
+    .col-right{flex:1;min-height:0;padding:28px 32px;display:flex;flex-direction:column;gap:28px;overflow-y:auto;}
     .bio-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);margin-bottom:12px;}
     .bio-text{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--text-secondary);line-height:1.7;}
     .tl-item{display:grid;grid-template-columns:80px 1fr;gap:16px;margin-bottom:14px;}
