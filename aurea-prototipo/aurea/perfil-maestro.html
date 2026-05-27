@@ -7,9 +7,8 @@
   <title>Perfil de maestro · Aurea</title>
   <link rel="stylesheet" href="css/global.css">
   <style>
-    body{overflow:hidden;}
-    .layout{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 57px);}
-    .col-left{border-right:0.5px solid var(--border);padding:28px 24px;display:flex;flex-direction:column;gap:22px;background:var(--night-soft);overflow-y:auto;}
+    .layout{display:grid;grid-template-columns:300px 1fr;}
+    .col-left{align-self:start;position:sticky;top:var(--nav-height);height:calc(var(--real-vh) - var(--nav-height));border-right:0.5px solid var(--border);padding:28px 24px;display:flex;flex-direction:column;gap:22px;background:var(--night-soft);overflow-y:auto;}
     .profile-header{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;}
     .big-avatar{width:88px;height:88px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:34px;font-weight:600;color:var(--night);}
     .profile-name{font-family:var(--font-serif);font-size:26px;font-weight:500;color:var(--text-primary);}
@@ -33,7 +32,7 @@
     .btn-circle.wait{border-color:var(--border-soft);box-shadow:none;cursor:default;}
     .btn-circle.wait:hover{transform:none;box-shadow:none;}
     .btn-circle.wait .btn-circle-label{color:var(--text-faint);}
-    .col-right{padding:28px 32px;display:flex;flex-direction:column;gap:28px;overflow-y:auto;}
+    .col-right{padding:28px 32px;display:flex;flex-direction:column;gap:28px;}
     .bio-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);margin-bottom:12px;}
     .bio-text{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--text-secondary);line-height:1.7;}
     .tl-item{display:grid;grid-template-columns:80px 1fr;gap:16px;margin-bottom:14px;}
@@ -66,6 +65,7 @@
     .btn-ms{font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--night);background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));border:none;padding:10px 24px;border-radius:100px;cursor:pointer;}
     .success-send{display:none;background:#1A2A12;border:0.5px solid #3B6D1144;border-radius:10px;padding:16px;text-align:center;}
     .success-send.show{display:block;}
+    .page-footer-bar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:36px;border-top:0.5px solid var(--border);background:var(--night-soft);}
   </style>
 </head>
 <body>
@@ -137,6 +137,15 @@
         <div class="disc-row"><div class="disc-avatar" style="background:#7A4F2A;">JM</div><div><div class="disc-name">Javier M.</div><div class="disc-sub">Filosofía estoica</div></div><span class="disc-since">8 meses</span></div>
         <div class="disc-row"><div class="disc-avatar" style="background:#3B6D11;">LP</div><div><div class="disc-name">Laura P.</div><div class="disc-sub">Filosofía estoica</div></div><span class="disc-since">5 meses</span></div>
       </div>
+    </div>
+  </div>
+
+  <div class="page-footer-bar">
+    <span class="footer-copy">© 2026 Aurea · Todos los derechos reservados</span>
+    <div class="footer-legal">
+      <a class="footer-legal-link" href="privacidad.html">Política de privacidad</a>
+      <a class="footer-legal-link" href="privacidad.html">Términos y condiciones</a>
+      <a class="footer-legal-link" href="privacidad.html">Cookies</a>
     </div>
   </div>
 
