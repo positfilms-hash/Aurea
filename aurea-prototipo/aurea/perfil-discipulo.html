@@ -254,13 +254,14 @@
       btn.textContent = 'Aceptando…'; btn.disabled = true;
 
       await supabase.from('solicitudes').update({ estado: 'aceptada' }).eq('id', solId);
-      await supabase.from('relaciones').insert({
+      const { data: rel, error } = await supabase.from('relaciones').insert({
         maestro_id:   _maestroId,
         discipulo_id: discipuloId,
         disciplina:   _solData?.disciplina || '',
         estado:       'prueba',
-      });
-      location.href = 'solicitudes.html';
+      }).select('id').single();
+      if (error) { btn.textContent = 'Error: ' + error.message; btn.disabled = false; return; }
+      location.href = `periodo-prueba.html?id=${rel.id}`;
     };
 
     window.rechazarDisc = async function() {

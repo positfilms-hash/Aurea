@@ -221,15 +221,14 @@
     window.aceptar = async function(solId, discipuloId, disciplina) {
       const { error: e1 } = await supabase.from('solicitudes').update({ estado: 'aceptada' }).eq('id', solId);
       if (e1) { alert('Error al aceptar. Inténtalo de nuevo.'); return; }
-      const { error: e2 } = await supabase.from('relaciones').insert({
+      const { data: rel, error: e2 } = await supabase.from('relaciones').insert({
         maestro_id:   _maestroId,
         discipulo_id: discipuloId,
         disciplina:   disciplina || '',
         estado:       'prueba',
-        // iniciada_at usa default now() — no hace falta enviarlo
-      });
-      if (e2) console.warn('Error al crear relación:', e2.message);
-      await cargarSolicitudes();
+      }).select('id').single();
+      if (e2) { alert('Error al crear la relación: ' + e2.message); return; }
+      location.href = `periodo-prueba.html?id=${rel.id}`;
     };
 
     window.rechazar = async function(solId) {
