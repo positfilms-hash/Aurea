@@ -52,6 +52,9 @@
     .msg-mot{background:var(--night-mid);border:0.5px solid var(--border-gold);border-radius:10px;padding:16px;}
     .msg-mot-label{font-size:9px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-faint);margin-bottom:8px;}
     .msg-mot-text{font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--text-primary);line-height:1.7;}
+    .btn-chat-gold{font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--gold);background:none;border:0.5px solid var(--border-gold);padding:10px 18px;border-radius:100px;cursor:pointer;transition:all 0.18s;white-space:nowrap;width:100%;}
+    .btn-chat-gold:hover{background:rgba(200,151,58,0.08);}
+    .activa-item{display:flex;align-items:center;gap:12px;background:rgba(200,151,58,0.04);border:0.5px solid var(--border-gold);border-radius:8px;padding:12px 14px;margin-bottom:10px;}
   </style>
 </head>
 <body>
@@ -142,28 +145,37 @@
       }
     }
 
-    // Cargar perfil + historial + solicitud en paralelo
+    // Cargar perfil + historial + solicitud + relación activa en paralelo
     const fetches = [
+      // 0 — perfil del discípulo
       supabase.from('profiles')
         .select('nombre, apellido, avatar_color, ubicacion, frase, constancia_score')
         .eq('id', discipuloId).single(),
+      // 1 — historial de prácticas
       supabase.from('historial_discipulo')
         .select('disciplina, duracion_meses, estado, maestro_nombre')
         .eq('discipulo_id', discipuloId)
         .order('created_at', { ascending: false }),
+      // 2 — solicitud (si viene por URL)
+      solId
+        ? supabase.from('solicitudes').select('motivacion, disciplina, estado').eq('id', solId).single()
+        : Promise.resolve({ data: null }),
+      // 3 — relación activa entre este maestro y este discípulo
+      _maestroId
+        ? supabase.from('relaciones')
+            .select('id, disciplina, estado')
+            .eq('maestro_id', _maestroId)
+            .eq('discipulo_id', discipuloId)
+            .in('estado', ['prueba', 'consolidada'])
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
     ];
-    if (solId) {
-      fetches.push(
-        supabase.from('solicitudes')
-          .select('motivacion, disciplina, estado')
-          .eq('id', solId).single()
-      );
-    }
 
-    const [perfilRes, histRes, solRes] = await Promise.all(fetches);
-    const perfil   = perfilRes.data;
+    const [perfilRes, histRes, solRes, relActivaRes] = await Promise.all(fetches);
+    const perfil    = perfilRes.data;
     const historial = histRes.data || [];
-    _solData = solRes?.data || null;
+    _solData        = solRes?.data || null;
+    const relActiva = relActivaRes?.data || null;
 
     // — Columna izquierda —
     if (perfil) {
@@ -206,24 +218,50 @@
       document.getElementById('pd-motivacion').textContent =
         _solData.motivacion ? `"${_solData.motivacion}"` : '(Sin mensaje de motivación)';
 
-      // Si ya fue respondida, deshabilitar botones
+      // Si ya fue respondida, reemplazar botones
       if (_solData.estado === 'aceptada' || _solData.estado === 'rechazada') {
-        document.getElementById('pd-actions').innerHTML =
-          `<div style="text-align:center;font-size:12px;color:var(--text-muted);font-family:var(--font-serif);font-style:italic;padding:8px;">
-            ${_solData.estado === 'aceptada' ? '✓ Ya aceptaste esta solicitud' : '✕ Ya rechazaste esta solicitud'}
-           </div>`;
+        if (_solData.estado === 'aceptada' && relActiva) {
+          document.getElementById('pd-actions').innerHTML =
+            `<button class="btn-chat-gold" onclick="location.href='periodo-prueba.html?id=${relActiva.id}'">Entrar al chat →</button>
+             <div style="text-align:center;font-size:10px;color:var(--text-faint);font-style:italic;padding:4px;">✓ Solicitud aceptada</div>`;
+        } else {
+          document.getElementById('pd-actions').innerHTML =
+            `<div style="text-align:center;font-size:12px;color:var(--text-muted);font-family:var(--font-serif);font-style:italic;padding:8px;">
+              ${_solData.estado === 'aceptada' ? '✓ Ya aceptaste esta solicitud' : '✕ Ya rechazaste esta solicitud'}
+             </div>`;
+        }
       }
     } else {
-      // Sin solicitud: ocultar sección de motivación y botones de acción
-      document.getElementById('pd-sol-sec').style.display   = 'none';
-      document.getElementById('pd-actions').style.display   = 'none';
-      // Ocultar el divider-sand que sigue al pd-sol-sec
+      // Sin solicitud: ocultar sección de motivación
+      document.getElementById('pd-sol-sec').style.display = 'none';
       const dividers = document.querySelectorAll('.divider-sand');
       if (dividers[0]) dividers[0].style.display = 'none';
+      // Si hay relación activa, mostrar botón de chat; si no, ocultar acciones
+      if (relActiva) {
+        document.getElementById('pd-actions').innerHTML =
+          `<button class="btn-chat-gold" onclick="location.href='periodo-prueba.html?id=${relActiva.id}'">Entrar al chat →</button>`;
+      } else {
+        document.getElementById('pd-actions').style.display = 'none';
+      }
     }
 
     // — Historial —
-    document.getElementById('pd-historial').innerHTML = historial.length
+    // Item de relación activa (al principio, si existe)
+    const activaHTML = relActiva ? `
+      <div class="activa-item">
+        <div style="flex:1;">
+          <div class="hist-disc">${relActiva.disciplina || '—'}</div>
+          <div class="hist-sub">${relActiva.estado === 'prueba' ? 'Periodo de prueba en curso' : 'Relación consolidada'}</div>
+        </div>
+        <span class="hist-badge hb-partial" style="margin-right:8px;">${relActiva.estado === 'prueba' ? '⏳ En prueba' : '✦ Activa'}</span>
+        <button onclick="location.href='periodo-prueba.html?id=${relActiva.id}'"
+          style="font-family:var(--font-serif);font-size:12px;font-style:italic;color:var(--gold);background:none;border:0.5px solid var(--border-gold);padding:6px 14px;border-radius:100px;cursor:pointer;white-space:nowrap;transition:background 0.18s;"
+          onmouseover="this.style.background='rgba(200,151,58,0.08)'" onmouseout="this.style.background='none'">
+          Chat →
+        </button>
+      </div>` : '';
+
+    document.getElementById('pd-historial').innerHTML = activaHTML + (historial.length
       ? historial.map(h => {
           const done = h.estado === 'completada';
           const cancel = h.estado === 'cancelada';
@@ -241,7 +279,7 @@
               <span class="hist-badge ${badgeClass}" style="${badgeStyle}">${badgeText}</span>
             </div>`;
         }).join('')
-      : `<p style="font-size:12px;color:var(--text-muted);padding:8px 0;">Sin historial de prácticas todavía.</p>`;
+      : `<p style="font-size:12px;color:var(--text-muted);padding:8px 0;">Sin historial de prácticas todavía.</p>`);
 
     // — Acciones aceptar / rechazar —
     window.aceptarDisc = async function() {
