@@ -276,6 +276,15 @@
       btn.style.opacity = '0.6';
       btn.disabled = true;
 
+      if (!_uid) {
+        btn.textContent = '✕ Sesión no cargada';
+        btn.style.background = 'var(--red)';
+        btn.style.opacity = '1';
+        btn.disabled = false;
+        setTimeout(() => { btn.textContent = 'Guardar cambios'; btn.style.background = 'var(--gold)'; }, 3000);
+        return;
+      }
+
       try {
         const nombre   = document.getElementById('f-nombre')?.value.trim()   || '';
         const apellido = document.getElementById('f-apellido')?.value.trim()  || '';
@@ -364,14 +373,27 @@
 
       } catch (err) {
         console.error('Error al guardar:', err);
-        btn.textContent = '✕ Error al guardar';
+        const msg = err?.message || err?.details || String(err);
+        btn.textContent = '✕ Error';
+        btn.title = msg;
         btn.style.background = 'var(--red)';
         btn.style.opacity = '1';
         btn.disabled = false;
+        // Mostrar mensaje de error debajo del botón
+        let errEl = document.getElementById('save-error-msg');
+        if (!errEl) {
+          errEl = document.createElement('div');
+          errEl.id = 'save-error-msg';
+          errEl.style.cssText = 'font-size:11px;color:#E87070;margin-top:6px;text-align:right;';
+          btn.parentElement.appendChild(errEl);
+        }
+        errEl.textContent = msg;
         setTimeout(() => {
           btn.textContent = 'Guardar cambios';
           btn.style.background = 'var(--gold)';
-        }, 3000);
+          btn.title = '';
+          if (errEl) errEl.textContent = '';
+        }, 5000);
       }
     };
 
