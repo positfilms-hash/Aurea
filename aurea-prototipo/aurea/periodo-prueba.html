@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -43,6 +43,8 @@
     .chat-title{font-family:var(--font-serif);font-size:17px;font-weight:500;color:var(--text-primary);}
     .chat-sub{font-size:10px;font-weight:300;color:var(--text-faint);}
     .chat-badge{font-size:9px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:100px;color:var(--purple);background:#1A1830;border:0.5px solid #53489744;}
+    .chat-badge.consolidada{color:var(--green);background:#1A2A12;border:0.5px solid #3B6D1144;}
+    .chat-badge.cancelada{color:var(--text-faint);background:var(--night-mid);border:0.5px solid var(--border);}
     .messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px;}
     .msg{max-width:70%;display:flex;flex-direction:column;gap:3px;}
     .msg.mine{align-self:flex-end;}
@@ -57,6 +59,7 @@
     .chat-textarea:focus{border-color:var(--gold);}
     .chat-textarea::placeholder{color:var(--text-ghost);}
     .chat-send-btn{background:var(--gold);border:none;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+    .chat-send-btn:disabled{opacity:0.4;cursor:default;}
     .modal-title{font-family:var(--font-serif);font-size:22px;font-weight:500;color:var(--text-primary);}
     .modal-sub{font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.7;}
     .modal-ta{background:var(--night-soft);border:0.5px solid var(--border-soft);border-radius:8px;padding:12px;font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-primary);outline:none;resize:none;height:90px;width:100%;margin-top:4px;}
@@ -70,6 +73,8 @@
     .sobre-icon{font-size:36px;margin-bottom:10px;}
     .sobre-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);margin-bottom:6px;}
     .sobre-sub{font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.6;}
+    .msgs-empty{text-align:center;padding:40px 20px;font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-faint);}
+    .ya-decidio{width:100%;text-align:center;font-size:11px;font-weight:300;color:var(--text-muted);padding:12px 0;letter-spacing:0.04em;}
   </style>
 </head>
 <body>
@@ -77,38 +82,47 @@
   <div class="layout">
     <div class="col-left">
       <div class="col-head">
-        <div class="col-avatar" style="background:#993556;">SL</div>
-        <div><div class="col-head-name">Sofía Llorente</div><div class="col-head-sub">Filosofía estoica · Discípulo</div></div>
+        <div class="col-avatar" id="col-avatar" style="background:#C8973A;">…</div>
+        <div>
+          <div class="col-head-name" id="col-head-name">Cargando…</div>
+          <div class="col-head-sub" id="col-head-sub"></div>
+        </div>
       </div>
       <div class="sesiones-title">Sesiones del periodo de prueba</div>
-      <div class="sesiones-list">
-        <div class="sesion-item"><span class="sesion-num sesion-n">1</span><div class="sesion-info"><div class="sesion-title">Primera sesión</div><div class="sesion-fecha">15 mayo 2026 · 18:00h</div></div><span class="sesion-badge sb-done">✓ Completada</span></div>
-        <div class="sesion-item"><span class="sesion-num sesion-n">2</span><div class="sesion-info"><div class="sesion-title">Segunda sesión</div><div class="sesion-fecha">Hoy · 19:00h</div></div><span class="sesion-badge sb-today">Hoy</span></div>
-        <div class="sesion-item"><span class="sesion-num" style="color:var(--border);">3</span><div class="sesion-info"><div class="sesion-title">Tercera sesión</div><div class="sesion-fecha">Por acordar</div></div><span class="sesion-badge sb-pending">Pendiente</span></div>
+      <div class="sesiones-list" id="sesiones-list">
+        <!-- Renderizado dinámico -->
       </div>
       <div class="progress-section">
-        <div class="prog-label"><span class="prog-text">Días de prueba transcurridos</span><span class="prog-pct">10 / 30</span></div>
-        <div class="prog-bar"><div class="prog-fill" style="width:33%;"></div></div>
+        <div class="prog-label">
+          <span class="prog-text">Días de prueba transcurridos</span>
+          <span class="prog-pct" id="prog-pct">— / —</span>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%;"></div></div>
       </div>
-      <div class="decision-band">
+      <div class="decision-band" id="decision-band">
         <button class="btn-decision btn-accept" onclick="openModal('aceptar')">Aceptar la cadena</button>
         <button class="btn-decision btn-cancel" onclick="openModal('cancelar')">Cancelar</button>
       </div>
     </div>
     <div class="col-right">
-      <div class="chat-header"><div><div class="chat-title">Sofía Llorente</div><div class="chat-sub">Periodo de prueba activo</div></div><span class="chat-badge">⏳ En prueba · 10 días</span></div>
+      <div class="chat-header">
+        <div>
+          <div class="chat-title" id="chat-title">…</div>
+          <div class="chat-sub">Periodo de prueba activo</div>
+        </div>
+        <span class="chat-badge" id="chat-badge">⏳ En prueba · — días</span>
+      </div>
       <div class="messages" id="messages">
-        <div class="msg theirs"><div class="msg-bubble">Hola Rafael, muchas gracias por aceptar mi solicitud. Llevo meses buscando alguien que enseñe estoicismo de verdad, no como moda.</div><div class="msg-meta">Sofía · 15 mayo</div></div>
-        <div class="msg mine"><div class="msg-bubble">Gracias por el mensaje, Sofía. Vi tu perfil y me pareció serio. ¿Qué estás leyendo ahora?</div><div class="msg-meta">Tú · 15 mayo</div></div>
-        <div class="msg theirs"><div class="msg-bubble">Estoy con el Manual de Epicteto. Ya lo he leído dos veces pero sigo sin entender bien la distinción entre lo que depende de nosotros y lo que no.</div><div class="msg-meta">Sofía · 15 mayo</div></div>
-        <div class="msg mine"><div class="msg-bubble">Eso es exactamente lo que trabajaremos en la primera sesión. No se entiende leyendo, se entiende aplicando. Nos vemos mañana a las 18h.</div><div class="msg-meta">Tú · 15 mayo</div></div>
-        <div class="msg theirs"><div class="msg-bubble">La sesión de ayer fue muy distinta a todo lo que esperaba. No sé si mejor o peor, pero diferente. Necesito unos días para digerirlo.</div><div class="msg-meta">Sofía · 17 mayo</div></div>
-        <div class="msg mine"><div class="msg-bubble">Eso es buena señal. Si todo encajara a la primera no estaría enseñando nada nuevo. Tómate tu tiempo.</div><div class="msg-meta">Tú · 17 mayo</div></div>
-        <div class="msg theirs"><div class="msg-bubble">Preparada para hoy. He hecho los ejercicios del diario que me propusiste. ¿A las 19h?</div><div class="msg-meta">Sofía · Hoy</div></div>
+        <div class="msgs-empty">Cargando mensajes…</div>
       </div>
       <div class="chat-input-bar">
-        <textarea class="chat-textarea" id="msg-input" placeholder="Escribe un mensaje…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
-        <button class="chat-send-btn" onclick="sendMsg()"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8L14 2L8 14L7 9L2 8Z" fill="#1C1410"/></svg></button>
+        <textarea class="chat-textarea" id="msg-input" placeholder="Escribe un mensaje…"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+        <button class="chat-send-btn" id="send-btn" onclick="sendMsg()">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M2 8L14 2L8 14L7 9L2 8Z" fill="#1C1410"/>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
@@ -119,9 +133,15 @@
       <div class="sobre-cerrado">
         <div class="sobre-icon">◎</div>
         <div class="sobre-title">Decisión en sobre cerrado</div>
-        <div class="sobre-sub">Si confirmas, tu decisión quedará registrada pero Sofía no la verá hasta que ella también decida.<br>Si ambos aceptáis, la cadena quedará consolidada.</div>
+        <div class="sobre-sub" id="sobre-sub">
+          Si confirmas, tu decisión quedará registrada pero la otra persona no la verá hasta que ella también decida.<br>
+          Si ambos aceptáis, la cadena quedará consolidada.
+        </div>
       </div>
-      <div class="modal-actions"><button class="btn-mb" onclick="closeModals()">Volver</button><button class="btn-mac" onclick="closeModals()">Confirmar aceptación</button></div>
+      <div class="modal-actions">
+        <button class="btn-mb" onclick="closeModals()">Volver</button>
+        <button class="btn-mac" onclick="confirmarAceptar()">Confirmar aceptación</button>
+      </div>
     </div>
   </div>
 
@@ -129,20 +149,286 @@
   <div class="overlay" id="modal-cancelar">
     <div class="modal" style="width:440px;">
       <div class="modal-title">Cancelar el periodo de prueba</div>
-      <div class="modal-sub">Puedes dejar un mensaje opcional para Sofía. No es obligatorio, pero puede ser un gesto generoso.</div>
-      <textarea class="modal-ta" placeholder="Un mensaje de despedida (opcional)…"></textarea>
-      <div class="modal-actions"><button class="btn-mb" onclick="closeModals()">Volver</button><button class="btn-mca" onclick="closeModals()">Cancelar el periodo</button></div>
+      <div class="modal-sub" id="cancelar-sub">
+        Puedes dejar un mensaje opcional. No es obligatorio, pero puede ser un gesto generoso.
+      </div>
+      <textarea class="modal-ta" id="modal-cancelar-msg" placeholder="Un mensaje de despedida (opcional)…"></textarea>
+      <div class="modal-actions">
+        <button class="btn-mb" onclick="closeModals()">Volver</button>
+        <button class="btn-mca" onclick="confirmarCancelar()">Cancelar el periodo</button>
+      </div>
     </div>
   </div>
 
   <div id="chat-container"></div>
   <script src="js/components.js"></script>
-  <script>
-    document.getElementById('nav-container').innerHTML = renderNavAuth('relaciones');
-    function sendMsg(){const t=document.getElementById('msg-input');const v=t.value.trim();if(!v)return;const msgs=document.getElementById('messages');const d=document.createElement('div');d.className='msg mine';d.innerHTML=`<div class="msg-bubble">${v}</div><div class="msg-meta">Tú · Ahora</div>`;msgs.appendChild(d);t.value='';msgs.scrollTop=msgs.scrollHeight;}
-    function openModal(type){document.getElementById('modal-'+type).classList.add('open');}
-    function closeModals(){document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('open'));}
-    document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)closeModals();}));
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { requireAuth } from './js/auth.js';
+
+    const session = await requireAuth();
+    const uid = session.user.id;
+
+    // — Relacion ID desde URL —
+    const params = new URLSearchParams(location.search);
+    const relacionId = params.get('id');
+    if (!relacionId) { location.href = 'relaciones.html'; }
+
+    // — Nav con iniciales reales —
+    const { data: me } = await supabase.from('profiles')
+      .select('nombre, apellido').eq('id', uid).single();
+    const ini = me ? ((me.nombre||'')[0] + (me.apellido||'')[0]).toUpperCase() || '?' : '?';
+    document.getElementById('nav-container').innerHTML = renderNavAuth('relaciones', ini);
+
+    // — Cargar relacion con perfiles de ambas partes —
+    const { data: rel, error: relErr } = await supabase
+      .from('relaciones')
+      .select(`
+        *,
+        maestro:profiles!maestro_id(nombre, apellido, avatar_color),
+        discipulo:profiles!discipulo_id(nombre, apellido, avatar_color)
+      `)
+      .eq('id', relacionId)
+      .single();
+
+    if (relErr || !rel) { location.href = 'relaciones.html'; }
+
+    const esMaestro = rel.maestro_id === uid;
+    const otroP = esMaestro ? rel.discipulo : rel.maestro;
+    const miDecision = esMaestro ? rel.decision_maestro : rel.decision_discipulo;
+
+    // — Panel izquierdo: datos del otro —
+    const otroNombre = `${otroP.nombre} ${otroP.apellido || ''}`.trim();
+    const otroIni = ((otroP.nombre||'')[0] + (otroP.apellido||'')[0]).toUpperCase() || '?';
+    const avatarEl = document.getElementById('col-avatar');
+    avatarEl.textContent = otroIni;
+    avatarEl.style.background = otroP.avatar_color || '#C8973A';
+    document.getElementById('col-head-name').textContent = otroNombre;
+    document.getElementById('col-head-sub').textContent =
+      `${rel.disciplina} · ${esMaestro ? 'Discípulo' : 'Maestro'}`;
+
+    // — Sesiones —
+    const { data: sesiones } = await supabase
+      .from('sesiones_prueba')
+      .select('*')
+      .eq('relacion_id', relacionId)
+      .order('numero', { ascending: true });
+    renderSesiones(sesiones || []);
+
+    // — Barra de progreso —
+    const diasTranscurridos = Math.min(
+      Math.floor((Date.now() - new Date(rel.iniciada_at)) / (1000 * 60 * 60 * 24)),
+      rel.dias_prueba_total
+    );
+    const pct = Math.round((diasTranscurridos / rel.dias_prueba_total) * 100);
+    document.getElementById('prog-pct').textContent = `${diasTranscurridos} / ${rel.dias_prueba_total}`;
+    document.getElementById('prog-fill').style.width = `${pct}%`;
+
+    // — Banda de decisión —
+    const bandEl = document.getElementById('decision-band');
+    if (rel.estado !== 'prueba') {
+      bandEl.style.display = 'none';
+    } else if (miDecision !== null && miDecision !== undefined) {
+      bandEl.innerHTML = `<div class="ya-decidio">Ya has tomado tu decisión · Esperando la de ${otroP.nombre}</div>`;
+    }
+
+    // — Chat header / badge —
+    document.getElementById('chat-title').textContent = otroNombre;
+    const badgeEl = document.getElementById('chat-badge');
+    if (rel.estado === 'consolidada') {
+      badgeEl.textContent = '✓ Cadena consolidada';
+      badgeEl.className = 'chat-badge consolidada';
+      document.getElementById('chat-input-bar')?.setAttribute('style','pointer-events:none;opacity:0.4;');
+      document.getElementById('send-btn').disabled = true;
+      document.getElementById('msg-input').disabled = true;
+    } else if (rel.estado === 'cancelada') {
+      badgeEl.textContent = '✗ Periodo cancelado';
+      badgeEl.className = 'chat-badge cancelada';
+      document.getElementById('send-btn').disabled = true;
+      document.getElementById('msg-input').disabled = true;
+    } else {
+      badgeEl.textContent = `⏳ En prueba · ${diasTranscurridos} día${diasTranscurridos !== 1 ? 's' : ''}`;
+    }
+
+    // — Textos de modales con nombre real —
+    document.getElementById('sobre-sub').innerHTML =
+      `Si confirmas, tu decisión quedará registrada pero ${otroP.nombre} no la verá hasta que ella también decida.<br>Si ambos aceptáis, la cadena quedará consolidada.`;
+    document.getElementById('cancelar-sub').textContent =
+      `Puedes dejar un mensaje opcional para ${otroP.nombre}. No es obligatorio, pero puede ser un gesto generoso.`;
+
+    // — Cargar mensajes —
+    const { data: msgs } = await supabase
+      .from('mensajes')
+      .select('*, autor:profiles!autor_id(nombre)')
+      .eq('relacion_id', relacionId)
+      .order('created_at', { ascending: true });
+
+    const msgBox = document.getElementById('messages');
+    msgBox.innerHTML = '';
+    if ((msgs || []).length === 0) {
+      msgBox.innerHTML = '<div class="msgs-empty">Aún no hay mensajes. Empieza la conversación.</div>';
+    } else {
+      msgs.forEach(m => appendMsg(m, uid));
+    }
+    msgBox.scrollTop = msgBox.scrollHeight;
+
+    // — Realtime: mensajes nuevos —
+    supabase.channel(`mensajes-${relacionId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'mensajes',
+        filter: `relacion_id=eq.${relacionId}`
+      }, async (payload) => {
+        const { data: m } = await supabase
+          .from('mensajes')
+          .select('*, autor:profiles!autor_id(nombre)')
+          .eq('id', payload.new.id)
+          .single();
+        if (m) {
+          // Remove empty state if present
+          const empty = msgBox.querySelector('.msgs-empty');
+          if (empty) empty.remove();
+          appendMsg(m, uid);
+          msgBox.scrollTop = msgBox.scrollHeight;
+        }
+      })
+      .subscribe();
+
+    // ─── Helpers ────────────────────────────────────────────
+
+    function renderSesiones(list) {
+      const container = document.getElementById('sesiones-list');
+      // Si no hay sesiones en BD, mostrar 3 pendientes por defecto
+      const total = list.length > 0 ? list.length : 3;
+      const items = list.length > 0 ? list : [
+        { numero: 1, titulo: 'Primera sesión', estado: 'pendiente', programada_at: null, completada_at: null },
+        { numero: 2, titulo: 'Segunda sesión', estado: 'pendiente', programada_at: null, completada_at: null },
+        { numero: 3, titulo: 'Tercera sesión', estado: 'pendiente', programada_at: null, completada_at: null },
+      ];
+      container.innerHTML = items.map(s => {
+        const activa = s.estado !== 'pendiente';
+        const numClass = activa ? 'sesion-n' : '';
+        const numStyle = activa ? '' : 'style="color:var(--border);"';
+        let fechaTxt = 'Por acordar';
+        if (s.completada_at) fechaTxt = formatDate(s.completada_at);
+        else if (s.programada_at) {
+          fechaTxt = isToday(s.programada_at)
+            ? `Hoy · ${formatTime(s.programada_at)}`
+            : formatDate(s.programada_at);
+        }
+        let badgeClass = 'sb-pending', badgeTxt = 'Pendiente';
+        if (s.estado === 'completada') { badgeClass = 'sb-done'; badgeTxt = '✓ Completada'; }
+        else if (s.estado === 'programada' && s.programada_at && isToday(s.programada_at)) { badgeClass = 'sb-today'; badgeTxt = 'Hoy'; }
+        else if (s.estado === 'programada') { badgeClass = 'sb-pending'; badgeTxt = 'Programada'; }
+        return `
+          <div class="sesion-item">
+            <span class="sesion-num ${numClass}" ${numStyle}>${s.numero}</span>
+            <div class="sesion-info">
+              <div class="sesion-title">${esc(s.titulo || ordinal(s.numero) + ' sesión')}</div>
+              <div class="sesion-fecha">${fechaTxt}</div>
+            </div>
+            <span class="sesion-badge ${badgeClass}">${badgeTxt}</span>
+          </div>`;
+      }).join('');
+    }
+
+    function appendMsg(m, myUid) {
+      const isMine = m.autor_id === myUid;
+      const box = document.getElementById('messages');
+      const div = document.createElement('div');
+      div.className = `msg ${isMine ? 'mine' : 'theirs'}`;
+      div.innerHTML = `
+        <div class="msg-bubble">${esc(m.texto)}</div>
+        <div class="msg-meta">${isMine ? 'Tú' : esc(m.autor?.nombre || '?')} · ${formatDateChat(m.created_at)}</div>`;
+      box.appendChild(div);
+    }
+
+    function isToday(ts) {
+      const d = new Date(ts), n = new Date();
+      return d.getDate() === n.getDate() && d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear();
+    }
+    function formatDate(ts) {
+      return new Date(ts).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+    function formatTime(ts) {
+      return new Date(ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) + 'h';
+    }
+    function formatDateChat(ts) {
+      if (isToday(ts)) return 'Hoy';
+      return new Date(ts).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+    }
+    function ordinal(n) {
+      return ['Primera','Segunda','Tercera','Cuarta','Quinta'][n - 1] || `${n}ª`;
+    }
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ─── Acciones globales ───────────────────────────────────
+
+    window.sendMsg = async function() {
+      const t = document.getElementById('msg-input');
+      const v = t.value.trim();
+      if (!v) return;
+      t.value = '';
+      const { error } = await supabase.from('mensajes').insert({
+        relacion_id: relacionId,
+        autor_id: uid,
+        texto: v
+      });
+      if (error) {
+        console.error('Error al enviar mensaje:', error);
+        t.value = v; // restaurar si falla
+      }
+      // El mensaje aparece vía suscripción realtime
+    };
+
+    window.openModal = function(type) {
+      document.getElementById('modal-' + type).classList.add('open');
+    };
+    window.closeModals = function() {
+      document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open'));
+    };
+
+    window.confirmarAceptar = async function() {
+      const campo = esMaestro ? 'decision_maestro' : 'decision_discipulo';
+      const { error } = await supabase.from('relaciones')
+        .update({ [campo]: true })
+        .eq('id', relacionId);
+      if (error) { alert('Error al guardar la decisión.'); return; }
+
+      // Comprobar si ambos han aceptado → consolidar
+      const { data: updated } = await supabase.from('relaciones')
+        .select('decision_maestro, decision_discipulo')
+        .eq('id', relacionId)
+        .single();
+      if (updated?.decision_maestro === true && updated?.decision_discipulo === true) {
+        await supabase.from('relaciones').update({
+          estado: 'consolidada',
+          consolidada_at: new Date().toISOString()
+        }).eq('id', relacionId);
+      }
+
+      closeModals();
+      document.getElementById('decision-band').innerHTML =
+        `<div class="ya-decidio">Ya has tomado tu decisión · Esperando la de ${otroP.nombre}</div>`;
+    };
+
+    window.confirmarCancelar = async function() {
+      const msg = document.getElementById('modal-cancelar-msg').value.trim() || null;
+      const { error } = await supabase.from('relaciones').update({
+        estado: 'cancelada',
+        mensaje_cancelacion: msg
+      }).eq('id', relacionId);
+      if (error) { alert('Error al cancelar el periodo.'); return; }
+      closeModals();
+      location.href = 'relaciones.html';
+    };
+
+    document.querySelectorAll('.overlay').forEach(o =>
+      o.addEventListener('click', function(e) { if (e.target === this) closeModals(); })
+    );
   </script>
 </body>
 </html>

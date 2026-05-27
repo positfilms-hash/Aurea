@@ -111,7 +111,14 @@
     import { supabase } from './js/supabase.js';
     import { requireAuth } from './js/auth.js';
 
-    document.getElementById('nav-container').innerHTML = renderNavAuth('relaciones');
+    // — Nav con iniciales reales —
+    const session0 = await requireAuth();
+    if (session0) {
+      const { data: me0 } = await supabase.from('profiles')
+        .select('nombre, apellido').eq('id', session0.user.id).single();
+      const ini0 = me0 ? ((me0.nombre||'')[0] + (me0.apellido||'')[0]).toUpperCase() || '?' : '?';
+      document.getElementById('nav-container').innerHTML = renderNavAuth('relaciones', ini0);
+    }
 
     // — Modales —
     function closeModals() { document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open')); }
@@ -219,8 +226,8 @@
         const disc = r.disciplina || r._disciplina || '—';
 
         const actionsHTML = esFinalizada ? '' : (r.estado === 'prueba'
-          ? `<button class="btn-small" onclick="location.href='periodo-prueba.html'">Chat</button>`
-          : `<button class="btn-small">Chat</button>
+          ? `<button class="btn-small" onclick="location.href='periodo-prueba.html?id=${r.id}'">Chat</button>`
+          : `<button class="btn-small" onclick="location.href='periodo-prueba.html?id=${r.id}'">Chat</button>
              <button class="btn-small warn" onclick="window.openMediador('${nombre}')">Incidencia</button>
              <button class="btn-small danger" onclick="window.openFinalizar('${r.id}','${nombre}')">Finalizar</button>`);
 
