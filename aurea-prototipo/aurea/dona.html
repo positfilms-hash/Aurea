@@ -103,6 +103,27 @@
   </div>
   <div id="footer-container"></div>
   <div id="chat-container"></div>
+  <!-- Modal Bizum -->
+  <div class="success-overlay" id="bizum-overlay" style="display:none;align-items:center;justify-content:center;">
+    <div class="success-modal" style="max-width:380px;">
+      <div style="font-size:36px;">📱</div>
+      <div style="font-family:var(--font-serif);font-size:22px;font-weight:500;color:var(--text-primary);">Paga con Bizum</div>
+      <div style="font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.8;">
+        Envía <strong id="bz-importe" style="color:var(--gold);font-family:var(--font-serif);font-size:15px;"></strong> a este número desde tu app bancaria:
+      </div>
+      <div style="background:var(--night-soft);border:0.5px solid var(--border-gold);border-radius:10px;padding:18px 24px;text-align:center;">
+        <div style="font-family:var(--font-serif);font-size:28px;font-weight:500;color:var(--text-primary);letter-spacing:0.05em;" id="bz-telefono">—</div>
+        <div style="font-size:10px;color:var(--text-faint);margin-top:6px;letter-spacing:0.08em;text-transform:uppercase;">Concepto: <span id="bz-concepto"></span></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button id="bz-copy" class="btn-ghost" style="flex:1;" onclick="copiarTelefono()">Copiar número</button>
+        <button class="btn-ghost" style="flex:1;color:var(--text-faint);font-size:11px;" onclick="document.getElementById('bizum-overlay').style.display='none'">Cancelar</button>
+      </div>
+      <button class="btn-primary" style="width:100%;" onclick="bizumEnviado()">Ya lo he enviado ✓</button>
+    </div>
+  </div>
+
+  <!-- Modal éxito -->
   <div class="success-overlay" id="success-overlay" style="display:none;align-items:center;justify-content:center;">
     <div class="success-modal">
       <div style="font-size:40px;">✦</div>
@@ -127,10 +148,124 @@
     }
   </script>
   <script>
-    function selAmount(el,val){document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');document.getElementById('custom-wrap').style.display=val==='custom'?'flex':'none';}
-    function selFreq(el){document.querySelectorAll('.freq-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
-    function selPay(el){document.querySelectorAll('.pay-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
-    function donar(){const o=document.getElementById('success-overlay');o.style.display='flex';}
+    // ── CONFIGURACIÓN DE PAGOS ──────────────────────────────────────────
+    // Rellena estos datos con tus cuentas reales antes de publicar
+    const PAGOS = {
+      stripe: {
+        // Crea un producto "El cliente elige el precio" en dashboard.stripe.com
+        // y pega el Payment Link aquí. El importe se pasa como ?prefilled_amount=N (céntimos)
+        unica:   'https://buy.stripe.com/XXXXXXXXXXXXXXX',  // pago único
+        mensual: 'https://buy.stripe.com/XXXXXXXXXXXXXXX',  // suscripción mensual
+      },
+      paypal: {
+        me: 'https://paypal.me/AureaApp',  // ← cambia por tu PayPal.me
+      },
+      bizum: {
+        telefono: '+34 6XX XXX XXX',       // ← tu número Bizum
+        concepto: 'Donación Aurea',
+      },
+    };
+    // ───────────────────────────────────────────────────────────────────
+
+    let _selAmount = '10';      // importe seleccionado (string o 'custom')
+    let _selFreq   = 'unica';   // 'unica' | 'mensual'
+    let _selPay    = 'tarjeta'; // 'tarjeta' | 'paypal' | 'bizum'
+
+    function selAmount(el, val) {
+      document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('on'));
+      el.classList.add('on');
+      _selAmount = val;
+      document.getElementById('custom-wrap').style.display = val === 'custom' ? 'flex' : 'none';
+      if (val !== 'custom') document.querySelector('.custom-input').value = '';
+    }
+
+    function selFreq(el) {
+      document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      _selFreq = el.textContent.trim().toLowerCase().includes('mensual') ? 'mensual' : 'unica';
+    }
+
+    function selPay(el) {
+      document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('on'));
+      el.classList.add('on');
+      _selPay = el.querySelector('.pay-label')?.textContent.trim().toLowerCase() || 'tarjeta';
+    }
+
+    function getAmount() {
+      if (_selAmount === 'custom') {
+        const v = parseFloat(document.querySelector('.custom-input')?.value);
+        return (!isNaN(v) && v >= 1) ? v : null;
+      }
+      return parseFloat(_selAmount);
+    }
+
+    function highlightError(el) {
+      el.style.borderColor = 'var(--red)';
+      setTimeout(() => el.style.borderColor = '', 2200);
+    }
+
+    function donar() {
+      const amount = getAmount();
+
+      // Validar importe
+      if (!amount) {
+        if (_selAmount === 'custom') {
+          highlightError(document.getElementById('custom-wrap'));
+          document.querySelector('.custom-input').focus();
+        }
+        return;
+      }
+
+      const amountCents = Math.round(amount * 100);
+      const btn = document.querySelector('.btn-primary');
+      btn.textContent = 'Redirigiendo…';
+      btn.disabled = true;
+      setTimeout(() => { btn.textContent = 'Donar ahora'; btn.disabled = false; }, 3000);
+
+      if (_selPay === 'tarjeta') {
+        const base = _selFreq === 'mensual' ? PAGOS.stripe.mensual : PAGOS.stripe.unica;
+        if (!base || base.includes('XXXX')) {
+          btn.textContent = 'Donar ahora'; btn.disabled = false;
+          alert('El pago con tarjeta estará disponible próximamente.\nConfigura tu Stripe Payment Link en dona.html.');
+          return;
+        }
+        window.open(`${base}?prefilled_amount=${amountCents}`, '_blank');
+
+      } else if (_selPay === 'paypal') {
+        const me = PAGOS.paypal.me;
+        if (!me || me.includes('AureaApp')) {
+          btn.textContent = 'Donar ahora'; btn.disabled = false;
+          alert('El pago con PayPal estará disponible próximamente.\nConfigura tu PayPal.me en dona.html.');
+          return;
+        }
+        // PayPal.me acepta /IMPORTE directamente
+        window.open(`${me}/${amount}`, '_blank');
+
+      } else if (_selPay === 'bizum') {
+        btn.textContent = 'Donar ahora'; btn.disabled = false;
+        _abrirBizum(amount);
+      }
+    }
+
+    function _abrirBizum(amount) {
+      document.getElementById('bz-importe').textContent = amount + ' €';
+      document.getElementById('bz-telefono').textContent = PAGOS.bizum.telefono;
+      document.getElementById('bz-concepto').textContent = PAGOS.bizum.concepto;
+      document.getElementById('bizum-overlay').style.display = 'flex';
+    }
+
+    window.copiarTelefono = function() {
+      navigator.clipboard.writeText(PAGOS.bizum.telefono).then(() => {
+        const btn = document.getElementById('bz-copy');
+        btn.textContent = '✓ Copiado';
+        setTimeout(() => btn.textContent = 'Copiar número', 2200);
+      });
+    };
+
+    window.bizumEnviado = function() {
+      document.getElementById('bizum-overlay').style.display = 'none';
+      document.getElementById('success-overlay').style.display = 'flex';
+    };
   </script>
 </body>
 </html>
