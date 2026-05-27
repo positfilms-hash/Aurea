@@ -31,8 +31,8 @@
     .avail-row:last-child{border-bottom:none;}
     .avail-label{font-size:11px;font-weight:300;color:var(--text-muted);}
     .avail-val{font-size:11px;font-weight:400;color:var(--text-primary);}
-    .btn-editar{width:100%;font-size:11px;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);background:none;border:0.5px solid var(--gold);padding:11px;border-radius:100px;cursor:pointer;transition:all 0.2s;margin-top:4px;}
-    .btn-editar:hover{background:var(--night-deep);}
+    .btn-editar{width:100%;font-family:var(--font-serif);font-size:15px;font-style:italic;font-weight:500;color:var(--night);background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));border:none;padding:12px;border-radius:100px;cursor:pointer;transition:opacity 0.2s;margin-top:4px;}
+    .btn-editar:hover{opacity:0.85;}
     .constancia-wrap{background:var(--night-mid);border:0.5px solid var(--border);border-radius:10px;padding:20px;text-align:center;}
     .constancia-bar-wrap{background:var(--border);border-radius:100px;height:6px;margin:12px 0;overflow:hidden;}
     .constancia-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,#A67828,#C8973A);}
@@ -106,7 +106,7 @@
         <div class="avail-row"><span class="avail-label">Horas semanales</span><span class="avail-val">2–3 h</span></div>
         <div class="avail-row"><span class="avail-label">Prácticas activas</span><span class="avail-val">2 / 3</span></div>
       </div>
-      <button class="btn-editar" onclick="location.href='perfil-edicion.html'">✎ Editar perfil</button>
+      <button class="btn-editar" onclick="location.href='perfil-edicion.html'">Editar perfil</button>
     </div>
     <div class="col-right" id="col-right"></div>
   </div>
@@ -153,7 +153,7 @@
       const bio = _profile?.frase || '';
       const bioHTML = bio
         ? `<p class="bio-text">"${bio}"</p>`
-        : `<p class="bio-text" style="color:var(--text-faint);font-style:normal;font-size:13px;">Sin descripción todavía. <a href="perfil-edicion.html" style="color:var(--gold);">Añadir</a></p>`;
+        : `<p style="font-size:12px;color:var(--text-faint);font-style:normal;">Sin descripción todavía.</p>`;
 
       const trayHTML = _tray.length
         ? _tray.map(t => `
@@ -161,7 +161,7 @@
               <span class="tl-year">${t.periodo || '—'}</span>
               <div><div class="tl-title">${t.titulo}</div>${t.descripcion ? `<div class="tl-sub">${t.descripcion}</div>` : ''}</div>
             </div>`).join('')
-        : `<p style="font-size:12px;color:var(--text-faint);padding:8px 0;">Sin trayectoria añadida. <a href="perfil-edicion.html" style="color:var(--gold);">Añadir</a></p>`;
+        : `<p style="font-size:12px;color:var(--text-faint);padding:8px 0;">Sin trayectoria añadida.</p>`;
 
       const resenasHTML = _resenas.length
         ? _resenas.map(r => `
@@ -201,7 +201,7 @@
       const bio = _profile?.frase || '';
       const bioHTML = bio
         ? `<p class="bio-text">"${bio}"</p>`
-        : `<p class="bio-text" style="color:var(--text-faint);font-style:normal;font-size:13px;">Añade tu motivación en <a href="perfil-edicion.html" style="color:var(--gold);">tu perfil</a>.</p>`;
+        : `<p style="font-size:12px;color:var(--text-faint);font-style:normal;">Sin descripción todavía.</p>`;
 
       const discHTML = _relD.length
         ? _relD.map(r => {
