@@ -7,8 +7,8 @@
   <title>Discover · Aurea</title>
   <link rel="stylesheet" href="css/global.css">
   <style>
-    body{overflow:hidden;}
-    .layout{display:grid;grid-template-columns:220px 1fr;grid-template-rows:1fr;height:calc(100vh - 57px);overflow:hidden;}
+    body{overflow:hidden;height:100vh;display:flex;flex-direction:column;}
+    .layout{flex:1;min-height:0;display:grid;grid-template-columns:220px 1fr;grid-template-rows:1fr;overflow:hidden;}
     .sidebar{border-right:0.5px solid var(--border);padding:16px;overflow-y:auto;background:var(--night-soft);min-height:0;}
     .filter-chips{display:flex;flex-wrap:wrap;gap:4px;}
     .filter-section{margin-bottom:18px;}

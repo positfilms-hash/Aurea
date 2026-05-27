@@ -7,7 +7,8 @@
   <title>Mi perfil · Aurea</title>
   <link rel="stylesheet" href="css/global.css">
   <style>
-    .page{display:grid;grid-template-columns:300px 1fr;grid-template-rows:1fr;height:calc(100vh - 57px);overflow:hidden;}
+    body{overflow:hidden;height:100vh;display:flex;flex-direction:column;}
+    .page{flex:1;min-height:0;display:grid;grid-template-columns:300px 1fr;grid-template-rows:1fr;overflow:hidden;}
     .col-left{border-right:0.5px solid var(--border);padding:28px 24px;display:flex;flex-direction:column;gap:22px;background:var(--night-soft);overflow-y:auto;min-height:0;}
 
     .role-toggle{display:flex;background:var(--night-mid);border:0.5px solid var(--border);border-radius:100px;padding:3px;gap:2px;}
