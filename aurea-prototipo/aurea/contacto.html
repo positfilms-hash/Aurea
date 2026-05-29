@@ -6,8 +6,10 @@
   <script src="js/scale.js"></script>
   <title>Contacto · Aurea</title>
   <link rel="stylesheet" href="css/global.css">
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
-    .page{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 57px - 200px);}
+    .page{display:grid;grid-template-columns:1fr 1fr;min-height:calc(var(--real-vh, 100vh) - 57px - 36px);}
     .col-left{padding:56px;border-right:0.5px solid var(--border);display:flex;flex-direction:column;gap:32px;background:var(--night-soft);}
     .page-title{font-family:var(--font-serif);font-size:48px;font-weight:500;color:var(--text-primary);line-height:1.05;}
     .page-title em{font-style:italic;color:var(--gold);}
@@ -21,10 +23,14 @@
     .col-right{padding:56px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;}
     .form-title{font-family:var(--font-serif);font-size:22px;font-weight:500;color:var(--text-primary);}
     .motivo-chips{display:flex;flex-wrap:wrap;gap:6px;}
+    .motivo-chip{font-size:11px;font-weight:300;color:var(--text-muted);border:0.5px solid var(--border);border-radius:100px;padding:5px 14px;cursor:pointer;background:none;transition:all 0.2s;}
+    .motivo-chip.sel{border-color:var(--gold);color:var(--gold);background:#C8973A11;}
     .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    .field-textarea{background:var(--night-mid);border:0.5px solid var(--border);border-radius:6px;padding:10px 14px;font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-primary);outline:none;resize:none;min-height:120px;line-height:1.6;width:100%;transition:border-color 0.2s;}
+    .field-textarea{background:var(--night-mid);border:0.5px solid var(--border);border-radius:6px;padding:10px 14px;font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-primary);outline:none;resize:none;min-height:120px;line-height:1.6;width:100%;transition:border-color 0.2s;box-sizing:border-box;}
     .field-textarea:focus{border-color:var(--gold);}
     .field-textarea::placeholder{color:var(--text-ghost);}
+    .form-error{display:none;color:#ff6b6b;font-size:11px;font-weight:300;line-height:1.5;}
+    .form-error.show{display:block;}
     .success-msg{display:none;background:#1A2A12;border:0.5px solid #3B6D1144;border-radius:10px;padding:20px 24px;text-align:center;}
     .success-msg.show{display:block;}
     .success-icon{font-size:28px;margin-bottom:8px;}
@@ -39,21 +45,45 @@
       <div><div class="eyebrow" style="margin-bottom:16px;">Contacto</div><h1 class="page-title">¿Qué<br><em>necesitas?</em></h1></div>
       <p class="page-sub">Aurea es un proyecto pequeño y humano. Detrás hay personas reales que leen cada mensaje.</p>
       <div>
-        <div class="contact-item"><span class="contact-icon">✉</span><div><div class="contact-label">Email</div><div class="contact-val">hola@aurea.app</div><div class="contact-sub">Respondemos en 24–48 horas</div></div></div>
+        <div class="contact-item">
+          <span class="contact-icon">✉</span>
+          <div>
+            <div class="contact-label">Email</div>
+            <div class="contact-val">info.aureacatena@gmail.com</div>
+            <div class="contact-sub">Respondemos en 24–48 horas</div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="col-right">
       <div class="form-title">Envíanos un mensaje</div>
-      <div class="field-row">
-        <div class="field-wrap"><span class="field-label">Nombre</span><input class="field-input" type="text" placeholder="Tu nombre"></div>
-        <div class="field-wrap"><span class="field-label">Email</span><input class="field-input" type="email" placeholder="tu@correo.com"></div>
+
+      <!-- Motivo -->
+      <div>
+        <span class="field-label" style="display:block;margin-bottom:8px;">Motivo</span>
+        <div class="motivo-chips" id="motivo-chips">
+          <button class="motivo-chip sel" onclick="selMotivo(this,'General')">General</button>
+          <button class="motivo-chip" onclick="selMotivo(this,'Reportar un error')">Reportar un error</button>
+          <button class="motivo-chip" onclick="selMotivo(this,'Propuesta')">Propuesta</button>
+          <button class="motivo-chip" onclick="selMotivo(this,'Prensa')">Prensa</button>
+          <button class="motivo-chip" onclick="selMotivo(this,'Otro')">Otro</button>
+        </div>
       </div>
-      <div class="field-wrap"><span class="field-label">Mensaje</span><textarea class="field-textarea" placeholder="Cuéntanos lo que necesitas…"></textarea></div>
+
+      <div class="field-row">
+        <div class="field-wrap"><span class="field-label">Nombre</span><input class="field-input" id="c-nombre" type="text" placeholder="Tu nombre" autocomplete="name"></div>
+        <div class="field-wrap"><span class="field-label">Email de respuesta</span><input class="field-input" id="c-email" type="email" placeholder="tu@correo.com" autocomplete="email"></div>
+      </div>
+      <div class="field-wrap"><span class="field-label">Mensaje</span><textarea class="field-textarea" id="c-mensaje" placeholder="Cuéntanos lo que necesitas…"></textarea></div>
+
+      <div class="form-error" id="form-error"></div>
+
       <button class="btn-primary" id="btn-enviar" onclick="enviar()" style="width:100%;">Enviar mensaje</button>
+
       <div class="success-msg" id="success">
         <div class="success-icon">✦</div>
         <div class="success-title">Mensaje enviado</div>
-        <div class="success-sub">Lo hemos recibido. Te responderemos en 24–48 horas.</div>
+        <div class="success-sub">Lo hemos recibido. Te responderemos en 24–48 horas en <strong>info.aureacatena@gmail.com</strong>.</div>
       </div>
     </div>
   </div>
@@ -63,7 +93,65 @@
   <script>
     document.getElementById('nav-container').innerHTML = renderNavPublic('contacto');
     document.getElementById('footer-container').innerHTML = renderFooter();
-    function enviar(){document.getElementById('btn-enviar').style.display='none';document.getElementById('success').classList.add('show');}
+
+    // ── EmailJS config ──────────────────────────────────────────────
+    // Rellena estos 3 valores tras crear tu cuenta en https://www.emailjs.com
+    const EJS_KEY      = 'VITE_EJS_KEY_PLACEHOLDER';      // Account → General → Public Key
+    const EJS_SERVICE  = 'VITE_EJS_SERVICE_PLACEHOLDER';  // Email Services → Service ID
+    const EJS_TEMPLATE = 'VITE_EJS_TEMPLATE_PLACEHOLDER'; // Email Templates → Template ID
+    // ────────────────────────────────────────────────────────────────
+
+    emailjs.init(EJS_KEY);
+
+    let _motivo = 'General';
+    function selMotivo(btn, val) {
+      _motivo = val;
+      document.querySelectorAll('.motivo-chip').forEach(b => b.classList.remove('sel'));
+      btn.classList.add('sel');
+    }
+
+    function mostrarError(msg) {
+      const d = document.getElementById('form-error');
+      d.textContent = msg;
+      d.classList.add('show');
+    }
+
+    async function enviar() {
+      const nombre  = document.getElementById('c-nombre').value.trim();
+      const email   = document.getElementById('c-email').value.trim();
+      const mensaje = document.getElementById('c-mensaje').value.trim();
+      const btn     = document.getElementById('btn-enviar');
+      const errDiv  = document.getElementById('form-error');
+
+      errDiv.classList.remove('show');
+
+      if (!nombre)  { mostrarError('Escribe tu nombre.'); return; }
+      if (!email || !email.includes('@')) { mostrarError('Escribe un email válido.'); return; }
+      if (!mensaje) { mostrarError('El mensaje no puede estar vacío.'); return; }
+
+      if (EJS_KEY.includes('PLACEHOLDER')) {
+        mostrarError('El formulario aún no está configurado. Contacta en info.aureacatena@gmail.com');
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Enviando…';
+
+      try {
+        await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+          motivo:     _motivo,
+          from_name:  nombre,
+          from_email: email,
+          message:    mensaje,
+        });
+        btn.style.display = 'none';
+        document.getElementById('success').classList.add('show');
+      } catch (err) {
+        mostrarError('Error al enviar. Inténtalo de nuevo o escríbenos directamente.');
+        btn.disabled    = false;
+        btn.textContent = 'Enviar mensaje';
+      }
+    }
   </script>
   <script type="module">
     import { supabase } from './js/supabase.js';
