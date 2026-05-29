@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "aurea-prototipo/aurea/dist",
+  "framework": null
+}
