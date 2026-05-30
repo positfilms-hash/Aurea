@@ -97,9 +97,13 @@ function cambiarRolNav(rol) {
   // 1. Cambiar tema y guardar preferencia
   if (typeof aureaSetTema === 'function') aureaSetTema(tema);
 
-  // 2. Actualizar badge del botón
+  // 2. Actualizar badge del botón "Mi perfil"
   var badge = document.getElementById('nav-rol-badge');
   if (badge) badge.textContent = '· ' + (rol === 'discipulo' ? 'Discípulo' : 'Maestro');
+
+  // 3. Actualizar el primer item de "Mis relaciones" (Mis discípulos ↔ Mis maestros)
+  var relFirstItem = document.querySelector('#nav-rel-dd .nav-dd-item');
+  if (relFirstItem) relFirstItem.textContent = rol === 'discipulo' ? 'Mis maestros' : 'Mis discípulos';
 
   // 3. Actualizar estado activo en el dropdown
   document.querySelectorAll('#nav-perfil-dd .nav-dd-item').forEach(function(el) {
