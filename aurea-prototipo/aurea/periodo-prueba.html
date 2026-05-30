@@ -274,6 +274,19 @@
     }
     msgBox.scrollTop = msgBox.scrollHeight;
 
+    // — Marcar como leídos los mensajes del otro al abrir el chat —
+    async function marcarLeidos() {
+      await supabase.from('mensajes')
+        .update({ leido_at: new Date().toISOString() })
+        .eq('relacion_id', relacionId)
+        .neq('autor_id', uid)
+        .is('leido_at', null);
+      // Resetear badge del nav si existe
+      const badge = document.getElementById('nav-msg-badge');
+      if (badge) badge.style.display = 'none';
+    }
+    marcarLeidos();
+
     // — Realtime: mensajes nuevos —
     supabase.channel(`mensajes-${relacionId}`)
       .on('postgres_changes', {
@@ -293,6 +306,8 @@
           if (empty) empty.remove();
           appendMsg(m, uid);
           msgBox.scrollTop = msgBox.scrollHeight;
+          // Si el mensaje es del otro, marcarlo como leído de inmediato
+          if (m.autor_id !== uid) marcarLeidos();
         }
       })
       .subscribe();

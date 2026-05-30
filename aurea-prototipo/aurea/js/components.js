@@ -58,7 +58,7 @@ function renderNavAuth(active='', user='') {
     <div class="nav-links">
       <a class="nav-link${active==='discover'?' active':''}" href="discover.html">Discover</a>
       ${relDd}
-      <a class="nav-link${active==='mensajes'?' active':''}" href="mensajes.html" id="nav-msg-link">Mensajes<span id="nav-msg-badge" class="notif-badge" style="display:none;">0</span></a>
+      <a class="nav-link${active==='mensajes'?' active':''}" href="mensajes.html" id="nav-msg-link">Mensajes <span id="nav-msg-badge" class="notif-badge" style="display:none;margin-left:3px;">0</span></a>
       ${pages.filter(p=>p.id!=='discover').map(p=>`<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('')}
     </div>
     <div class="nav-perfil-wrap" id="nav-perfil-wrap">
