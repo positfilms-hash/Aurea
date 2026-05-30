@@ -39,23 +39,16 @@ export async function requireAuth() {
       // Siempre actualizar la caché
       localStorage.setItem('aurea-rol', rolActual);
 
-      // Si el rol ha cambiado (o no estaba cacheado) → actualizar tema y nav
+      // Si el rol ha cambiado → aplicar tema correcto y recargar para sincronizar nav
       if (rolActual !== rolAnterior) {
-        // Aplicar tema correcto para roles únicos
         if (rolActual === 'discipulo') {
           if (typeof aureaSetTema === 'function') aureaSetTema('arena');
         } else if (rolActual === 'maestro') {
           if (typeof aureaSetTema === 'function') aureaSetTema('dark');
         }
-        // 'ambos': respetar aurea-tema ya guardado
-
-        // Re-renderizar el nav para que el dropdown muestre el estado correcto
-        const navEl = document.getElementById('nav-container');
-        if (navEl && typeof renderNavAuth === 'function') {
-          // Detectar la página activa desde la URL
-          const page = window.location.pathname.split('/').pop()?.replace('.html','') || '';
-          navEl.innerHTML = renderNavAuth(page);
-        }
+        // Recargar para que renderNavAuth() lea el rol actualizado y muestre el dropdown correcto
+        window.location.reload();
+        return session; // no continuar con el resto de init antes del reload
       }
     }
   } catch { /* silencioso */ }
