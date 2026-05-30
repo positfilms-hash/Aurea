@@ -6,10 +6,89 @@ function renderNavPublic(active=''){
   return `<nav class="nav"><a class="nav-logo" href="index.html"><img src="${LOGO_URL}" alt="Aurea"><span class="nav-wordmark">Aurea</span></a><div class="nav-links">${pages.map(p=>`<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('')}</div><div style="display:flex;align-items:center;gap:8px;"><a class="nav-cta-outline" href="login.html">Entrar</a><a class="nav-cta${active==='registro'?' active':''}" href="registro.html">Registro</a></div></nav>`;
 }
 
-function renderNavAuth(active='',user=''){
-  const pages=[{id:'discover',label:'Discover',href:'discover.html'},{id:'relaciones',label:'Mis relaciones',href:'relaciones.html'},{id:'solicitudes',label:'Mis solicitudes',href:'solicitudes.html'},{id:'contacto',label:'Contacto',href:'contacto.html'},{id:'dona',label:'Dona',href:'dona.html'}];
-  return `<nav class="nav"><a class="nav-logo" href="discover.html"><img src="${LOGO_URL}" alt="Aurea"><span class="nav-wordmark">Aurea</span></a><div class="nav-links">${pages.map(p=>`<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('')}</div><a href="perfil.html" class="nav-perfil-btn${active==='perfil'?' active':''}">Mi perfil</a><a href="logout.html" class="nav-link" style="font-size:10px;letter-spacing:0.1em;color:var(--text-secondary);" title="Cerrar sesión">Salir</a></nav>`;
+function renderNavAuth(active='', user='') {
+  const pages = [
+    {id:'discover',   label:'Discover',        href:'discover.html'},
+    {id:'relaciones', label:'Mis relaciones',  href:'relaciones.html'},
+    {id:'solicitudes',label:'Mis solicitudes', href:'solicitudes.html'},
+    {id:'contacto',   label:'Contacto',        href:'contacto.html'},
+    {id:'dona',       label:'Dona',            href:'dona.html'},
+  ];
+
+  // Estado actual leído de localStorage (disponible en cualquier página)
+  const rol   = localStorage.getItem('aurea-rol')  || 'maestro';
+  const tema  = localStorage.getItem('aurea-tema') || 'dark';
+  const arena = rol === 'discipulo' || (rol === 'ambos' && tema === 'arena');
+  const badge = arena ? 'Discípulo' : 'Maestro';
+
+  // Contenido del dropdown según rol
+  let ddItems = '';
+  if (rol === 'ambos') {
+    ddItems += `<button class="nav-dd-item${!arena?' active':''}" onclick="cambiarRolNav('maestro')">🎓 Maestro</button>`;
+    ddItems += `<button class="nav-dd-item${arena?' active':''}" onclick="cambiarRolNav('discipulo')">📖 Discípulo</button>`;
+    ddItems += `<div class="nav-dd-sep"></div>`;
+  } else {
+    const icon = rol === 'maestro' ? '🎓' : '📖';
+    ddItems += `<div class="nav-dd-item" style="cursor:default;opacity:0.6;">${icon} ${badge}</div>`;
+    ddItems += `<div class="nav-dd-sep"></div>`;
+  }
+  ddItems += `<a class="nav-dd-item" href="perfil.html">Ver mi perfil</a>`;
+  ddItems += `<a class="nav-dd-item" href="perfil-edicion.html">Editar perfil</a>`;
+  if (rol !== 'ambos') {
+    const otro = rol === 'maestro' ? 'discipulo' : 'maestro';
+    const otroLabel = rol === 'maestro' ? 'Discípulo' : 'Maestro';
+    ddItems += `<div class="nav-dd-sep"></div>`;
+    ddItems += `<a class="nav-dd-item nav-dd-add" href="perfil-edicion.html?add=${otro}">+ Añadir rol de ${otroLabel}</a>`;
+  }
+
+  const links = pages.map(p => `<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('');
+  return `<nav class="nav">
+    <a class="nav-logo" href="discover.html"><img src="${LOGO_URL}" alt="Aurea"><span class="nav-wordmark">Aurea</span></a>
+    <div class="nav-links">${links}</div>
+    <div class="nav-perfil-wrap" id="nav-perfil-wrap">
+      <button class="nav-perfil-btn${active==='perfil'?' active':''}" id="nav-perfil-btn" onclick="toggleNavDd()">
+        Mi perfil <span class="nav-rol-badge" id="nav-rol-badge">· ${badge}</span> <span class="nav-dd-arrow">▾</span>
+      </button>
+      <div class="nav-dd" id="nav-perfil-dd">${ddItems}</div>
+    </div>
+    <a href="logout.html" class="nav-link" style="font-size:10px;letter-spacing:0.1em;color:var(--text-secondary);" title="Cerrar sesión">Salir</a>
+  </nav>`;
 }
+
+// — Nav dropdown: abrir/cerrar y cambiar rol —
+function toggleNavDd() {
+  var dd = document.getElementById('nav-perfil-dd');
+  if (dd) dd.classList.toggle('open');
+}
+
+function cambiarRolNav(rol) {
+  var tema = rol === 'discipulo' ? 'arena' : 'dark';
+  if (typeof aureaSetTema === 'function') aureaSetTema(tema);
+  // Actualizar badge
+  var badge = document.getElementById('nav-rol-badge');
+  if (badge) badge.textContent = '· ' + (rol === 'discipulo' ? 'Discípulo' : 'Maestro');
+  // Actualizar estado activo en items del dropdown
+  document.querySelectorAll('#nav-perfil-dd .nav-dd-item').forEach(function(el) {
+    if (el.tagName === 'BUTTON') {
+      el.classList.toggle('active',
+        (rol === 'maestro'   && el.textContent.includes('Maestro')) ||
+        (rol === 'discipulo' && el.textContent.includes('Discípulo'))
+      );
+    }
+  });
+  // Cerrar
+  var dd = document.getElementById('nav-perfil-dd');
+  if (dd) dd.classList.remove('open');
+}
+
+// Cerrar al clicar fuera
+document.addEventListener('click', function(e) {
+  var wrap = document.getElementById('nav-perfil-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    var dd = document.getElementById('nav-perfil-dd');
+    if (dd) dd.classList.remove('open');
+  }
+});
 
 function renderFooter(){
   return `<footer class="footer"><div class="footer-top"><div><div class="footer-logo"><img src="${LOGO_URL}" alt="Aurea"><span class="footer-logo-name">Aurea</span></div><p class="footer-tagline">La cadena áurea del conocimiento. Gratuito siempre.</p></div><div><div class="footer-col-title">Plataforma</div><a class="footer-link" href="como-funciona.html">Cómo funciona</a><a class="footer-link" href="discover.html">Maestros</a><a class="footer-link" href="registro.html">Registro</a></div><div><div class="footer-col-title">Proyecto</div><a class="footer-link" href="dona.html">Dona</a><a class="footer-link" href="contacto.html">Contacto</a></div><div><div class="footer-col-title">Contacto</div><a class="footer-link" href="contacto.html">info.aureacatena@gmail.com</a><a class="footer-link" href="contacto.html">Formulario de contacto</a></div></div><div class="footer-bottom"><span class="footer-copy">© 2026 Aurea · Todos los derechos reservados</span><div class="footer-legal"><a class="footer-legal-link" href="privacidad.html">Política de privacidad</a><a class="footer-legal-link" href="privacidad.html">Términos y condiciones</a><a class="footer-legal-link" href="privacidad.html">Cookies</a></div></div></footer>`;

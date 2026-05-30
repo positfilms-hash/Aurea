@@ -146,9 +146,12 @@
       btn.classList.add('active');
       const esMaestro = role === 'maestro';
 
-      // — Tema según vista activa (persiste en todas las páginas) —
-      // Para 'ambos': guarda la vista activa en aurea-tema; el rol real sigue siendo 'ambos'
-      aureaSetTema(esMaestro ? 'dark' : 'arena', _profile?.rol || null);
+      // — Cambiar tema y sincronizar con el dropdown del nav —
+      if (typeof cambiarRolNav === 'function') {
+        cambiarRolNav(esMaestro ? 'maestro' : 'discipulo');
+      } else {
+        aureaSetTema(esMaestro ? 'dark' : 'arena', _profile?.rol || null);
+      }
 
       // — Etiqueta de rol —
       document.getElementById('role-label').textContent = esMaestro ? 'Maestro' : 'Discípulo';
