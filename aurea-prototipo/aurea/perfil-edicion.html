@@ -14,10 +14,10 @@
     .btn-preview:hover{color:var(--text-primary);border-color:var(--border-soft);}
     .btn-save{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--night);background:var(--gold);border:none;padding:7px 20px;border-radius:100px;cursor:pointer;}
     .layout{display:grid;grid-template-columns:220px 1fr;}
-    .sidebar{align-self:start;position:sticky;top:var(--nav-height);height:calc(var(--real-vh) - var(--nav-height) - 36px);border-right:0.5px solid var(--border);background:var(--night-soft);overflow-y:auto;}
+    .sidebar{align-self:start;position:sticky;top:var(--nav-height);height:calc(var(--real-vh) - var(--nav-height) - 36px);border-right:0.5px solid var(--border);background:var(--night-soft);overflow-y:auto;display:flex;flex-direction:column;}
     .page-footer-bar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:36px;border-top:0.5px solid var(--border);background:var(--night-soft);}
 
-    .tabs{display:flex;flex-direction:column;padding:16px 12px;gap:2px;}
+    .tabs{display:flex;flex-direction:column;padding:16px 12px;gap:2px;flex:1;}
     .tab-btn{font-size:11px;font-weight:300;color:var(--text-muted);background:none;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;text-align:left;transition:all 0.18s;width:100%;display:flex;align-items:center;gap:10px;}
     .tab-btn:hover{color:var(--text-primary);background:var(--night-mid);}
     .tab-btn.active{color:var(--gold);background:var(--night-deep);}
@@ -96,7 +96,7 @@
             </div>
           </div>
           <div class="edit-field"><span class="edit-label">Frase / bio (se mostrará en cursiva)</span><textarea class="edit-textarea" id="f-frase" placeholder="Una frase sobre ti y por qué enseñas…"></textarea></div>
-          <div id="sec-maestro">
+          <div id="sec-maestro" style="display:none;">
             <div class="edit-field" style="margin-bottom:18px;"><span class="edit-label">Disciplina principal</span><input class="edit-input" id="f-disciplina" type="text" placeholder="Filosofía estoica"></div>
             <div class="edit-row" style="margin-bottom:18px;">
               <div class="edit-field"><span class="edit-label">Categoría</span>
@@ -679,7 +679,7 @@
         }
       }
 
-      if (!m) {
+      if (!_esMaestro) {
         // No es maestro: ocultar sección maestro y tabs que no aplican
         document.getElementById('sec-maestro').style.display = 'none';
         document.querySelectorAll('.tab-btn').forEach(b => {
@@ -687,8 +687,9 @@
             b.style.display = 'none';
         });
       } else {
-        // Maestro: rellenar campos de maestro
-        document.getElementById('f-disciplina').value = m.disciplina || '';
+        // Maestro: mostrar sección y rellenar campos
+        document.getElementById('sec-maestro').style.display = '';
+        document.getElementById('f-disciplina').value = m?.disciplina || '';
         document.getElementById('f-categoria').value  = m.categoria  || 'Otra';
         document.getElementById('f-formato').value    = m.formato    || 'ambos';
         if (m.experiencia_anos != null) document.getElementById('f-anos').value  = m.experiencia_anos;

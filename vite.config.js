@@ -11,17 +11,22 @@ const htmlEntries = Object.fromEntries(
     .map(f => [f.replace('.html', ''), resolve(ROOT, f)])
 );
 
-// Plugin: copia los scripts legacy (sin type="module") a dist/js/
+// Plugin: copia scripts legacy y assets estáticos que components.js referencia por nombre fijo
 function copyLegacyScripts() {
   return {
     name: 'copy-legacy-scripts',
     apply: 'build',
     closeBundle() {
-      const destDir = resolve(ROOT, 'dist/js');
-      mkdirSync(destDir, { recursive: true });
+      // JS legacy (sin type="module")
+      const destJs = resolve(ROOT, 'dist/js');
+      mkdirSync(destJs, { recursive: true });
       for (const file of ['scale.js', 'components.js']) {
-        copyFileSync(resolve(ROOT, 'js', file), resolve(destDir, file));
+        copyFileSync(resolve(ROOT, 'js', file), resolve(destJs, file));
       }
+      // Logo sin hash — components.js lo referencia como 'assets/logo.png'
+      const destAssets = resolve(ROOT, 'dist/assets');
+      mkdirSync(destAssets, { recursive: true });
+      copyFileSync(resolve(ROOT, 'assets/logo.png'), resolve(destAssets, 'logo.png'));
     },
   };
 }

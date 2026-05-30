@@ -97,10 +97,10 @@
           <p class="form-sub">No tiene que ser perfecto — podrás editarlo cuando quieras.</p>
           <div style="display:flex;flex-direction:column;gap:14px;">
             <div class="avatar-pick"><div class="avatar-preview" id="av-prev">RM</div><button class="btn-ghost" style="padding:8px 16px;">Subir foto</button></div>
-            <div class="field-wrap"><span class="field-label">Disciplina principal</span><input class="field-input" type="text" placeholder="Ej. Filosofía estoica, Carpintería…" id="f-disciplina"></div>
-            <div class="field-wrap"><span class="field-label">Categoría</span><select class="field-input" style="cursor:pointer;" id="f-categoria"><option value="" disabled selected>Selecciona una categoría</option><option>Filosofía</option><option>Artes</option><option>Oficios</option><option>Deportes</option><option>Espiritualidad</option><option>Ciencia</option><option>Lenguas</option></select></div>
+            <div class="field-wrap"><span class="field-label" id="lbl-disciplina">Disciplina principal</span><input class="field-input" type="text" placeholder="Ej. Filosofía estoica, Carpintería…" id="f-disciplina"></div>
+            <div class="field-wrap" id="wrap-categoria"><span class="field-label">Categoría</span><select class="field-input" style="cursor:pointer;" id="f-categoria"><option value="" disabled selected>Selecciona una categoría</option><option>Filosofía</option><option>Artes</option><option>Oficios</option><option>Deportes</option><option>Espiritualidad</option><option>Ciencia</option><option>Lenguas</option></select></div>
             <div class="field-wrap"><span class="field-label">Una frase sobre ti</span><input class="field-input" type="text" placeholder="Lo que te define…" id="f-frase"></div>
-            <div class="field-wrap"><span class="field-label">Formato</span><select class="field-input" style="cursor:pointer;" id="f-formato"><option value="" disabled selected>¿Presencial, online o ambos?</option><option>Presencial</option><option>Online</option><option>Ambos</option></select></div>
+            <div class="field-wrap" id="wrap-formato"><span class="field-label" id="lbl-formato">Formato preferido</span><select class="field-input" style="cursor:pointer;" id="f-formato"><option value="" disabled selected>¿Presencial, online o ambos?</option><option>Presencial</option><option>Online</option><option>Ambos</option></select></div>
           </div>
         </div>
       </div>
@@ -280,6 +280,12 @@
       el.classList.add('selected');
       rolOk = true;
       document.getElementById('btn-next').disabled = false;
+      // Adaptar etiquetas del paso 3 según rol
+      const rolTitle = el.querySelector('.rol-title')?.textContent || '';
+      const esDisc = rolTitle === 'Discípulo';
+      document.getElementById('lbl-disciplina').textContent = esDisc ? 'Disciplina que buscas' : 'Disciplina principal';
+      document.getElementById('lbl-formato').textContent    = esDisc ? 'Formato preferido' : 'Formato de enseñanza';
+      // Categoría sigue siendo útil para todos
     };
 
     window.nextStep = async function() {
