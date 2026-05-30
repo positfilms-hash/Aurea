@@ -152,9 +152,64 @@
       document.getElementById('btn-back').style.visibility = step > 1 ? 'visible' : 'hidden';
     }
 
+    // — Validación en tiempo real del paso 2 —
     function checkP2() {
-      const filled = Array.from(document.querySelectorAll('#paso2 .field-input')).filter(f => f.value.trim()).length;
-      document.getElementById('btn-next').disabled = filled < 3;
+      const nombre   = document.getElementById('f-nombre').value.trim();
+      const email    = document.getElementById('f-email').value.trim();
+      const password = document.getElementById('f-password').value;
+      const ok = nombre && email.includes('@') && email.includes('.') && password.length >= 8;
+      document.getElementById('btn-next').disabled = !ok;
+    }
+
+    // — Marcar campo inválido visualmente —
+    function marcarError(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.borderColor = '#E87070';
+      const reset = () => { el.style.borderColor = ''; el.removeEventListener('input', reset); el.removeEventListener('change', reset); };
+      el.addEventListener('input',  reset);
+      el.addEventListener('change', reset);
+    }
+
+    // — Validación completa del paso 2 antes de avanzar —
+    function validarPaso2() {
+      const nombre   = document.getElementById('f-nombre').value.trim();
+      const email    = document.getElementById('f-email').value.trim();
+      const password = document.getElementById('f-password').value;
+      const errores  = [];
+      if (!nombre)                                 errores.push('f-nombre');
+      if (!email || !email.includes('@'))          errores.push('f-email');
+      if (!password || password.length < 8)        errores.push('f-password');
+      errores.forEach(marcarError);
+      if (errores.length) {
+        const msgs = {
+          'f-nombre':   'El nombre es obligatorio.',
+          'f-email':    'Introduce un correo válido.',
+          'f-password': 'La contraseña debe tener al menos 8 caracteres.',
+        };
+        mostrarError(msgs[errores[0]]);
+        return false;
+      }
+      return true;
+    }
+
+    // — Validación del paso 3 antes de registrar —
+    function validarPaso3() {
+      const rolTitle   = document.querySelector('.rol-card.selected .rol-title')?.textContent || '';
+      const esDiscipulo = rolTitle === 'Discípulo';
+      const disciplina  = document.getElementById('f-disciplina').value.trim();
+      const categoria   = document.getElementById('f-categoria').value;
+      const formato     = document.getElementById('f-formato').value;
+      const errores     = [];
+      if (!disciplina)             errores.push('f-disciplina');
+      if (!esDiscipulo && !categoria) errores.push('f-categoria');
+      if (!formato)                errores.push('f-formato');
+      errores.forEach(marcarError);
+      if (errores.length) {
+        mostrarError('Completa los campos obligatorios marcados en rojo.');
+        return false;
+      }
+      return true;
     }
 
     // — Registro en Supabase —
@@ -163,33 +218,26 @@
       const errDiv = document.getElementById('reg-error');
       const okDiv  = document.getElementById('reg-success');
 
-      // Recoger datos del formulario
-      const rolTitle = document.querySelector('.rol-card.selected .rol-title')?.textContent || 'Discípulo';
-      const rolMap   = { 'Maestro':'maestro', 'Discípulo':'discipulo', 'Ambos':'ambos' };
-      const rol      = rolMap[rolTitle] || 'discipulo';
+      const rolTitle   = document.querySelector('.rol-card.selected .rol-title')?.textContent || 'Discípulo';
+      const rolMap     = { 'Maestro':'maestro', 'Discípulo':'discipulo', 'Ambos':'ambos' };
+      const rol        = rolMap[rolTitle] || 'discipulo';
+      const nombre     = document.getElementById('f-nombre').value.trim();
+      const apellido   = document.getElementById('f-apellido').value.trim();
+      const email      = document.getElementById('f-email').value.trim();
+      const password   = document.getElementById('f-password').value;
+      const ubicacion  = document.getElementById('f-ubicacion').value.trim();
+      const disciplina = document.getElementById('f-disciplina').value.trim();
+      const categoria  = document.getElementById('f-categoria').value;
+      const frase      = document.getElementById('f-frase').value.trim();
+      const formatoRaw = document.getElementById('f-formato').value;
+      const fmtMap     = { 'Presencial':'presencial', 'Online':'online', 'Ambos':'ambos' };
+      const formato    = fmtMap[formatoRaw] || 'ambos';
 
-      const nombre   = document.getElementById('f-nombre').value.trim();
-      const apellido = document.getElementById('f-apellido').value.trim();
-      const email    = document.getElementById('f-email').value.trim();
-      const password = document.getElementById('f-password').value;
-      const ubicacion= document.getElementById('f-ubicacion').value.trim();
-      const disciplina= document.getElementById('f-disciplina').value.trim();
-      const categoria = document.getElementById('f-categoria').value;
-      const frase     = document.getElementById('f-frase').value.trim();
-      const formatoRaw= document.getElementById('f-formato').value;
-      const fmtMap    = { 'Presencial':'presencial', 'Online':'online', 'Ambos':'ambos' };
-      const formato   = fmtMap[formatoRaw] || 'ambos';
-
-      // Validación básica
-      if (!email || !password) { mostrarError('Completa el correo y la contraseña.'); return; }
-      if (password.length < 6) { mostrarError('La contraseña debe tener al menos 6 caracteres.'); return; }
-
-      btn.disabled = true;
+      btn.disabled    = true;
       btn.textContent = 'Registrando…';
       errDiv.style.display = 'none';
 
       try {
-        // signUp: el trigger handle_new_user crea profiles (y maestro_perfiles si aplica)
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -200,32 +248,30 @@
 
         if (error) throw error;
 
-        // Si hay sesión activa → confirmación desactivada → redirigir
         if (data.session) {
           window.location.href = 'discover.html';
         } else {
-          // Confirmación de email activada → mostrar aviso
           btn.closest('.reg-footer').style.display = 'none';
           okDiv.style.display = 'block';
         }
 
       } catch (err) {
         const msgs = {
-          'User already registered':                         'Ya existe una cuenta con ese correo.',
-          'Password should be at least 6 characters':        'La contraseña debe tener al menos 6 caracteres.',
-          'Unable to validate email address: invalid format':'El correo electrónico no es válido.',
-          'Invalid email':                                   'El correo electrónico no es válido.',
+          'User already registered':                          'Este usuario ya tiene cuenta. Prueba a <a href="login.html" style="color:var(--gold);">iniciar sesión</a>.',
+          'Password should be at least 6 characters':         'La contraseña debe tener al menos 8 caracteres.',
+          'Unable to validate email address: invalid format': 'El correo electrónico no es válido.',
+          'Invalid email':                                    'El correo electrónico no es válido.',
         };
-        mostrarError(msgs[err.message] || ('Error: ' + err.message));
+        mostrarError(msgs[err.message] || ('Error: ' + err.message), !!msgs[err.message]);
         btn.disabled    = false;
         btn.textContent = 'Entrar en Aurea';
       }
     }
 
-    function mostrarError(msg) {
+    function mostrarError(msg, esHTML = false) {
       const d = document.getElementById('reg-error');
-      d.textContent    = msg;
-      d.style.display  = 'block';
+      if (esHTML) d.innerHTML = msg; else d.textContent = msg;
+      d.style.display = 'block';
     }
 
     // — Navegación entre pasos —
@@ -237,18 +283,22 @@
     };
 
     window.nextStep = async function() {
-      if (step < 3) {
-        document.getElementById('paso'+step).classList.add('hidden');
-        step++;
-        document.getElementById('paso'+step).classList.remove('hidden');
-        const btn = document.getElementById('btn-next');
-        btn.textContent = step === 3 ? 'Entrar en Aurea' : 'Continuar';
-        btn.disabled    = step === 2;
-        if (step === 2) document.querySelectorAll('#paso2 .field-input').forEach(f => f.addEventListener('input', checkP2));
-        updateProgress();
-      } else {
-        await registrar();
+      // Validar antes de avanzar
+      if (step === 2 && !validarPaso2()) return;
+      if (step === 3) { if (!validarPaso3()) return; await registrar(); return; }
+
+      document.getElementById('paso'+step).classList.add('hidden');
+      step++;
+      document.getElementById('paso'+step).classList.remove('hidden');
+      document.getElementById('reg-error').style.display = 'none';
+      const btn = document.getElementById('btn-next');
+      btn.textContent = step === 3 ? 'Entrar en Aurea' : 'Continuar';
+      btn.disabled    = step === 2;
+      if (step === 2) {
+        document.querySelectorAll('#paso2 .field-input').forEach(f => f.addEventListener('input', checkP2));
       }
+      if (step === 3) btn.disabled = false; // paso3 siempre habilitado (validamos al enviar)
+      updateProgress();
     };
 
     window.prevStep = function() {
@@ -256,7 +306,8 @@
         document.getElementById('paso'+step).classList.add('hidden');
         step--;
         document.getElementById('paso'+step).classList.remove('hidden');
-        document.getElementById('btn-next').textContent = 'Continuar';
+        document.getElementById('reg-error').style.display = 'none';
+        document.getElementById('btn-next').textContent = step === 3 ? 'Entrar en Aurea' : 'Continuar';
         document.getElementById('btn-next').disabled    = step === 1 && !rolOk;
         updateProgress();
       }
