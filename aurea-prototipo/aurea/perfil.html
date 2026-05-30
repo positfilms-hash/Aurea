@@ -301,8 +301,10 @@
       const nombre = _profile.nombre || '', apellido = _profile.apellido || '';
       const initials = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
       const av = document.querySelector('.big-avatar');
-      av.innerHTML = initials + '<div class="avatar-overlay">📷</div>';
-      av.style.background = _profile.avatar_color || 'var(--gold)';
+      av.style.background = _profile.avatar_url ? 'transparent' : (_profile.avatar_color || 'var(--gold)');
+      av.innerHTML = _profile.avatar_url
+        ? `<img src="${_profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${initials}"><div class="avatar-overlay" onclick="location.href='perfil-edicion.html'">✎</div>`
+        : `${initials}<div class="avatar-overlay" onclick="location.href='perfil-edicion.html'">📷</div>`;
       document.getElementById('profile-name').textContent     = (nombre + ' ' + apellido).trim();
       document.getElementById('profile-location').textContent = _profile.ubicacion || '';
 
@@ -340,19 +342,26 @@
       _relD      = rdRes.data || [];
       _discipulo = dRes.data  || null;
 
-      // Actualizar columna izquierda discípulo con datos reales
+      // Constancia score real
+      const score = _profile?.constancia_score ?? 50;
+      const constN = document.querySelector('#stats-discipulo .constancia-n');
+      const constB = document.querySelector('#stats-discipulo .constancia-bar');
+      if (constN) constN.textContent = score;
+      if (constB) constB.style.width = score + '%';
+
+      // Discípulo: hashtags + disponibilidad
       if (_discipulo) {
-        if (_discipulo.hashtags?.length) {
-          document.querySelector('#tags-discipulo .tags-wrap').innerHTML =
-            _discipulo.hashtags.map(t => `<span class="tag gold">${t}</span>`).join('');
-        }
-        const avRows = document.querySelectorAll('#avail-discipulo .avail-val');
-        if (avRows[0] && _discipulo.disponibilidad_dias) avRows[0].textContent = _discipulo.disponibilidad_dias;
-        if (avRows[1] && _discipulo.horas_semanales)     avRows[1].textContent = _discipulo.horas_semanales;
-        if (avRows[2]) avRows[2].textContent = `${_relD.length} / ${_discipulo.max_practicas || 3}`;
+        document.querySelector('#tags-discipulo .tags-wrap').innerHTML =
+          (_discipulo.hashtags?.length
+            ? _discipulo.hashtags.map(t => `<span class="tag gold">${t}</span>`).join('')
+            : '<span style="font-size:11px;color:var(--text-ghost)">Sin hashtags</span>');
+        const avD = document.querySelectorAll('#avail-discipulo .avail-val');
+        if (avD[0]) avD[0].textContent = _discipulo.disponibilidad_dias || '—';
+        if (avD[1]) avD[1].textContent = _discipulo.horas_semanales    || '—';
+        if (avD[2]) avD[2].textContent = `${_relD.length} / ${_discipulo.max_practicas || 3}`;
       }
 
-      // Stats de maestro
+      // Stats de maestro + disponibilidad
       if (_maestro) {
         const activeCount = _relM.length;
         const plazas = Math.max(0, (_maestro.max_discipulos || 4) - activeCount);
@@ -361,10 +370,18 @@
           <div class="stat-box"><div class="stat-n">${_maestro.experiencia_anos ?? '—'}</div><div class="stat-l">Años exp.</div></div>
           <div class="stat-box"><div class="stat-n">${activeCount}</div><div class="stat-l">Discípulos</div></div>
           <div class="stat-box"><div class="stat-n">${plazas}</div><div class="stat-l">Plaza${plazas !== 1 ? 's' : ''} libre${plazas !== 1 ? 's' : ''}</div></div>`;
-        if (_maestro.hashtags?.length) {
-          document.querySelector('#tags-maestro .tags-wrap').innerHTML =
-            _maestro.hashtags.map(t => `<span class="tag gold">${t}</span>`).join('');
-        }
+        document.querySelector('#tags-maestro .tags-wrap').innerHTML =
+          (_maestro.hashtags?.length
+            ? _maestro.hashtags.map(t => `<span class="tag gold">${t}</span>`).join('')
+            : '<span style="font-size:11px;color:var(--text-ghost)">Sin hashtags</span>');
+        // Disponibilidad maestro
+        const avM = document.querySelectorAll('#avail-maestro .avail-val');
+        if (avM[0]) avM[0].textContent = _maestro.disponibilidad_dias || '—';
+        if (avM[1]) avM[1].textContent = _maestro.horas_semanales    || '—';
+        if (avM[2]) avM[2].textContent = _maestro.nivel_requerido
+          ? _maestro.nivel_requerido[0].toUpperCase() + _maestro.nivel_requerido.slice(1)
+          : 'Sin requisito';
+        if (avM[3]) avM[3].textContent = _maestro.radio_km ? `${_maestro.radio_km} km` : '—';
       }
 
       // Toggle: si solo tiene un rol, el otro botón ofrece activarlo

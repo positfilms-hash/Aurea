@@ -65,13 +65,11 @@
       <div class="progress-wrap">
         <div class="progress-steps">
           <div class="p-step"><div class="p-circle active" id="pc1">1</div><div class="p-line" id="pl1"></div></div>
-          <div class="p-step"><div class="p-circle pending" id="pc2">2</div><div class="p-line" id="pl2"></div></div>
-          <div class="p-step" style="flex:0;"><div class="p-circle pending" id="pc3">3</div></div>
+          <div class="p-step" style="flex:0;"><div class="p-circle pending" id="pc2">2</div></div>
         </div>
         <div class="step-labels">
           <span class="step-label active" id="sl1">Tu rol</span>
           <span class="step-label" id="sl2">Tus datos</span>
-          <span class="step-label" id="sl3">Tu perfil</span>
         </div>
       </div>
       <div class="reg-form">
@@ -92,28 +90,6 @@
             <div class="field-wrap"><span class="field-label">Ubicación</span><input class="field-input" type="text" placeholder="Madrid, España" id="f-ubicacion"></div>
           </div>
         </div>
-        <div id="paso3" class="hidden">
-          <div class="form-title">Tu primer perfil</div>
-          <p class="form-sub">No tiene que ser perfecto — podrás editarlo cuando quieras.</p>
-          <div style="display:flex;flex-direction:column;gap:14px;">
-            <div class="avatar-pick"><div class="avatar-preview" id="av-prev">RM</div><button class="btn-ghost" style="padding:8px 16px;">Subir foto</button></div>
-            <div class="field-row">
-              <div class="field-wrap"><span class="field-label">Categoría</span>
-                <select class="field-input" style="cursor:pointer;" id="f-categoria" onchange="onRegCat()">
-                  <option value="" disabled selected>Categoría</option>
-                </select>
-              </div>
-              <div class="field-wrap"><span class="field-label">Subcategoría</span>
-                <select class="field-input" style="cursor:pointer;" id="f-subcategoria" disabled>
-                  <option value="" disabled selected>Subcategoría</option>
-                </select>
-              </div>
-            </div>
-            <div class="field-wrap"><span class="field-label" id="lbl-disciplina">Disciplina principal</span><input class="field-input" type="text" placeholder="Ej. Estoicismo clásico, Carpintería japonesa…" id="f-disciplina"></div>
-            <div class="field-wrap"><span class="field-label">Una frase sobre ti</span><input class="field-input" type="text" placeholder="Lo que te define…" id="f-frase"></div>
-            <div class="field-wrap" id="wrap-formato"><span class="field-label" id="lbl-formato">Formato preferido</span><select class="field-input" style="cursor:pointer;" id="f-formato"><option value="" disabled selected>¿Presencial, online o ambos?</option><option>Presencial</option><option>Online</option><option>Ambos</option></select></div>
-          </div>
-        </div>
       </div>
       <div id="reg-error" style="display:none;color:#ff6b6b;font-size:11px;font-weight:300;padding:6px 40px;text-align:center;line-height:1.5;"></div>
       <div id="reg-success" style="display:none;background:#1A2A12;border-top:0.5px solid #3B6D1144;padding:14px 40px;text-align:center;">
@@ -123,7 +99,7 @@
       </div>
       <div class="reg-footer">
         <button class="btn-back-reg" id="btn-back" onclick="prevStep()" style="visibility:hidden;">← Volver</button>
-        <span class="step-counter" id="step-counter">Paso 1 de 3</span>
+        <span class="step-counter" id="step-counter">Paso 1 de 2</span>
         <button class="btn-primary" id="btn-next" onclick="nextStep()" disabled style="padding:12px 28px;">Continuar</button>
       </div>
     </div>
@@ -131,19 +107,6 @@
   <script src="js/components.js"></script>
   <script type="module">
     import { supabase } from './js/supabase.js';
-    import { CATS, poblarSub } from './js/categorias.js';
-
-    // Poblar categorías al cargar
-    (function() {
-      const sel = document.getElementById('f-categoria');
-      if (sel) sel.innerHTML = '<option value="" disabled selected>Categoría</option>' +
-        Object.keys(CATS).map(c => `<option value="${c}">${c}</option>`).join('');
-    })();
-
-    window.onRegCat = () => poblarSub(
-      document.getElementById('f-categoria'),
-      document.getElementById('f-subcategoria')
-    );
 
     let step = 1, rolOk = false;
 
@@ -164,15 +127,15 @@
 
     // — Progreso —
     function updateProgress() {
-      for (let i = 1; i <= 3; i++) {
+      for (let i = 1; i <= 2; i++) {
         const c = document.getElementById('pc'+i), l = document.getElementById('sl'+i);
         if (i < step)      { c.className = 'p-circle done';    c.textContent = '✓'; }
         else if (i===step) { c.className = 'p-circle active';  c.textContent = i;   }
         else               { c.className = 'p-circle pending'; c.textContent = i;   }
         if (l) l.className = 'step-label' + (i === step ? ' active' : '');
-        if (i < 3) { const pl = document.getElementById('pl'+i); if (pl) pl.className = 'p-line' + (i < step ? ' done' : ''); }
+        if (i < 2) { const pl = document.getElementById('pl'+i); if (pl) pl.className = 'p-line' + (i < step ? ' done' : ''); }
       }
-      document.getElementById('step-counter').textContent = 'Paso ' + step + ' de 3';
+      document.getElementById('step-counter').textContent = 'Paso ' + step + ' de 2';
       document.getElementById('btn-back').style.visibility = step > 1 ? 'visible' : 'hidden';
     }
 
@@ -242,21 +205,14 @@
       const errDiv = document.getElementById('reg-error');
       const okDiv  = document.getElementById('reg-success');
 
-      const rolTitle   = document.querySelector('.rol-card.selected .rol-title')?.textContent || 'Discípulo';
-      const rolMap     = { 'Maestro':'maestro', 'Discípulo':'discipulo', 'Ambos':'ambos' };
-      const rol        = rolMap[rolTitle] || 'discipulo';
-      const nombre     = document.getElementById('f-nombre').value.trim();
-      const apellido   = document.getElementById('f-apellido').value.trim();
-      const email      = document.getElementById('f-email').value.trim();
-      const password   = document.getElementById('f-password').value;
-      const ubicacion  = document.getElementById('f-ubicacion').value.trim();
-      const disciplina   = document.getElementById('f-disciplina').value.trim();
-      const categoria    = document.getElementById('f-categoria').value || 'Otra';
-      const subcategoria = document.getElementById('f-subcategoria').value || '';
-      const frase        = document.getElementById('f-frase').value.trim();
-      const formatoRaw   = document.getElementById('f-formato').value;
-      const fmtMap       = { 'Presencial':'presencial', 'Online':'online', 'Ambos':'ambos' };
-      const formato      = fmtMap[formatoRaw] || 'ambos';
+      const rolTitle = document.querySelector('.rol-card.selected .rol-title')?.textContent || 'Discípulo';
+      const rolMap   = { 'Maestro':'maestro', 'Discípulo':'discipulo', 'Ambos':'ambos' };
+      const rol      = rolMap[rolTitle] || 'discipulo';
+      const nombre   = document.getElementById('f-nombre').value.trim();
+      const apellido = document.getElementById('f-apellido').value.trim();
+      const email    = document.getElementById('f-email').value.trim();
+      const password = document.getElementById('f-password').value;
+      const ubicacion = document.getElementById('f-ubicacion').value.trim();
 
       btn.disabled    = true;
       btn.textContent = 'Registrando…';
@@ -267,14 +223,14 @@
           email,
           password,
           options: {
-            data: { nombre, apellido, rol, ubicacion, frase, disciplina, categoria, subcategoria, formato }
+            data: { nombre, apellido, rol, ubicacion }
           }
         });
 
         if (error) throw error;
 
         if (data.session) {
-          window.location.href = 'discover.html';
+          window.location.href = 'perfil-edicion.html';
         } else {
           btn.closest('.reg-footer').style.display = 'none';
           okDiv.style.display = 'block';
@@ -314,21 +270,18 @@
     };
 
     window.nextStep = async function() {
-      // Validar antes de avanzar
-      if (step === 2 && !validarPaso2()) return;
-      if (step === 3) { if (!validarPaso3()) return; await registrar(); return; }
+      // Paso 2 → validar y registrar directamente
+      if (step === 2) { if (!validarPaso2()) return; await registrar(); return; }
 
+      // Paso 1 → avanzar a paso 2
       document.getElementById('paso'+step).classList.add('hidden');
       step++;
       document.getElementById('paso'+step).classList.remove('hidden');
       document.getElementById('reg-error').style.display = 'none';
       const btn = document.getElementById('btn-next');
-      btn.textContent = step === 3 ? 'Entrar en Aurea' : 'Continuar';
-      btn.disabled    = step === 2;
-      if (step === 2) {
-        document.querySelectorAll('#paso2 .field-input').forEach(f => f.addEventListener('input', checkP2));
-      }
-      if (step === 3) btn.disabled = false; // paso3 siempre habilitado (validamos al enviar)
+      btn.textContent = 'Crear cuenta';
+      btn.disabled    = true;
+      document.querySelectorAll('#paso2 .field-input').forEach(f => f.addEventListener('input', checkP2));
       updateProgress();
     };
 
@@ -338,7 +291,7 @@
         step--;
         document.getElementById('paso'+step).classList.remove('hidden');
         document.getElementById('reg-error').style.display = 'none';
-        document.getElementById('btn-next').textContent = step === 3 ? 'Entrar en Aurea' : 'Continuar';
+        document.getElementById('btn-next').textContent = 'Continuar';
         document.getElementById('btn-next').disabled    = step === 1 && !rolOk;
         updateProgress();
       }

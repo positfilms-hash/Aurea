@@ -79,11 +79,14 @@
         <div class="section-title">Información del perfil</div>
         <div class="edit-grid">
           <div class="avatar-section">
-            <div class="edit-avatar" id="ea-avatar">?</div>
+            <div class="edit-avatar" id="ea-avatar" title="Cambiar foto" onclick="document.getElementById('avatar-file').click()" style="cursor:pointer;overflow:hidden;flex-shrink:0;"></div>
             <div>
-              <div style="font-size:11px;font-weight:300;color:var(--text-faint);line-height:1.6;">El avatar usa tus iniciales.<br>Soporte de foto próximamente.</div>
+              <div style="font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.6;margin-bottom:8px;">Haz clic en el avatar para subir una foto.<br>JPG, PNG o WebP · Máx. 5 MB.</div>
+              <button type="button" onclick="document.getElementById('avatar-file').click()" class="btn-ghost" style="padding:7px 16px;font-size:11px;">Subir foto</button>
+              <div id="avatar-upload-msg" style="font-size:10px;color:var(--text-faint);margin-top:6px;"></div>
             </div>
           </div>
+          <input type="file" id="avatar-file" accept="image/jpeg,image/png,image/webp" style="display:none;">
           <div class="edit-row">
             <div class="edit-field"><span class="edit-label">Nombre</span><input class="edit-input" id="f-nombre" type="text" placeholder="Tu nombre"></div>
             <div class="edit-field"><span class="edit-label">Apellido</span><input class="edit-input" id="f-apellido" type="text" placeholder="Tu apellido"></div>
@@ -311,6 +314,63 @@
     document.getElementById('nav-container').innerHTML = renderNavAuth('perfil');
 
     let _uid = null, _esMaestro = false, _esDiscipulo = false, _rol = null;
+
+    // — Redimensionar imagen antes de subir —
+    function resizeImg(file, maxPx = 400) {
+      return new Promise(resolve => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          let { naturalWidth: w, naturalHeight: h } = img;
+          if (w > h && w > maxPx) { h = Math.round(h * maxPx / w); w = maxPx; }
+          else if (h > maxPx)     { w = Math.round(w * maxPx / h); h = maxPx; }
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(url);
+          c.toBlob(resolve, 'image/jpeg', 0.88);
+        };
+        img.src = url;
+      });
+    }
+
+    // — Render avatar en el editor —
+    function renderAvatar(url, initials, color) {
+      const el = document.getElementById('ea-avatar');
+      if (!el) return;
+      if (url) {
+        el.style.background = 'transparent';
+        el.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${initials}">`;
+      } else {
+        el.style.background = color || 'var(--gold)';
+        el.textContent = initials || '?';
+      }
+    }
+
+    // — Upload de foto —
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('avatar-file')?.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file || !_uid) return;
+        if (file.size > 5 * 1024 * 1024) { document.getElementById('avatar-upload-msg').textContent = 'El archivo supera 5 MB.'; return; }
+        const msg = document.getElementById('avatar-upload-msg');
+        msg.textContent = 'Subiendo…';
+        try {
+          const blob = await resizeImg(file, 400);
+          const path = `${_uid}/avatar.jpg`;
+          const { error: upErr } = await supabase.storage.from('avatars').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
+          if (upErr) throw upErr;
+          const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
+          const urlFinal = publicUrl + '?t=' + Date.now();
+          await supabase.from('profiles').update({ avatar_url: urlFinal }).eq('id', _uid);
+          renderAvatar(urlFinal, '', '');
+          msg.textContent = '✓ Foto actualizada';
+          setTimeout(() => { msg.textContent = ''; }, 3000);
+        } catch (err) {
+          msg.textContent = 'Error: ' + (err.message || err);
+        }
+      });
+    });
     // Si venimos de "añadir rol", este parámetro indica cuál hay que activar
     const _addRole = new URLSearchParams(location.search).get('add'); // 'maestro' | 'discipulo' | null
 
@@ -577,9 +637,11 @@
           }
         }
 
-        // Actualizar avatar de la barra superior
-        document.getElementById('ea-avatar').textContent =
-          ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
+        // Actualizar iniciales en avatar (no toca foto si existe)
+        const avEl = document.getElementById('ea-avatar');
+        if (!avEl.querySelector('img')) {
+          avEl.textContent = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
+        }
 
         btn.textContent = '✓ Guardado';
         btn.style.background = 'var(--green)';
@@ -678,7 +740,6 @@
       }
 
       if (p) {
-        // Perfil básico
         const nombre   = p.nombre   || '';
         const apellido = p.apellido || '';
         document.getElementById('f-nombre').value    = nombre;
@@ -686,7 +747,7 @@
         document.getElementById('f-ubicacion').value = p.ubicacion || '';
         document.getElementById('f-frase').value     = p.frase     || '';
         const initials = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
-        document.getElementById('ea-avatar').textContent = initials;
+        renderAvatar(p.avatar_url || '', initials, p.avatar_color || 'var(--gold)');
       }
 
       // — Sección discípulo —
