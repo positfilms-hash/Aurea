@@ -12,7 +12,8 @@
     .profile-header{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;}
     .big-avatar{width:88px;height:88px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:34px;font-weight:600;color:var(--night);}
     .profile-name{font-family:var(--font-serif);font-size:26px;font-weight:500;color:var(--text-primary);}
-    .profile-disc{font-size:10px;font-weight:300;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-top:4px;}
+    .profile-cat{font-size:10px;font-weight:300;letter-spacing:0.12em;color:var(--text-muted);margin-top:3px;}
+    .profile-disc{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--gold);margin-top:3px;}
     .profile-location{font-size:11px;font-weight:300;color:var(--text-faint);margin-top:4px;}
     .badge-v{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#854F0B;background:var(--night-deep);border:0.5px solid var(--border-gold);padding:4px 10px;border-radius:100px;}
     .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -76,6 +77,7 @@
         <div class="big-avatar" id="p-avatar">RM</div>
         <div>
           <div class="profile-name"    id="p-nombre">Rafael Montoya</div>
+          <div class="profile-cat"     id="p-cat"></div>
           <div class="profile-disc"    id="p-disc">Filosofía estoica</div>
           <div class="profile-location" id="p-ubicacion">Madrid · Presencial y online</div>
         </div>
@@ -219,7 +221,7 @@
       const [perfilRes, trayRes, resenasRes, relacionesRes] = await Promise.all([
         supabase
           .from('maestro_perfiles')
-          .select(`disciplina, hashtags, experiencia_anos, formato,
+          .select(`disciplina, categoria, subcategoria, hashtags, experiencia_anos, formato,
                    disponibilidad_dias, horas_semanales, max_discipulos,
                    acepta_solicitudes, constancia_minima, motivacion_obligatoria,
                    nivel_requerido, requisitos_libres, reputacion,
@@ -259,7 +261,12 @@
       av.textContent         = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '??';
       av.style.background    = p?.avatar_color || '#C8973A';
       document.getElementById('p-nombre').textContent   = fullName;
-      document.getElementById('p-disc').textContent     = m.disciplina;
+      // Categoría › Subcategoría
+      const catEl = document.getElementById('p-cat');
+      catEl.textContent = m.categoria
+        ? (m.subcategoria ? `${m.categoria} › ${m.subcategoria}` : m.categoria)
+        : '';
+      document.getElementById('p-disc').textContent = m.disciplina || '';
       const fmtLabel = { presencial:'Presencial', online:'Online', ambos:'Presencial y online' };
       document.getElementById('p-ubicacion').textContent =
         (p?.ubicacion || '') + (m.formato ? ' · ' + (fmtLabel[m.formato] || '') : '');

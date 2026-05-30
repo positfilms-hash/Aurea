@@ -22,6 +22,8 @@
     .big-avatar:hover .avatar-overlay{opacity:1;}
     .profile-name{font-family:var(--font-serif);font-size:26px;font-weight:500;color:var(--text-primary);line-height:1.1;}
     .profile-role-label{font-size:10px;font-weight:300;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-top:2px;}
+    .profile-cat{font-size:10px;font-weight:300;letter-spacing:0.12em;color:var(--text-muted);margin-top:3px;}
+    .profile-disc-label{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-secondary);margin-top:3px;}
     .profile-location{font-size:11px;font-weight:300;color:var(--text-faint);margin-top:4px;}
     .badge-v{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#854F0B;background:var(--night-deep);border:0.5px solid var(--border-gold);padding:4px 10px;border-radius:100px;}
     .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -74,7 +76,13 @@
       </div>
       <div class="profile-header">
         <div class="big-avatar">RM<div class="avatar-overlay">📷</div></div>
-        <div><div class="profile-name">Rafael Montoya</div><div class="profile-role-label" id="role-label">Maestro · Filosofía estoica</div><div class="profile-location">Madrid · Presencial y online</div></div>
+        <div>
+          <div class="profile-name" id="profile-name">Rafael Montoya</div>
+          <div class="profile-role-label" id="role-label">Maestro</div>
+          <div class="profile-cat"  id="profile-cat"></div>
+          <div class="profile-disc-label" id="profile-disc"></div>
+          <div class="profile-location"   id="profile-location">Madrid · Presencial y online</div>
+        </div>
         <span class="badge-v">✦ Verificado por Aurea</span>
       </div>
       <div id="stats-maestro" class="stats-grid">
@@ -133,16 +141,29 @@
 
     // — setRole expuesto globalmente para los onclick —
     window.setRole = function(role, btn) {
-      // Si el botón es de "añadir rol", activar esa lógica en vez de togglear
       if (btn.classList.contains('add-role')) { añadirRol(role); return; }
       document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const esMaestro = role === 'maestro';
-      const disc = _maestro?.disciplina || '';
-      const rol  = _profile?.rol || 'discipulo';
-      document.getElementById('role-label').textContent = esMaestro
-        ? `Maestro${disc ? ' · ' + disc : ''}`
-        : `Discípulo${disc && rol === 'ambos' ? ' · buscando ' + disc : ''}`;
+
+      // — Etiqueta de rol —
+      document.getElementById('role-label').textContent = esMaestro ? 'Maestro' : 'Discípulo';
+
+      // — Categoría › Subcategoría —
+      const src = esMaestro ? _maestro : _discipulo;
+      const cat  = src?.categoria    || '';
+      const sub  = src?.subcategoria || '';
+      const catEl = document.getElementById('profile-cat');
+      catEl.textContent = cat ? (sub ? `${cat} › ${sub}` : cat) : '';
+
+      // — Disciplina —
+      const discEl = document.getElementById('profile-disc');
+      if (esMaestro) {
+        discEl.textContent = _maestro?.disciplina || '';
+      } else {
+        const buscada = _discipulo?.disciplina_buscada || '';
+        discEl.textContent = buscada ? `Buscando: ${buscada}` : '';
+      }
       ['stats-maestro','tags-maestro','avail-maestro'].forEach(id =>
         document.getElementById(id).classList.toggle('hidden', !esMaestro));
       ['stats-discipulo','tags-discipulo','avail-discipulo'].forEach(id =>
@@ -282,8 +303,8 @@
       const av = document.querySelector('.big-avatar');
       av.innerHTML = initials + '<div class="avatar-overlay">📷</div>';
       av.style.background = _profile.avatar_color || 'var(--gold)';
-      document.querySelector('.profile-name').textContent = (nombre + ' ' + apellido).trim();
-      document.querySelector('.profile-location').textContent = _profile.ubicacion || '';
+      document.getElementById('profile-name').textContent     = (nombre + ' ' + apellido).trim();
+      document.getElementById('profile-location').textContent = _profile.ubicacion || '';
 
 
       // Cargar datos secundarios en paralelo
