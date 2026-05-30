@@ -97,8 +97,19 @@
           <p class="form-sub">No tiene que ser perfecto — podrás editarlo cuando quieras.</p>
           <div style="display:flex;flex-direction:column;gap:14px;">
             <div class="avatar-pick"><div class="avatar-preview" id="av-prev">RM</div><button class="btn-ghost" style="padding:8px 16px;">Subir foto</button></div>
-            <div class="field-wrap"><span class="field-label" id="lbl-disciplina">Disciplina principal</span><input class="field-input" type="text" placeholder="Ej. Filosofía estoica, Carpintería…" id="f-disciplina"></div>
-            <div class="field-wrap" id="wrap-categoria"><span class="field-label">Categoría</span><select class="field-input" style="cursor:pointer;" id="f-categoria"><option value="" disabled selected>Selecciona una categoría</option><option>Filosofía</option><option>Artes</option><option>Oficios</option><option>Deportes</option><option>Espiritualidad</option><option>Ciencia</option><option>Lenguas</option></select></div>
+            <div class="field-row">
+              <div class="field-wrap"><span class="field-label">Categoría</span>
+                <select class="field-input" style="cursor:pointer;" id="f-categoria" onchange="onRegCat()">
+                  <option value="" disabled selected>Categoría</option>
+                </select>
+              </div>
+              <div class="field-wrap"><span class="field-label">Subcategoría</span>
+                <select class="field-input" style="cursor:pointer;" id="f-subcategoria" disabled>
+                  <option value="" disabled selected>Subcategoría</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-wrap"><span class="field-label" id="lbl-disciplina">Disciplina principal</span><input class="field-input" type="text" placeholder="Ej. Estoicismo clásico, Carpintería japonesa…" id="f-disciplina"></div>
             <div class="field-wrap"><span class="field-label">Una frase sobre ti</span><input class="field-input" type="text" placeholder="Lo que te define…" id="f-frase"></div>
             <div class="field-wrap" id="wrap-formato"><span class="field-label" id="lbl-formato">Formato preferido</span><select class="field-input" style="cursor:pointer;" id="f-formato"><option value="" disabled selected>¿Presencial, online o ambos?</option><option>Presencial</option><option>Online</option><option>Ambos</option></select></div>
           </div>
@@ -120,6 +131,19 @@
   <script src="js/components.js"></script>
   <script type="module">
     import { supabase } from './js/supabase.js';
+    import { CATS, poblarSub } from './js/categorias.js';
+
+    // Poblar categorías al cargar
+    (function() {
+      const sel = document.getElementById('f-categoria');
+      if (sel) sel.innerHTML = '<option value="" disabled selected>Categoría</option>' +
+        Object.keys(CATS).map(c => `<option value="${c}">${c}</option>`).join('');
+    })();
+
+    window.onRegCat = () => poblarSub(
+      document.getElementById('f-categoria'),
+      document.getElementById('f-subcategoria')
+    );
 
     let step = 1, rolOk = false;
 
@@ -226,12 +250,13 @@
       const email      = document.getElementById('f-email').value.trim();
       const password   = document.getElementById('f-password').value;
       const ubicacion  = document.getElementById('f-ubicacion').value.trim();
-      const disciplina = document.getElementById('f-disciplina').value.trim();
-      const categoria  = document.getElementById('f-categoria').value;
-      const frase      = document.getElementById('f-frase').value.trim();
-      const formatoRaw = document.getElementById('f-formato').value;
-      const fmtMap     = { 'Presencial':'presencial', 'Online':'online', 'Ambos':'ambos' };
-      const formato    = fmtMap[formatoRaw] || 'ambos';
+      const disciplina   = document.getElementById('f-disciplina').value.trim();
+      const categoria    = document.getElementById('f-categoria').value || 'Otra';
+      const subcategoria = document.getElementById('f-subcategoria').value || '';
+      const frase        = document.getElementById('f-frase').value.trim();
+      const formatoRaw   = document.getElementById('f-formato').value;
+      const fmtMap       = { 'Presencial':'presencial', 'Online':'online', 'Ambos':'ambos' };
+      const formato      = fmtMap[formatoRaw] || 'ambos';
 
       btn.disabled    = true;
       btn.textContent = 'Registrando…';
@@ -242,7 +267,7 @@
           email,
           password,
           options: {
-            data: { nombre, apellido, rol, ubicacion, frase, disciplina, categoria, formato }
+            data: { nombre, apellido, rol, ubicacion, frase, disciplina, categoria, subcategoria, formato }
           }
         });
 

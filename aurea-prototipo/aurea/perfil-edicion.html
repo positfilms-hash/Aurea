@@ -97,16 +97,20 @@
           </div>
           <div class="edit-field"><span class="edit-label">Frase / bio (se mostrará en cursiva)</span><textarea class="edit-textarea" id="f-frase" placeholder="Una frase sobre ti y por qué enseñas…"></textarea></div>
           <div id="sec-maestro" style="display:none;">
-            <div class="edit-field" style="margin-bottom:18px;"><span class="edit-label">Disciplina principal</span><input class="edit-input" id="f-disciplina" type="text" placeholder="Filosofía estoica"></div>
             <div class="edit-row" style="margin-bottom:18px;">
               <div class="edit-field"><span class="edit-label">Categoría</span>
-                <select class="edit-input" id="f-categoria" style="cursor:pointer;">
-                  <option value="Filosofía">Filosofía</option><option value="Artes">Artes</option>
-                  <option value="Oficios">Oficios</option><option value="Deportes">Deportes</option>
-                  <option value="Espiritualidad">Espiritualidad</option><option value="Ciencia">Ciencia</option>
-                  <option value="Lenguas">Lenguas</option><option value="Otra">Otra</option>
+                <select class="edit-input" id="f-categoria" style="cursor:pointer;" onchange="onCatM()">
+                  <option value="" disabled selected>Categoría</option>
                 </select>
               </div>
+              <div class="edit-field"><span class="edit-label">Subcategoría</span>
+                <select class="edit-input" id="f-subcategoria" style="cursor:pointer;" disabled>
+                  <option value="" disabled selected>Subcategoría</option>
+                </select>
+              </div>
+            </div>
+            <div class="edit-field" style="margin-bottom:18px;"><span class="edit-label">Disciplina principal</span><input class="edit-input" id="f-disciplina" type="text" placeholder="Ej. Estoicismo clásico, Carpintería japonesa…"></div>
+            <div class="edit-row" style="margin-bottom:18px;">
               <div class="edit-field"><span class="edit-label">Formato</span>
                 <select class="edit-input" id="f-formato" style="cursor:pointer;">
                   <option value="ambos">Presencial y online</option>
@@ -114,10 +118,7 @@
                   <option value="online">Solo online</option>
                 </select>
               </div>
-            </div>
-            <div class="edit-row" style="margin-bottom:18px;">
               <div class="edit-field"><span class="edit-label">Años de experiencia</span><input class="edit-input" id="f-anos" type="number" min="0" max="60" placeholder="10"></div>
-              <div class="edit-field"><span class="edit-label">Radio presencial (km)</span><input class="edit-input" id="f-radio" type="number" min="0" placeholder="30"></div>
             </div>
             <div class="edit-row" style="margin-bottom:18px;">
               <div class="edit-field"><span class="edit-label">Días disponibles</span><input class="edit-input" id="f-dias" type="text" placeholder="Martes y jueves"></div>
@@ -131,14 +132,18 @@
                   <option value="6">6</option><option value="8">8</option><option value="10">10</option>
                 </select>
               </div>
-              <div class="edit-field"><span class="edit-label">Aceptar solicitudes</span>
-                <select class="edit-input" id="f-acepta" style="cursor:pointer;">
-                  <option value="true">Sí, acepto solicitudes</option>
-                  <option value="false">No (en pausa)</option>
-                </select>
-              </div>
+              <div class="edit-field"><span class="edit-label">Radio presencial (km)</span><input class="edit-input" id="f-radio" type="number" min="0" placeholder="30"></div>
             </div>
-            <div class="edit-field"><span class="edit-label">Hashtags (separados por comas)</span><input class="edit-input" id="f-hashtags" type="text" placeholder="#presencial, #riguroso, #avanzado"></div>
+            <div class="edit-field" style="margin-bottom:6px;"><span class="edit-label">Aceptar solicitudes</span>
+              <select class="edit-input" id="f-acepta" style="cursor:pointer;">
+                <option value="true">Sí, acepto solicitudes</option>
+                <option value="false">No (en pausa)</option>
+              </select>
+            </div>
+            <div class="edit-field" style="margin-bottom:18px;">
+              <span class="edit-label">Hashtags del maestro</span>
+              <div id="ht-maestro"></div>
+            </div>
           </div>
 
           <!-- AÑADIR ROL -->
@@ -157,31 +162,30 @@
           <div id="sec-discipulo" style="display:none;">
             <div style="height:0.5px;background:var(--border);margin:8px 0 20px;"></div>
             <div class="edit-row" style="margin-bottom:18px;">
-              <div class="edit-field">
-                <span class="edit-label">Disciplina que buscas</span>
-                <input class="edit-input" id="fd-disciplina" type="text" placeholder="Filosofía estoica">
+              <div class="edit-field"><span class="edit-label">Categoría</span>
+                <select class="edit-input" id="fd-categoria" style="cursor:pointer;" onchange="onCatD()">
+                  <option value="" disabled selected>Categoría</option>
+                </select>
               </div>
-              <div class="edit-field">
-                <span class="edit-label">Categoría</span>
-                <select class="edit-input" id="fd-categoria" style="cursor:pointer;">
-                  <option value="Filosofía">Filosofía</option><option value="Artes">Artes</option>
-                  <option value="Oficios">Oficios</option><option value="Deportes">Deportes</option>
-                  <option value="Espiritualidad">Espiritualidad</option><option value="Ciencia">Ciencia</option>
-                  <option value="Lenguas">Lenguas</option><option value="Otra">Otra</option>
+              <div class="edit-field"><span class="edit-label">Subcategoría</span>
+                <select class="edit-input" id="fd-subcategoria" style="cursor:pointer;" disabled>
+                  <option value="" disabled selected>Subcategoría</option>
                 </select>
               </div>
             </div>
+            <div class="edit-field" style="margin-bottom:18px;">
+              <span class="edit-label">Disciplina que buscas</span>
+              <input class="edit-input" id="fd-disciplina" type="text" placeholder="Ej. Meditación vipassana, Cocina japonesa…">
+            </div>
             <div class="edit-row" style="margin-bottom:18px;">
-              <div class="edit-field">
-                <span class="edit-label">Nivel actual</span>
+              <div class="edit-field"><span class="edit-label">Nivel actual</span>
                 <select class="edit-input" id="fd-nivel" style="cursor:pointer;">
                   <option value="principiante">Principiante</option>
                   <option value="intermedio">Intermedio</option>
                   <option value="avanzado">Avanzado</option>
                 </select>
               </div>
-              <div class="edit-field">
-                <span class="edit-label">Máximo de prácticas activas</span>
+              <div class="edit-field"><span class="edit-label">Máximo de prácticas activas</span>
                 <select class="edit-input" id="fd-max-practicas" style="cursor:pointer;">
                   <option value="1">1</option><option value="2">2</option>
                   <option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
@@ -189,18 +193,12 @@
               </div>
             </div>
             <div class="edit-row" style="margin-bottom:18px;">
-              <div class="edit-field">
-                <span class="edit-label">Días disponibles</span>
-                <input class="edit-input" id="fd-dias" type="text" placeholder="Lunes y miércoles">
-              </div>
-              <div class="edit-field">
-                <span class="edit-label">Horas semanales</span>
-                <input class="edit-input" id="fd-horas" type="text" placeholder="2–3 h">
-              </div>
+              <div class="edit-field"><span class="edit-label">Días disponibles</span><input class="edit-input" id="fd-dias" type="text" placeholder="Lunes y miércoles"></div>
+              <div class="edit-field"><span class="edit-label">Horas semanales</span><input class="edit-input" id="fd-horas" type="text" placeholder="2–3 h"></div>
             </div>
             <div class="edit-field">
-              <span class="edit-label">Hashtags del discípulo (separados por comas)</span>
-              <input class="edit-input" id="fd-hashtags" type="text" placeholder="#presencial, #comprometido, #principiante">
+              <span class="edit-label">Hashtags del discípulo</span>
+              <div id="ht-discipulo"></div>
             </div>
           </div>
         </div>
@@ -286,6 +284,29 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     import { requireAuth } from './js/auth.js';
+    import { CATS, poblarSub, initHashtags } from './js/categorias.js';
+
+    // Poblar selects de categoría con las 11 categorías
+    function poblarCats(selId) {
+      const sel = document.getElementById(selId);
+      if (!sel) return;
+      sel.innerHTML = '<option value="" disabled selected>Categoría</option>' +
+        Object.keys(CATS).map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+    poblarCats('f-categoria');
+    poblarCats('fd-categoria');
+
+    window.onCatM = () => poblarSub(
+      document.getElementById('f-categoria'),
+      document.getElementById('f-subcategoria')
+    );
+    window.onCatD = () => poblarSub(
+      document.getElementById('fd-categoria'),
+      document.getElementById('fd-subcategoria')
+    );
+
+    let _htMaestro   = { getTags: () => [] };
+    let _htDiscipulo = { getTags: () => [] };
 
     document.getElementById('nav-container').innerHTML = renderNavAuth('perfil');
 
@@ -472,19 +493,20 @@
 
         // 2a. Actualizar discipulo_perfiles (si es discípulo)
         if (_esDiscipulo) {
-          const disciplinaBuscada = document.getElementById('fd-disciplina')?.value.trim() || '';
-          const categoriaDisc     = document.getElementById('fd-categoria')?.value  || 'Otra';
-          const nivelDisc         = document.getElementById('fd-nivel')?.value       || 'principiante';
-          const maxPracticas      = parseInt(document.getElementById('fd-max-practicas')?.value) || 3;
-          const diasDisc          = document.getElementById('fd-dias')?.value.trim()  || '';
-          const horasDisc         = document.getElementById('fd-horas')?.value.trim() || '';
-          const hashtagsDiscRaw   = document.getElementById('fd-hashtags')?.value || '';
-          const hashtagsDisc      = hashtagsDiscRaw.split(',').map(h => h.trim()).filter(Boolean);
+          const disciplinaBuscada  = document.getElementById('fd-disciplina')?.value.trim() || '';
+          const categoriaDisc      = document.getElementById('fd-categoria')?.value  || 'Otra';
+          const subcategoriaDisc   = document.getElementById('fd-subcategoria')?.value || null;
+          const nivelDisc          = document.getElementById('fd-nivel')?.value       || 'principiante';
+          const maxPracticas       = parseInt(document.getElementById('fd-max-practicas')?.value) || 3;
+          const diasDisc           = document.getElementById('fd-dias')?.value.trim()  || '';
+          const horasDisc          = document.getElementById('fd-horas')?.value.trim() || '';
+          const hashtagsDisc       = _htDiscipulo.getTags();
 
           const { error: dErr } = await supabase.from('discipulo_perfiles').upsert({
             id:                  _uid,
             disciplina_buscada:  disciplinaBuscada || null,
             categoria:           categoriaDisc,
+            subcategoria:        subcategoriaDisc,
             nivel:               nivelDisc,
             disponibilidad_dias: diasDisc  || null,
             horas_semanales:     horasDisc || null,
@@ -496,17 +518,17 @@
 
         // 2b. Actualizar maestro_perfiles (si es maestro)
         if (_esMaestro) {
-          const disciplina = document.getElementById('f-disciplina')?.value.trim() || '';
-          const categoria  = document.getElementById('f-categoria')?.value  || 'Otra';
-          const formato    = document.getElementById('f-formato')?.value    || 'ambos';
-          const anosStr    = document.getElementById('f-anos')?.value;
-          const radioStr   = document.getElementById('f-radio')?.value;
-          const dias       = document.getElementById('f-dias')?.value.trim() || '';
-          const horas      = document.getElementById('f-horas')?.value.trim() || '';
-          const maxDisc    = parseInt(document.getElementById('f-max-disc')?.value) || 4;
-          const acepta     = document.getElementById('f-acepta')?.value === 'true';
-          const hashtagsRaw = document.getElementById('f-hashtags')?.value || '';
-          const hashtags   = hashtagsRaw.split(',').map(h => h.trim()).filter(Boolean);
+          const disciplina   = document.getElementById('f-disciplina')?.value.trim() || '';
+          const categoria    = document.getElementById('f-categoria')?.value  || 'Otra';
+          const subcategoria = document.getElementById('f-subcategoria')?.value || null;
+          const formato      = document.getElementById('f-formato')?.value    || 'ambos';
+          const anosStr      = document.getElementById('f-anos')?.value;
+          const radioStr     = document.getElementById('f-radio')?.value;
+          const dias         = document.getElementById('f-dias')?.value.trim() || '';
+          const horas        = document.getElementById('f-horas')?.value.trim() || '';
+          const maxDisc      = parseInt(document.getElementById('f-max-disc')?.value) || 4;
+          const acepta       = document.getElementById('f-acepta')?.value === 'true';
+          const hashtags     = _htMaestro.getTags();
 
           const constancia = parseInt(document.getElementById('f-constancia')?.value) || 0;
           const motivacion = document.getElementById('f-motivacion')?.classList.contains('on');
@@ -517,7 +539,7 @@
           const { error: mErr } = await supabase.from('maestro_perfiles')
             .upsert({
               id: _uid,
-              disciplina, categoria, formato,
+              disciplina, categoria, subcategoria, formato,
               experiencia_anos:     anosStr   ? parseInt(anosStr)  : null,
               radio_km:             radioStr  ? parseInt(radioStr) : null,
               disponibilidad_dias:  dias  || null,
@@ -631,13 +653,15 @@
 
       // Modo "añadir rol": forzar visibilidad de la nueva sección
       if (_addRole === 'maestro' && !_esMaestro) {
-        _esMaestro = true; // mostrar sección maestro (vacía)
+        _esMaestro = true;
         document.getElementById('edit-bar-label').textContent = '✎ Activando rol de Maestro';
-        // Mostrar tabs de trayectoria/requisitos
         document.querySelectorAll('.tab-btn').forEach(b => b.style.display = '');
+        // Init widget vacío para el nuevo maestro
+        _htMaestro = initHashtags({ containerId: 'ht-maestro', supabase });
       } else if (_addRole === 'discipulo' && !_esDiscipulo) {
-        _esDiscipulo = true; // mostrar sección discípulo (vacía)
+        _esDiscipulo = true;
         document.getElementById('edit-bar-label').textContent = '✎ Activando rol de Discípulo';
+        _htDiscipulo = initHashtags({ containerId: 'ht-discipulo', supabase });
       }
 
       // Mostrar botón "Añadir rol" si no es ambos todavía (y no estamos ya en modo add)
@@ -668,14 +692,21 @@
       // — Sección discípulo —
       if (_esDiscipulo) {
         document.getElementById('sec-discipulo').style.display = '';
+        _htDiscipulo = initHashtags({
+          containerId: 'ht-discipulo',
+          initial: d?.hashtags || [],
+          supabase,
+        });
         if (d) {
-          document.getElementById('fd-disciplina').value   = d.disciplina_buscada  || '';
-          document.getElementById('fd-categoria').value    = d.categoria            || 'Otra';
-          document.getElementById('fd-nivel').value        = d.nivel                || 'principiante';
+          document.getElementById('fd-disciplina').value    = d.disciplina_buscada || '';
+          document.getElementById('fd-nivel').value         = d.nivel || 'principiante';
           document.getElementById('fd-max-practicas').value = String(d.max_practicas || 3);
-          document.getElementById('fd-dias').value         = d.disponibilidad_dias  || '';
-          document.getElementById('fd-horas').value        = d.horas_semanales      || '';
-          document.getElementById('fd-hashtags').value     = (d.hashtags || []).join(', ');
+          document.getElementById('fd-dias').value          = d.disponibilidad_dias || '';
+          document.getElementById('fd-horas').value         = d.horas_semanales || '';
+          if (d.categoria) {
+            document.getElementById('fd-categoria').value = d.categoria;
+            poblarSub(document.getElementById('fd-categoria'), document.getElementById('fd-subcategoria'), d.subcategoria || '');
+          }
         }
       }
 
@@ -689,16 +720,23 @@
       } else {
         // Maestro: mostrar sección y rellenar campos
         document.getElementById('sec-maestro').style.display = '';
-        document.getElementById('f-disciplina').value = m?.disciplina || '';
-        document.getElementById('f-categoria').value  = m.categoria  || 'Otra';
-        document.getElementById('f-formato').value    = m.formato    || 'ambos';
+        _htMaestro = initHashtags({
+          containerId: 'ht-maestro',
+          initial: m.hashtags || [],
+          supabase,
+        });
+        document.getElementById('f-disciplina').value   = m.disciplina || '';
+        document.getElementById('f-formato').value      = m.formato    || 'ambos';
         if (m.experiencia_anos != null) document.getElementById('f-anos').value  = m.experiencia_anos;
         if (m.radio_km         != null) document.getElementById('f-radio').value = m.radio_km;
-        document.getElementById('f-dias').value  = m.disponibilidad_dias || '';
-        document.getElementById('f-horas').value = m.horas_semanales    || '';
-        document.getElementById('f-max-disc').value = String(m.max_discipulos || 4);
-        document.getElementById('f-acepta').value   = m.acepta_solicitudes ? 'true' : 'false';
-        document.getElementById('f-hashtags').value = (m.hashtags || []).join(', ');
+        document.getElementById('f-dias').value         = m.disponibilidad_dias || '';
+        document.getElementById('f-horas').value        = m.horas_semanales    || '';
+        document.getElementById('f-max-disc').value     = String(m.max_discipulos || 4);
+        document.getElementById('f-acepta').value       = m.acepta_solicitudes ? 'true' : 'false';
+        if (m.categoria) {
+          document.getElementById('f-categoria').value = m.categoria;
+          poblarSub(document.getElementById('f-categoria'), document.getElementById('f-subcategoria'), m.subcategoria || '');
+        }
 
         // Requisitos
         const constancia = m.constancia_minima || 0;

@@ -127,6 +127,19 @@ img { max-width: 100%; display: block; }
 .modal { background:var(--night-mid); border:0.5px solid var(--border-soft); border-radius:14px; padding:28px; display:flex; flex-direction:column; gap:16px; }
 
 /* CHAT FAB */
+/* ── HASHTAG WIDGET ── */
+.ht-box { background:var(--night-mid); border:0.5px solid var(--border); border-radius:6px; padding:8px 10px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; cursor:text; transition:border-color 0.2s; min-height:44px; }
+.ht-box:focus-within { border-color:var(--gold); }
+.ht-chip { display:inline-flex; align-items:center; gap:4px; background:var(--night-deep); border:0.5px solid var(--border-gold); color:var(--gold); font-size:11px; font-weight:300; padding:3px 8px; border-radius:100px; white-space:nowrap; }
+.ht-del { background:none; border:none; color:var(--gold); font-size:12px; cursor:pointer; padding:0; line-height:1; opacity:0.7; }
+.ht-del:hover { opacity:1; }
+.ht-input { background:none; border:none; outline:none; color:var(--text-primary); font-size:12px; font-family:var(--font-sans); flex:1; min-width:140px; padding:2px 4px; }
+.ht-input::placeholder { color:var(--text-ghost); }
+.ht-sugs { background:var(--night-mid); border:0.5px solid var(--border); border-top:none; border-radius:0 0 6px 6px; display:none; flex-direction:column; gap:0; overflow:hidden; }
+.ht-sugs.open { display:flex; }
+.ht-sug { background:none; border:none; text-align:left; padding:8px 12px; font-size:12px; color:var(--text-muted); cursor:pointer; transition:all 0.15s; }
+.ht-sug:hover { background:var(--night-deep); color:var(--gold); }
+
 .chat-fab { position:fixed; bottom:28px; right:28px; width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark)); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 20px #e9a63044; z-index:200; transition:transform 0.2s; font-size:20px; }
 .chat-fab:hover { transform:scale(1.08); }
 .chat-widget { position:fixed; bottom:92px; right:28px; width:340px; background:var(--night-mid); border:0.5px solid var(--border); border-radius:16px; overflow:hidden; z-index:200; box-shadow:0 8px 40px #00000088; display:none; flex-direction:column; }
