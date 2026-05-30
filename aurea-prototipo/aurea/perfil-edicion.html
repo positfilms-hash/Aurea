@@ -766,16 +766,17 @@
           : 'Se desactivará tu cuenta de Aurea. Perderás tu perfil e historial. Tus relaciones activas se finalizarán.';
       }
 
-      // Modo "añadir rol": forzar visibilidad de la nueva sección
+      // Modo "añadir rol": mostrar SOLO la sección del nuevo rol
       if (_addRole === 'maestro' && !_esMaestro) {
-        _esMaestro = true;
-        document.getElementById('edit-bar-label').textContent = '✎ Activando rol de Maestro';
+        _esMaestro   = true;
+        _esDiscipulo = false;   // ocultar sección discípulo para no confundir
+        document.getElementById('edit-bar-label').textContent = '✎ Configurando tu perfil de Maestro';
         document.querySelectorAll('.tab-btn').forEach(b => b.style.display = '');
-        // Init widget vacío para el nuevo maestro
         _htMaestro = initHashtags({ containerId: 'ht-maestro', supabase });
       } else if (_addRole === 'discipulo' && !_esDiscipulo) {
         _esDiscipulo = true;
-        document.getElementById('edit-bar-label').textContent = '✎ Activando rol de Discípulo';
+        _esMaestro   = false;   // ocultar sección maestro para no confundir
+        document.getElementById('edit-bar-label').textContent = '✎ Configurando tu perfil de Discípulo';
         _htDiscipulo = initHashtags({ containerId: 'ht-discipulo', supabase });
       }
 
@@ -806,11 +807,14 @@
       // — Sección discípulo —
       if (_esDiscipulo) {
         document.getElementById('sec-discipulo').style.display = '';
-        _htDiscipulo = initHashtags({
-          containerId: 'ht-discipulo',
-          initial: d?.hashtags || [],
-          supabase,
-        });
+        // Solo init widget si no lo hizo ya el bloque add-role
+        if (_addRole !== 'discipulo') {
+          _htDiscipulo = initHashtags({
+            containerId: 'ht-discipulo',
+            initial: d?.hashtags || [],
+            supabase,
+          });
+        }
         if (d) {
           document.getElementById('fd-disciplina').value    = d.disciplina_buscada || '';
           document.getElementById('fd-nivel').value         = d.nivel || 'principiante';
@@ -834,35 +838,38 @@
       } else {
         // Maestro: mostrar sección y rellenar campos
         document.getElementById('sec-maestro').style.display = '';
-        _htMaestro = initHashtags({
-          containerId: 'ht-maestro',
-          initial: m.hashtags || [],
-          supabase,
-        });
-        document.getElementById('f-disciplina').value   = m.disciplina || '';
-        document.getElementById('f-formato').value      = m.formato    || 'ambos';
-        if (m.experiencia_anos != null) document.getElementById('f-anos').value  = m.experiencia_anos;
-        if (m.radio_km         != null) document.getElementById('f-radio').value = m.radio_km;
-        document.getElementById('f-dias').value         = m.disponibilidad_dias || '';
-        document.getElementById('f-horas').value        = m.horas_semanales    || '';
-        document.getElementById('f-max-disc').value     = String(m.max_discipulos || 4);
-        document.getElementById('f-acepta').value       = m.acepta_solicitudes ? 'true' : 'false';
-        if (m.categoria) {
-          document.getElementById('f-categoria').value = m.categoria;
-          poblarSub(document.getElementById('f-categoria'), document.getElementById('f-subcategoria'), m.subcategoria || '');
+
+        // Solo init widget si no lo hizo ya el bloque add-role
+        if (_addRole !== 'maestro') {
+          _htMaestro = initHashtags({
+            containerId: 'ht-maestro',
+            initial: m?.hashtags || [],
+            supabase,
+          });
         }
 
-        // Requisitos
-        const constancia = m.constancia_minima || 0;
-        const rangeEl = document.getElementById('f-constancia');
-        rangeEl.value = constancia;
-        document.getElementById('const-val').textContent = constancia;
-
-        const motivEl = document.getElementById('f-motivacion');
-        if (!m.motivacion_obligatoria) motivEl.classList.remove('on');
-
-        document.getElementById('f-nivel').value = m.nivel_requerido || '';
-        document.getElementById('f-req-libres').value = (m.requisitos_libres || []).join('\n');
+        // Rellenar campos solo si maestro_perfiles ya existe (m no es null)
+        if (m) {
+          document.getElementById('f-disciplina').value   = m.disciplina || '';
+          document.getElementById('f-formato').value      = m.formato    || 'ambos';
+          if (m.experiencia_anos != null) document.getElementById('f-anos').value  = m.experiencia_anos;
+          if (m.radio_km         != null) document.getElementById('f-radio').value = m.radio_km;
+          document.getElementById('f-dias').value         = m.disponibilidad_dias || '';
+          document.getElementById('f-horas').value        = m.horas_semanales    || '';
+          document.getElementById('f-max-disc').value     = String(m.max_discipulos || 4);
+          document.getElementById('f-acepta').value       = m.acepta_solicitudes ? 'true' : 'false';
+          if (m.categoria) {
+            document.getElementById('f-categoria').value = m.categoria;
+            poblarSub(document.getElementById('f-categoria'), document.getElementById('f-subcategoria'), m.subcategoria || '');
+          }
+          // Requisitos
+          const constancia = m.constancia_minima || 0;
+          document.getElementById('f-constancia').value = constancia;
+          document.getElementById('const-val').textContent = constancia;
+          if (!m.motivacion_obligatoria) document.getElementById('f-motivacion').classList.remove('on');
+          document.getElementById('f-nivel').value = m.nivel_requerido || '';
+          document.getElementById('f-req-libres').value = (m.requisitos_libres || []).join('\n');
+        }
 
         // Trayectoria
         const { data: tray } = await supabase
@@ -873,7 +880,7 @@
           _tlCount = i + 2;
           list.appendChild(crearBloqueTL(t, i + 1));
         });
-        if (!tray?.length) window.addTL(); // al menos un bloque vacío
+        if (!tray?.length) window.addTL();
       }
     }
 
