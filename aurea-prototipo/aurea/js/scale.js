@@ -18,4 +18,21 @@
   window.addEventListener('resize', function () {
     document.documentElement.style.setProperty('--real-vh', (window.innerHeight / z) + 'px');
   });
+
+  // — Tema arena persistente —
+  // Se aplica ANTES del render para evitar flash de tema incorrecto
+  if (localStorage.getItem('aurea-tema') === 'arena') {
+    document.documentElement.classList.add('theme-arena');
+  }
 })();
+
+// Función global para cambiar tema desde cualquier página
+function aureaSetTema(tema) {
+  if (tema === 'arena') {
+    document.documentElement.classList.add('theme-arena');
+    localStorage.setItem('aurea-tema', 'arena');
+  } else {
+    document.documentElement.classList.remove('theme-arena');
+    localStorage.setItem('aurea-tema', 'dark');
+  }
+}

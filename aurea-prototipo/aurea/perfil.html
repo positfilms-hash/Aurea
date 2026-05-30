@@ -146,8 +146,8 @@
       btn.classList.add('active');
       const esMaestro = role === 'maestro';
 
-      // — Tema arena para discípulo, oscuro para maestro —
-      document.documentElement.classList.toggle('theme-arena', !esMaestro);
+      // — Tema arena para discípulo, oscuro para maestro (persiste en todas las páginas) —
+      aureaSetTema(esMaestro ? 'dark' : 'arena');
 
       // — Etiqueta de rol —
       document.getElementById('role-label').textContent = esMaestro ? 'Maestro' : 'Discípulo';
