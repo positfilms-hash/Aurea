@@ -14,6 +14,8 @@
     .role-toggle{display:flex;background:var(--night-mid);border:0.5px solid var(--border);border-radius:100px;padding:3px;gap:2px;}
     .role-btn{flex:1;font-size:10px;font-weight:400;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);background:none;border:none;padding:7px 12px;border-radius:100px;cursor:pointer;transition:all 0.22s;text-align:center;}
     .role-btn.active{background:var(--gold);color:var(--night);}
+    .role-btn.add-role{color:var(--text-ghost);font-style:italic;letter-spacing:0.06em;}
+    .role-btn.add-role:hover{color:var(--gold);}
     .profile-header{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;}
     .big-avatar{width:88px;height:88px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:34px;font-weight:600;color:var(--night);border:2px solid var(--border-soft);position:relative;cursor:pointer;}
     .avatar-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(28,20,16,0.6);display:flex;align-items:center;justify-content:center;font-size:22px;opacity:0;transition:opacity 0.2s;}
@@ -124,8 +126,33 @@
     let _profile = null, _maestro = null, _discipulo = null;
     let _tray = [], _resenas = [], _relM = [], _relD = [];
 
+    // — Añadir rol desde el toggle —
+    window.añadirRol = async function(role) {
+      const label = role === 'maestro' ? 'maestro' : 'discípulo';
+      if (!confirm(`¿Activar el rol de ${label}? Se añadirán nuevos campos a tu perfil que podrás editar.`)) return;
+      try {
+        const { error: pErr } = await supabase.from('profiles')
+          .update({ rol: 'ambos' }).eq('id', _profile.id);
+        if (pErr) throw pErr;
+        if (role === 'maestro') {
+          const { error: mErr } = await supabase.from('maestro_perfiles')
+            .upsert({ id: _profile.id, disciplina: 'Sin especificar', categoria: 'Otra', formato: 'ambos' });
+          if (mErr) throw mErr;
+        } else {
+          const { error: dErr } = await supabase.from('discipulo_perfiles')
+            .upsert({ id: _profile.id });
+          if (dErr) throw dErr;
+        }
+        window.location.reload();
+      } catch (err) {
+        alert('Error activando el rol: ' + (err.message || err));
+      }
+    };
+
     // — setRole expuesto globalmente para los onclick —
     window.setRole = function(role, btn) {
+      // Si el botón es de "añadir rol", activar esa lógica en vez de togglear
+      if (btn.classList.contains('add-role')) { añadirRol(role); return; }
       document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const esMaestro = role === 'maestro';
@@ -337,11 +364,17 @@
         }
       }
 
-      // Visibilidad del toggle según rol
+      // Toggle: si solo tiene un rol, el otro botón ofrece activarlo
       const rol = _profile.rol || 'discipulo';
       const btns = document.querySelectorAll('.role-btn');
-      if (rol === 'maestro')   btns[1].style.display = 'none';
-      if (rol === 'discipulo') btns[0].style.display = 'none';
+      if (rol === 'maestro') {
+        btns[1].classList.add('add-role');
+        btns[1].textContent = '+ Discípulo';
+      }
+      if (rol === 'discipulo') {
+        btns[0].classList.add('add-role');
+        btns[0].textContent = '+ Maestro';
+      }
 
       // Vista inicial según rol
       const startRole = rol === 'discipulo' ? 'discipulo' : 'maestro';
