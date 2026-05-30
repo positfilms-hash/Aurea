@@ -69,6 +69,7 @@
         <button class="tab-btn active" onclick="showTab('perfil',this)"><span class="tab-icon">👤</span>Perfil</button>
         <button class="tab-btn" onclick="showTab('trayectoria',this)"><span class="tab-icon">📋</span>Trayectoria</button>
         <button class="tab-btn" onclick="showTab('requisitos',this)"><span class="tab-icon">✦</span>Requisitos mínimos</button>
+        <button class="tab-btn" onclick="showTab('cuenta',this)" style="margin-top:auto;color:var(--red);"><span class="tab-icon">⚠</span>Cuenta</button>
       </div>
       <div class="sidebar-info">Los cambios no se publican hasta que pulses "Guardar cambios".</div>
     </div>
@@ -245,6 +246,30 @@
           <div class="edit-field"><span class="edit-label">Requisitos libres (uno por línea)</span><textarea class="edit-textarea" id="f-req-libres" style="height:90px;" placeholder="Haber leído al menos un texto de la disciplina&#10;Disponibilidad mínima de 3 horas semanales"></textarea></div>
         </div>
       </div>
+      <!-- CUENTA -->
+      <div class="tab-panel" id="tab-cuenta">
+        <div class="section-title">Cuenta</div>
+        <div class="edit-grid">
+
+          <!-- Dar de baja como Maestro -->
+          <div id="baja-maestro" style="display:none;background:var(--night-mid);border:0.5px solid #E8707044;border-radius:10px;padding:20px 24px;">
+            <div style="font-size:9px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:#E87070;margin-bottom:10px;">Zona de peligro</div>
+            <div style="font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--text-primary);margin-bottom:6px;">Darme de baja como Maestro</div>
+            <div id="baja-maestro-desc" style="font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.7;margin-bottom:16px;"></div>
+            <button onclick="darseDebaja('maestro')" style="font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#E87070;background:none;border:0.5px solid #E8707055;padding:9px 20px;border-radius:100px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#E8707011'" onmouseout="this.style.background='none'">Darme de baja como Maestro</button>
+          </div>
+
+          <!-- Dar de baja como Discípulo -->
+          <div id="baja-discipulo" style="display:none;background:var(--night-mid);border:0.5px solid #E8707044;border-radius:10px;padding:20px 24px;">
+            <div style="font-size:9px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:#E87070;margin-bottom:10px;">Zona de peligro</div>
+            <div style="font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--text-primary);margin-bottom:6px;">Darme de baja como Discípulo</div>
+            <div id="baja-discipulo-desc" style="font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.7;margin-bottom:16px;"></div>
+            <button onclick="darseDebaja('discipulo')" style="font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#E87070;background:none;border:0.5px solid #E8707055;padding:9px 20px;border-radius:100px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#E8707011'" onmouseout="this.style.background='none'">Darme de baja como Discípulo</button>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -267,6 +292,43 @@
     let _uid = null, _esMaestro = false, _esDiscipulo = false, _rol = null;
     // Si venimos de "añadir rol", este parámetro indica cuál hay que activar
     const _addRole = new URLSearchParams(location.search).get('add'); // 'maestro' | 'discipulo' | null
+
+    // — Darse de baja de un rol —
+    window.darseDebaja = async function(rol) {
+      const esAmbos = _rol === 'ambos';
+      const label   = rol === 'maestro' ? 'Maestro' : 'Discípulo';
+      const otroRol = rol === 'maestro' ? 'discipulo' : 'maestro';
+      const tabla   = rol === 'maestro' ? 'maestro_perfiles' : 'discipulo_perfiles';
+
+      const msg = esAmbos
+        ? `¿Seguro que quieres dejar de ser ${label}?\n\nSe eliminarán tu perfil y datos como ${label}. Seguirás siendo ${otroRol === 'maestro' ? 'Maestro' : 'Discípulo'} en Aurea.`
+        : `¿Seguro que quieres darte de baja de Aurea?\n\nSe eliminarán todos tus datos y tu cuenta quedará desactivada. Esta acción no se puede deshacer.`;
+
+      if (!confirm(msg)) return;
+
+      try {
+        if (esAmbos) {
+          // Eliminar solo ese rol, conservar el otro
+          const { error: dErr } = await supabase.from(tabla).delete().eq('id', _uid);
+          if (dErr) throw dErr;
+          const { error: pErr } = await supabase.from('profiles')
+            .update({ rol: otroRol }).eq('id', _uid);
+          if (pErr) throw pErr;
+          window.location.href = 'perfil.html';
+        } else {
+          // Único rol → desactivar cuenta
+          const { error: dErr } = await supabase.from(tabla).delete().eq('id', _uid);
+          if (dErr) throw dErr;
+          const { error: pErr } = await supabase.from('profiles')
+            .update({ activo: false }).eq('id', _uid);
+          if (pErr) throw pErr;
+          await supabase.auth.signOut();
+          window.location.href = 'index.html';
+        }
+      } catch (err) {
+        alert('Error al procesar la baja: ' + (err.message || err));
+      }
+    };
 
     // — Añadir otro rol —
     window.añadirRol = async function() {
@@ -550,6 +612,22 @@
       _rol         = p?.rol || 'discipulo';
       _esMaestro   = _rol === 'maestro' || _rol === 'ambos';
       _esDiscipulo = _rol === 'discipulo' || _rol === 'ambos';
+
+      // — Pestaña Cuenta: mostrar cards de baja según rol —
+      if (_esMaestro) {
+        const card = document.getElementById('baja-maestro');
+        card.style.display = '';
+        document.getElementById('baja-maestro-desc').textContent = _rol === 'ambos'
+          ? 'Perderás tu perfil de maestro, tu trayectoria y tus reseñas. Tus relaciones activas se finalizarán. Seguirás siendo discípulo.'
+          : 'Se desactivará tu cuenta de Aurea. Perderás tu perfil, trayectoria y reseñas. Tus relaciones activas se finalizarán.';
+      }
+      if (_esDiscipulo) {
+        const card = document.getElementById('baja-discipulo');
+        card.style.display = '';
+        document.getElementById('baja-discipulo-desc').textContent = _rol === 'ambos'
+          ? 'Perderás tu perfil de discípulo y tu historial. Tus relaciones activas se finalizarán. Seguirás siendo maestro.'
+          : 'Se desactivará tu cuenta de Aurea. Perderás tu perfil e historial. Tus relaciones activas se finalizarán.';
+      }
 
       // Modo "añadir rol": forzar visibilidad de la nueva sección
       if (_addRole === 'maestro' && !_esMaestro) {
