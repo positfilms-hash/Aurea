@@ -165,7 +165,7 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     import { requireAuth } from './js/auth.js';
-    import { checkNotificaciones } from './js/notif.js';
+    import { checkNotificaciones, refreshMsgBadge } from './js/notif.js';
 
     const session = await requireAuth();
     const uid = session.user.id;
@@ -274,16 +274,15 @@
     }
     msgBox.scrollTop = msgBox.scrollHeight;
 
-    // — Marcar como leídos los mensajes del otro al abrir el chat —
+    // — Marcar como leídos los mensajes del otro y actualizar badge global —
     async function marcarLeidos() {
       await supabase.from('mensajes')
         .update({ leido_at: new Date().toISOString() })
         .eq('relacion_id', relacionId)
         .neq('autor_id', uid)
         .is('leido_at', null);
-      // Resetear badge del nav si existe
-      const badge = document.getElementById('nav-msg-badge');
-      if (badge) badge.style.display = 'none';
+      // Recalcular badge teniendo en cuenta otros chats no leídos
+      await refreshMsgBadge();
     }
     marcarLeidos();
 
