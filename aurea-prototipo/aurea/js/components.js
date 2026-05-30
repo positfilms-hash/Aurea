@@ -7,12 +7,27 @@ function renderNavPublic(active=''){
 }
 
 function renderNavAuth(active='', user='') {
+  // El dropdown de "Mis relaciones" cambia su primer item según la vista activa
+  const rol   = localStorage.getItem('aurea-rol')  || 'maestro';
+  const tema  = localStorage.getItem('aurea-tema') || 'dark';
+  const arenaView = rol === 'discipulo' || (rol === 'ambos' && tema === 'arena');
+  const relLabel  = arenaView ? 'Mis maestros' : 'Mis discípulos';
+  const relActive = ['relaciones','solicitudes','historia'].includes(active);
+
+  const relDd = `<div class="nav-rel-wrap" id="nav-rel-wrap">
+    <button class="nav-link nav-dd-btn${relActive?' active':''}" onclick="toggleRelDd()">Mis relaciones <span class="nav-dd-arrow">▾</span></button>
+    <div class="nav-dd nav-dd-left" id="nav-rel-dd">
+      <a class="nav-dd-item${active==='relaciones'?' active':''}" href="relaciones.html">${relLabel}</a>
+      <a class="nav-dd-item${active==='solicitudes'?' active':''}" href="solicitudes.html">Mis solicitudes</a>
+      <div class="nav-dd-sep"></div>
+      <a class="nav-dd-item${active==='historia'?' active':''}" href="historia.html">Mi historia</a>
+    </div>
+  </div>`;
+
   const pages = [
-    {id:'discover',   label:'Discover',        href:'discover.html'},
-    {id:'relaciones', label:'Mis relaciones',  href:'relaciones.html'},
-    {id:'solicitudes',label:'Mis solicitudes', href:'solicitudes.html'},
-    {id:'contacto',   label:'Contacto',        href:'contacto.html'},
-    {id:'dona',       label:'Dona',            href:'dona.html'},
+    {id:'discover', label:'Discover', href:'discover.html'},
+    {id:'contacto', label:'Contacto', href:'contacto.html'},
+    {id:'dona',     label:'Dona',     href:'dona.html'},
   ];
 
   // Estado actual leído de localStorage (disponible en cualquier página)
@@ -41,10 +56,14 @@ function renderNavAuth(active='', user='') {
     ddItems += `<a class="nav-dd-item nav-dd-add" href="perfil-edicion.html?add=${otro}">+ Añadir rol de ${otroLabel}</a>`;
   }
 
-  const links = pages.map(p => `<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('');
   return `<nav class="nav">
     <a class="nav-logo" href="discover.html"><img src="${LOGO_URL}" alt="Aurea"><span class="nav-wordmark">Aurea</span></a>
-    <div class="nav-links">${links}</div>
+    <div class="nav-links">
+      <a class="nav-link${active==='discover'?' active':''}" href="discover.html">Discover</a>
+      ${relDd}
+      <a class="nav-link${active==='mensajes'?' active':''}" href="mensajes.html" id="nav-msg-link">Mensajes<span id="nav-msg-badge" class="notif-badge" style="display:none;">0</span></a>
+      ${pages.filter(p=>p.id!=='discover').map(p=>`<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('')}
+    </div>
     <div class="nav-perfil-wrap" id="nav-perfil-wrap">
       <button class="nav-perfil-btn${active==='perfil'?' active':''}" id="nav-perfil-btn" onclick="toggleNavDd()">
         Mi perfil <span class="nav-rol-badge" id="nav-rol-badge">· ${badge}</span> <span class="nav-dd-arrow">▾</span>
@@ -55,10 +74,24 @@ function renderNavAuth(active='', user='') {
   </nav>`;
 }
 
-// — Nav dropdown: abrir/cerrar y cambiar rol —
+// — Nav dropdown Mis relaciones —
+function toggleRelDd() {
+  var dd = document.getElementById('nav-rel-dd');
+  if (dd) {
+    dd.classList.toggle('open');
+    var dd2 = document.getElementById('nav-perfil-dd');
+    if (dd2) dd2.classList.remove('open');
+  }
+}
+
+// — Nav dropdown Mi perfil —
 function toggleNavDd() {
   var dd = document.getElementById('nav-perfil-dd');
-  if (dd) dd.classList.toggle('open');
+  if (dd) {
+    dd.classList.toggle('open');
+    var dd2 = document.getElementById('nav-rel-dd');
+    if (dd2) dd2.classList.remove('open');
+  }
 }
 
 function cambiarRolNav(rol) {
@@ -101,13 +134,16 @@ function cambiarRolNav(rol) {
   }
 }
 
-// Cerrar al clicar fuera
+// Cerrar dropdowns al clicar fuera
 document.addEventListener('click', function(e) {
-  var wrap = document.getElementById('nav-perfil-wrap');
-  if (wrap && !wrap.contains(e.target)) {
-    var dd = document.getElementById('nav-perfil-dd');
-    if (dd) dd.classList.remove('open');
-  }
+  ['nav-perfil-wrap','nav-rel-wrap'].forEach(function(wrapId) {
+    var wrap = document.getElementById(wrapId);
+    if (wrap && !wrap.contains(e.target)) {
+      var ddId = wrapId === 'nav-perfil-wrap' ? 'nav-perfil-dd' : 'nav-rel-dd';
+      var dd = document.getElementById(ddId);
+      if (dd) dd.classList.remove('open');
+    }
+  });
 });
 
 function renderFooter(){

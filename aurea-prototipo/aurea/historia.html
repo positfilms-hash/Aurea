@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="js/scale.js"></script>
+  <title>Mi historia · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .page{display:grid;grid-template-columns:260px 1fr;}
+    .sidebar{align-self:start;position:sticky;top:var(--nav-height);height:calc(var(--real-vh,100vh) - var(--nav-height) - 36px);border-right:0.5px solid var(--border);background:var(--night-soft);overflow-y:auto;display:flex;flex-direction:column;gap:0;}
+    .sidebar-header{padding:24px 24px 16px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
+    .sidebar-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);}
+    .sidebar-sub{font-size:11px;color:var(--text-muted);margin-top:4px;}
+    .stat-card{margin:16px;background:var(--night-mid);border:0.5px solid var(--border);border-radius:10px;padding:16px;}
+    .stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border);}
+    .stat-row:last-child{border-bottom:none;}
+    .stat-lbl{font-size:11px;color:var(--text-muted);}
+    .stat-val{font-family:var(--font-serif);font-size:18px;font-weight:500;color:var(--gold);}
+    .filter-btns{display:flex;gap:6px;padding:16px 20px;border-bottom:0.5px solid var(--border);}
+    .filter-btn{font-size:10px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;padding:5px 12px;border-radius:100px;border:0.5px solid var(--border);background:none;color:var(--text-muted);cursor:pointer;transition:all 0.2s;}
+    .filter-btn.active{border-color:var(--gold);color:var(--gold);background:var(--night-deep);}
+    .content{padding:28px 36px;overflow-y:auto;}
+    .page-title{font-family:var(--font-serif);font-size:28px;font-weight:500;color:var(--text-primary);margin-bottom:6px;}
+    .page-sub{font-size:12px;color:var(--text-muted);margin-bottom:28px;}
+    .hist-item{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:20px 0;border-bottom:0.5px solid var(--border);}
+    .hist-item:last-child{border-bottom:none;}
+    .hist-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:16px;font-weight:600;color:var(--night);flex-shrink:0;}
+    .hist-name{font-size:14px;font-weight:500;color:var(--text-primary);}
+    .hist-disc{font-size:12px;color:var(--gold);margin-top:2px;}
+    .hist-meta{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap;}
+    .hist-tag{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:3px 8px;border-radius:100px;}
+    .tag-finalizada{color:#3B6D11;background:#1A2A12;border:0.5px solid #3B6D1144;}
+    .tag-cancelada{color:var(--text-faint);background:var(--night-mid);border:0.5px solid var(--border);}
+    .hist-dates{font-size:11px;color:var(--text-faint);}
+    .hist-dur{font-size:11px;color:var(--text-muted);}
+    .empty{padding:60px 36px;text-align:center;color:var(--text-faint);}
+    .empty-icon{font-size:36px;margin-bottom:16px;}
+    .empty-title{font-family:var(--font-serif);font-size:18px;font-style:italic;margin-bottom:8px;}
+    .empty-sub{font-size:12px;line-height:1.7;max-width:320px;margin:0 auto;}
+    .page-footer-bar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:36px;border-top:0.5px solid var(--border);background:var(--night-soft);}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="page">
+    <!-- Sidebar con stats -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Mi historia</div>
+        <div class="sidebar-sub">Relaciones pasadas en Aurea</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-row"><span class="stat-lbl">Total relaciones</span><span class="stat-val" id="st-total">—</span></div>
+        <div class="stat-row"><span class="stat-lbl">Completadas</span><span class="stat-val" id="st-fin">—</span></div>
+        <div class="stat-row"><span class="stat-lbl">Canceladas</span><span class="stat-val" id="st-can">—</span></div>
+        <div class="stat-row"><span class="stat-lbl">Meses acumulados</span><span class="stat-val" id="st-dur">—</span></div>
+      </div>
+      <div class="filter-btns">
+        <button class="filter-btn active" id="btn-todo" onclick="filtrar('todo')">Todo</button>
+        <button class="filter-btn" id="btn-maestro" onclick="filtrar('maestro')">Maestro</button>
+        <button class="filter-btn" id="btn-discipulo" onclick="filtrar('discipulo')">Discípulo</button>
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div id="content-area" class="content">
+      <div class="page-title">Mi historia</div>
+      <div class="page-sub">Cargando…</div>
+    </div>
+  </div>
+
+  <div class="page-footer-bar">
+    <span style="font-size:10px;color:var(--text-ghost);">© 2026 Aurea · Todos los derechos reservados</span>
+  </div>
+
+  <script src="js/components.js"></script>
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { requireAuth } from './js/auth.js';
+
+    document.getElementById('nav-container').innerHTML = renderNavAuth('historia');
+
+    let _uid = null;
+    let _allRels = [];
+    let _filtro = 'todo';
+
+    function duracionMeses(ini, fin) {
+      if (!ini) return 0;
+      const d1 = new Date(ini), d2 = fin ? new Date(fin) : new Date();
+      return Math.max(0, Math.round((d2 - d1) / (1000 * 60 * 60 * 24 * 30)));
+    }
+
+    function formatDate(ts) {
+      if (!ts) return '—';
+      return new Date(ts).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' });
+    }
+
+    function ini(p) {
+      return ((p?.nombre||'')[0] + (p?.apellido||'')[0]).toUpperCase() || '?';
+    }
+    function nombreCompleto(p) {
+      return ((p?.nombre||'') + ' ' + (p?.apellido||'')).trim() || '—';
+    }
+
+    window.filtrar = function(f) {
+      _filtro = f;
+      ['todo','maestro','discipulo'].forEach(id => {
+        document.getElementById('btn-'+id).classList.toggle('active', id === f);
+      });
+      renderLista();
+    };
+
+    function renderLista() {
+      const rels = _allRels.filter(r => {
+        if (_filtro === 'maestro')   return r.maestro_id === _uid;
+        if (_filtro === 'discipulo') return r.discipulo_id === _uid;
+        return true;
+      });
+
+      const content = document.getElementById('content-area');
+
+      if (!rels.length) {
+        content.innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">📜</div>
+            <div class="empty-title">Sin historial en esta categoría</div>
+            <div class="empty-sub">Las relaciones finalizadas o canceladas aparecerán aquí.</div>
+          </div>`;
+        return;
+      }
+
+      const html = rels.map(r => {
+        const esMaestro = r.maestro_id === _uid;
+        const otro = esMaestro ? r.pd : r.pm;
+        const rol  = esMaestro ? 'Maestro' : 'Discípulo';
+        const dur  = duracionMeses(r.iniciada_at, r.finalizada_at || r.updated_at);
+        const estadoLabel = r.estado === 'finalizada' ? 'Completada' : 'Cancelada';
+        const estadoCls   = r.estado === 'finalizada' ? 'tag-finalizada' : 'tag-cancelada';
+        return `<div class="hist-item">
+          <div class="hist-avatar" style="background:${otro?.avatar_color||'var(--gold)'};">${ini(otro)}</div>
+          <div>
+            <div class="hist-name">${nombreCompleto(otro)}</div>
+            <div class="hist-disc">${r.disciplina || '—'}</div>
+            <div class="hist-meta">
+              <span class="hist-tag ${estadoCls}">${estadoLabel}</span>
+              <span class="hist-tag" style="color:var(--text-muted);background:var(--night-mid);border:0.5px solid var(--border);">${rol}</span>
+              <span class="hist-dur">${dur > 0 ? dur + (dur===1?' mes':' meses') : '< 1 mes'}</span>
+            </div>
+            <div class="hist-dates">${formatDate(r.iniciada_at)} → ${formatDate(r.finalizada_at)}</div>
+          </div>
+        </div>`;
+      }).join('');
+
+      content.innerHTML = `
+        <div class="page-title">Mi historia</div>
+        <div class="page-sub">${rels.length} relación${rels.length!==1?'es':''} pasada${rels.length!==1?'s':''}</div>
+        ${html}`;
+    }
+
+    async function init() {
+      const session = await requireAuth();
+      if (!session) return;
+      _uid = session.user.id;
+
+      const { data: rels } = await supabase
+        .from('relaciones')
+        .select(`
+          id, disciplina, estado, iniciada_at, finalizada_at, updated_at,
+          maestro_id, discipulo_id,
+          pm:profiles!maestro_id(nombre, apellido, avatar_color),
+          pd:profiles!discipulo_id(nombre, apellido, avatar_color)
+        `)
+        .or(`maestro_id.eq.${_uid},discipulo_id.eq.${_uid}`)
+        .in('estado', ['finalizada','cancelada'])
+        .order('updated_at', { ascending: false });
+
+      _allRels = rels || [];
+
+      // Stats
+      const total = _allRels.length;
+      const fin   = _allRels.filter(r => r.estado === 'finalizada').length;
+      const can   = _allRels.filter(r => r.estado === 'cancelada').length;
+      const durTotal = _allRels.reduce((s, r) => s + duracionMeses(r.iniciada_at, r.finalizada_at || r.updated_at), 0);
+
+      document.getElementById('st-total').textContent = total || '0';
+      document.getElementById('st-fin').textContent   = fin   || '0';
+      document.getElementById('st-can').textContent   = can   || '0';
+      document.getElementById('st-dur').textContent   = durTotal || '0';
+
+      renderLista();
+    }
+
+    init();
+  </script>
+</body>
+</html>

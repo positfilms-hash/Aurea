@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="js/scale.js"></script>
+  <title>Mensajes · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .page{display:grid;grid-template-columns:340px 1fr;height:calc(var(--real-vh,100vh) - var(--nav-height));}
+    .conv-list{border-right:0.5px solid var(--border);background:var(--night-soft);overflow-y:auto;display:flex;flex-direction:column;}
+    .conv-header{padding:20px 24px 14px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
+    .conv-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);}
+    .conv-item{display:flex;align-items:center;gap:12px;padding:14px 20px;cursor:pointer;border-bottom:0.5px solid var(--border);transition:background 0.15s;text-decoration:none;}
+    .conv-item:hover{background:var(--night-mid);}
+    .conv-item.unread{background:var(--night-deep);}
+    .conv-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:16px;font-weight:600;color:var(--night);flex-shrink:0;}
+    .conv-info{flex:1;min-width:0;}
+    .conv-name{font-size:13px;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .conv-disc{font-size:11px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .conv-preview{font-size:11px;color:var(--text-faint);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .conv-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+    .conv-time{font-size:10px;color:var(--text-ghost);}
+    .conv-badge{background:var(--gold);color:var(--night);font-size:9px;font-weight:700;border-radius:100px;padding:2px 6px;min-width:16px;text-align:center;}
+    .conv-estado{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;padding:2px 7px;border-radius:100px;}
+    .estado-prueba{color:var(--purple);background:#1A1830;border:0.5px solid #53489744;}
+    .estado-consolidada{color:#3B6D11;background:#1A2A12;border:0.5px solid #3B6D1144;}
+    .main-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--text-faint);height:100%;}
+    .main-empty-icon{font-size:48px;opacity:0.3;}
+    .main-empty-text{font-family:var(--font-serif);font-size:18px;font-style:italic;}
+    .main-empty-sub{font-size:12px;text-align:center;max-width:280px;line-height:1.7;}
+    .no-conv{padding:40px 24px;text-align:center;color:var(--text-faint);}
+    .no-conv-icon{font-size:32px;margin-bottom:12px;}
+    .no-conv-text{font-size:13px;font-family:var(--font-serif);font-style:italic;}
+    .no-conv-sub{font-size:11px;margin-top:6px;line-height:1.6;}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="page">
+    <!-- Lista de conversaciones -->
+    <div class="conv-list">
+      <div class="conv-header">
+        <div class="conv-title">Mensajes</div>
+      </div>
+      <div id="conv-list-body">
+        <div class="no-conv">
+          <div class="no-conv-icon">✉</div>
+          <div class="no-conv-text">Cargando conversaciones…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel derecho -->
+    <div id="main-panel" class="main-empty">
+      <div class="main-empty-icon">✦</div>
+      <div class="main-empty-text">Selecciona una conversación</div>
+      <div class="main-empty-sub">Aquí aparecen los mensajes de tus relaciones activas y en periodo de prueba.</div>
+    </div>
+  </div>
+
+  <div class="page-footer-bar" style="display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:36px;border-top:0.5px solid var(--border);background:var(--night-soft);">
+    <span style="font-size:10px;color:var(--text-ghost);">© 2026 Aurea</span>
+  </div>
+
+  <script src="js/components.js"></script>
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { requireAuth } from './js/auth.js';
+
+    document.getElementById('nav-container').innerHTML = renderNavAuth('mensajes');
+
+    function timeAgo(ts) {
+      if (!ts) return '';
+      const d = Math.floor((Date.now() - new Date(ts)) / 60000);
+      if (d < 1)  return 'Ahora';
+      if (d < 60) return `Hace ${d} min`;
+      if (d < 1440) return `Hace ${Math.floor(d/60)} h`;
+      return `Hace ${Math.floor(d/1440)} d`;
+    }
+
+    function ini(p) {
+      return ((p?.nombre||'')[0] + (p?.apellido||'')[0]).toUpperCase() || '?';
+    }
+    function nombreCompleto(p) {
+      return ((p?.nombre||'') + ' ' + (p?.apellido||'')).trim() || '—';
+    }
+
+    async function init() {
+      const session = await requireAuth();
+      if (!session) return;
+      const uid = session.user.id;
+
+      // Cargar todas las relaciones activas donde el usuario participa
+      const { data: rels, error } = await supabase
+        .from('relaciones')
+        .select(`
+          id, disciplina, estado, iniciada_at,
+          maestro_id, discipulo_id,
+          pm:profiles!maestro_id(nombre, apellido, avatar_color),
+          pd:profiles!discipulo_id(nombre, apellido, avatar_color)
+        `)
+        .or(`maestro_id.eq.${uid},discipulo_id.eq.${uid}`)
+        .in('estado', ['prueba','consolidada'])
+        .order('iniciada_at', { ascending: false });
+
+      if (error || !rels?.length) {
+        document.getElementById('conv-list-body').innerHTML = `
+          <div class="no-conv">
+            <div class="no-conv-icon">✉</div>
+            <div class="no-conv-text">Sin conversaciones activas</div>
+            <div class="no-conv-sub">Los mensajes aparecen cuando tienes una relación en periodo de prueba o activa.</div>
+          </div>`;
+        return;
+      }
+
+      // Para cada relación, obtener el último mensaje y el número de no leídos
+      const relIds = rels.map(r => r.id);
+      const [lastMsgs, unreadMsgs] = await Promise.all([
+        supabase.from('mensajes')
+          .select('relacion_id, texto, created_at, autor_id')
+          .in('relacion_id', relIds)
+          .order('created_at', { ascending: false }),
+        supabase.from('mensajes')
+          .select('relacion_id', { count: 'exact' })
+          .in('relacion_id', relIds)
+          .neq('autor_id', uid)
+          .is('leido_at', null),
+      ]);
+
+      // Indexar últimos mensajes por relacion_id
+      const lastByRel  = {};
+      const unreadByRel = {};
+      (lastMsgs.data || []).forEach(m => {
+        if (!lastByRel[m.relacion_id]) lastByRel[m.relacion_id] = m;
+      });
+      // Contar no leídos por relación
+      if (unreadMsgs.data) {
+        const { data: uData } = await supabase.from('mensajes')
+          .select('relacion_id')
+          .in('relacion_id', relIds)
+          .neq('autor_id', uid)
+          .is('leido_at', null);
+        (uData || []).forEach(m => {
+          unreadByRel[m.relacion_id] = (unreadByRel[m.relacion_id] || 0) + 1;
+        });
+      }
+
+      const html = rels.map(r => {
+        const esMaestro = r.maestro_id === uid;
+        const otro = esMaestro ? r.pd : r.pm;
+        const last = lastByRel[r.id];
+        const unread = unreadByRel[r.id] || 0;
+        const estadoCls = r.estado === 'prueba' ? 'estado-prueba' : 'estado-consolidada';
+        const estadoLabel = r.estado === 'prueba' ? 'Prueba' : 'Activa';
+
+        return `<a class="conv-item${unread>0?' unread':''}" href="periodo-prueba.html?id=${r.id}">
+          <div class="conv-avatar" style="background:${otro?.avatar_color||'var(--gold)'};">${ini(otro)}</div>
+          <div class="conv-info">
+            <div class="conv-name">${nombreCompleto(otro)}</div>
+            <div class="conv-disc">${r.disciplina || '—'}</div>
+            <div class="conv-preview">${last ? (last.autor_id === uid ? 'Tú: ' : '') + last.texto.substring(0,60) : 'Sin mensajes aún'}</div>
+          </div>
+          <div class="conv-meta">
+            <span class="conv-time">${timeAgo(last?.created_at)}</span>
+            ${unread > 0 ? `<span class="conv-badge">${unread}</span>` : ''}
+            <span class="conv-estado ${estadoCls}">${estadoLabel}</span>
+          </div>
+        </a>`;
+      }).join('');
+
+      document.getElementById('conv-list-body').innerHTML = html || `
+        <div class="no-conv">
+          <div class="no-conv-icon">✉</div>
+          <div class="no-conv-text">Sin conversaciones activas</div>
+        </div>`;
+    }
+
+    init();
+  </script>
+</body>
+</html>

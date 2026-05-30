@@ -99,6 +99,11 @@ img { max-width: 100%; display: block; }
 .nav-rol-badge { font-size:9px; letter-spacing:0.1em; text-transform:uppercase; opacity:0.85; }
 .nav-dd-arrow  { font-size:8px; margin-left:2px; opacity:0.6; }
 
+/* Dropdowns del nav (Mi perfil + Mis relaciones) */
+.nav-perfil-wrap, .nav-rel-wrap { position:relative; display:flex; align-items:center; }
+.nav-dd-btn { background:none; border:none; font-family:var(--font-sans); font-size:11px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); cursor:pointer; transition:color 0.2s; padding:0; }
+.nav-dd-btn:hover, .nav-dd-btn.active { color:var(--gold); }
+.nav-dd-left { right:auto; left:0; } /* alineación izquierda para el dropdown de relaciones */
 /* Dropdown Mi perfil */
 .nav-perfil-wrap { position:relative; display:flex; align-items:center; }
 .nav-dd { position:absolute; top:calc(100% + 10px); right:0; background:var(--night-mid); border:0.5px solid var(--border-soft); border-radius:12px; padding:6px; min-width:196px; z-index:500; box-shadow:0 8px 32px #00000055; display:none; flex-direction:column; gap:1px; }
