@@ -63,13 +63,40 @@ function toggleNavDd() {
 
 function cambiarRolNav(rol) {
   var tema = rol === 'discipulo' ? 'arena' : 'dark';
-  // Guardar preferencia antes de recargar
+
+  // 1. Cambiar tema y guardar preferencia
   if (typeof aureaSetTema === 'function') aureaSetTema(tema);
-  // Cerrar dropdown
+
+  // 2. Actualizar badge del botón
+  var badge = document.getElementById('nav-rol-badge');
+  if (badge) badge.textContent = '· ' + (rol === 'discipulo' ? 'Discípulo' : 'Maestro');
+
+  // 3. Actualizar estado activo en el dropdown
+  document.querySelectorAll('#nav-perfil-dd .nav-dd-item').forEach(function(el) {
+    if (el.tagName === 'BUTTON') {
+      el.classList.toggle('active',
+        (rol === 'maestro'   && el.textContent.includes('Maestro')) ||
+        (rol === 'discipulo' && el.textContent.includes('Discípulo'))
+      );
+    }
+  });
+
+  // 4. Cerrar dropdown
   var dd = document.getElementById('nav-perfil-dd');
   if (dd) dd.classList.remove('open');
-  // Recargar la página para que el contenido se actualice con el nuevo rol
-  window.location.reload();
+
+  // 5. Si estamos en perfil.html (tiene .role-btn), actualizar el contenido de la página
+  //    directamente, sin recargar
+  var roleBtns = document.querySelectorAll('.role-btn:not(.add-role)');
+  if (roleBtns.length > 0 && typeof window.setRole === 'function') {
+    roleBtns.forEach(function(btn) {
+      var txt = btn.textContent.trim().toLowerCase();
+      var coincide =
+        (rol === 'maestro'   && txt.indexOf('maestro')   !== -1) ||
+        (rol === 'discipulo' && (txt.indexOf('discípulo') !== -1 || txt.indexOf('discipulo') !== -1));
+      if (coincide) window.setRole(rol, btn);
+    });
+  }
 }
 
 // Cerrar al clicar fuera
