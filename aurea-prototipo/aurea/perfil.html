@@ -126,27 +126,9 @@
     let _profile = null, _maestro = null, _discipulo = null;
     let _tray = [], _resenas = [], _relM = [], _relD = [];
 
-    // — Añadir rol desde el toggle —
-    window.añadirRol = async function(role) {
-      const label = role === 'maestro' ? 'maestro' : 'discípulo';
-      if (!confirm(`¿Activar el rol de ${label}? Se añadirán nuevos campos a tu perfil que podrás editar.`)) return;
-      try {
-        const { error: pErr } = await supabase.from('profiles')
-          .update({ rol: 'ambos' }).eq('id', _profile.id);
-        if (pErr) throw pErr;
-        if (role === 'maestro') {
-          const { error: mErr } = await supabase.from('maestro_perfiles')
-            .upsert({ id: _profile.id, disciplina: 'Sin especificar', categoria: 'Otra', formato: 'ambos' });
-          if (mErr) throw mErr;
-        } else {
-          const { error: dErr } = await supabase.from('discipulo_perfiles')
-            .upsert({ id: _profile.id });
-          if (dErr) throw dErr;
-        }
-        window.location.reload();
-      } catch (err) {
-        alert('Error activando el rol: ' + (err.message || err));
-      }
+    // — Añadir rol: lleva a editar perfil con el nuevo rol pre-cargado —
+    window.añadirRol = function(role) {
+      window.location.href = 'perfil-edicion.html?add=' + role;
     };
 
     // — setRole expuesto globalmente para los onclick —

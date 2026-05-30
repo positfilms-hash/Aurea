@@ -57,7 +57,7 @@
 <body>
   <div id="nav-container"></div>
   <div class="edit-bar">
-    <span class="edit-bar-label">✎ Modo edición activo</span>
+    <span class="edit-bar-label" id="edit-bar-label">✎ Modo edición activo</span>
     <div class="edit-bar-actions">
       <button class="btn-preview" onclick="location.href='perfil.html'">← Ver perfil</button>
       <button class="btn-save" onclick="guardar()">Guardar cambios</button>
@@ -265,6 +265,8 @@
     document.getElementById('nav-container').innerHTML = renderNavAuth('perfil');
 
     let _uid = null, _esMaestro = false, _esDiscipulo = false, _rol = null;
+    // Si venimos de "añadir rol", este parámetro indica cuál hay que activar
+    const _addRole = new URLSearchParams(location.search).get('add'); // 'maestro' | 'discipulo' | null
 
     // — Añadir otro rol —
     window.añadirRol = async function() {
@@ -398,9 +400,11 @@
         const ubicacion = document.getElementById('f-ubicacion')?.value.trim() || '';
         const frase     = document.getElementById('f-frase')?.value.trim()    || '';
 
-        // 1. Actualizar profiles
+        // 1. Actualizar profiles (si añadimos rol, cambiamos también el rol a 'ambos')
+        const profileUpdate = { nombre, apellido, ubicacion, frase };
+        if (_addRole && _rol !== 'ambos') profileUpdate.rol = 'ambos';
         const { error: pErr } = await supabase.from('profiles')
-          .update({ nombre, apellido, ubicacion, frase })
+          .update(profileUpdate)
           .eq('id', _uid);
         if (pErr) throw pErr;
 
@@ -547,8 +551,19 @@
       _esMaestro   = _rol === 'maestro' || _rol === 'ambos';
       _esDiscipulo = _rol === 'discipulo' || _rol === 'ambos';
 
-      // Mostrar botón "Añadir rol" si no es ambos todavía
-      if (_rol !== 'ambos') {
+      // Modo "añadir rol": forzar visibilidad de la nueva sección
+      if (_addRole === 'maestro' && !_esMaestro) {
+        _esMaestro = true; // mostrar sección maestro (vacía)
+        document.getElementById('edit-bar-label').textContent = '✎ Activando rol de Maestro';
+        // Mostrar tabs de trayectoria/requisitos
+        document.querySelectorAll('.tab-btn').forEach(b => b.style.display = '');
+      } else if (_addRole === 'discipulo' && !_esDiscipulo) {
+        _esDiscipulo = true; // mostrar sección discípulo (vacía)
+        document.getElementById('edit-bar-label').textContent = '✎ Activando rol de Discípulo';
+      }
+
+      // Mostrar botón "Añadir rol" si no es ambos todavía (y no estamos ya en modo add)
+      if (_rol !== 'ambos' && !_addRole) {
         const secRol = document.getElementById('sec-anadir-rol');
         secRol.style.display = '';
         if (_rol === 'maestro') {
