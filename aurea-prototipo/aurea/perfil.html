@@ -425,8 +425,15 @@
         btns[0].textContent = '+ Maestro';
       }
 
-      // Vista inicial según rol
-      const startRole = rol === 'discipulo' ? 'discipulo' : 'maestro';
+      // Vista inicial:
+      //   rol único → su propio rol
+      //   'ambos'   → respetar la última vista guardada en localStorage
+      const savedTema = localStorage.getItem('aurea-tema') || 'dark';
+      const startRole = rol === 'discipulo'
+        ? 'discipulo'
+        : (rol === 'maestro'
+          ? 'maestro'
+          : (savedTema === 'arena' ? 'discipulo' : 'maestro')); // ambos: usa preferencia
       const activeBtn = startRole === 'maestro' ? btns[0] : btns[1];
       window.setRole(startRole, activeBtn);
 
