@@ -38,10 +38,14 @@ export async function requireAuth() {
       if (p?.rol) {
         localStorage.setItem('aurea-rol',    p.rol);
         localStorage.setItem('aurea-rol-ts', String(Date.now()));
-        // Aplicar tema solo si es un rol único (ambos lo gestiona perfil.html)
-        if (p.rol === 'discipulo') aureaSetTema('arena', 'discipulo');
-        else if (p.rol === 'maestro') aureaSetTema('dark', 'maestro');
-        else localStorage.setItem('aurea-rol', 'ambos'); // ambos: no forzar tema
+        // Para roles únicos, forzar el tema correcto
+        // Para 'ambos', respetar la preferencia guardada en aurea-tema
+        if (p.rol === 'discipulo') {
+          if (typeof aureaSetTema === 'function') aureaSetTema('arena');
+        } else if (p.rol === 'maestro') {
+          if (typeof aureaSetTema === 'function') aureaSetTema('dark');
+        }
+        // 'ambos': scale.js ya aplica el tema correcto desde aurea-tema
       }
     } catch { /* silencioso — usará el valor cacheado */ }
   }

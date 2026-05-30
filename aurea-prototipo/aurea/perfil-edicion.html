@@ -700,10 +700,19 @@
         btn.style.background = 'var(--green)';
         btn.style.opacity = '1';
         btn.disabled = false;
-        setTimeout(() => {
-          btn.textContent = 'Guardar cambios';
-          btn.style.background = 'var(--gold)';
-        }, 2500);
+
+        // Si acabamos de añadir un nuevo rol → actualizar localStorage y redirigir
+        if (_addRole && _rol !== 'ambos') {
+          localStorage.setItem('aurea-rol', 'ambos');
+          localStorage.removeItem('aurea-rol-ts'); // invalidar caché para que auth.js lo refresque
+          btn.textContent = '✓ Rol activado — redirigiendo…';
+          setTimeout(() => { window.location.href = 'perfil.html'; }, 1200);
+        } else {
+          setTimeout(() => {
+            btn.textContent = 'Guardar cambios';
+            btn.style.background = 'var(--gold)';
+          }, 2500);
+        }
 
       } catch (err) {
         console.error('Error al guardar:', err);
