@@ -113,6 +113,22 @@
     <div class="diff-item"><span class="diff-check">✦</span><div class="diff-item-title">Métrica de constancia visible</div></div>
   </div>
 
+  <!-- Stats reales -->
+  <div style="display:flex;justify-content:center;gap:60px;padding:40px 80px;border-bottom:0.5px solid var(--border);background:var(--night-soft);">
+    <div style="text-align:center;">
+      <div style="font-family:var(--font-serif);font-size:40px;font-weight:500;color:var(--gold);" id="cf-maestros">—</div>
+      <div style="font-size:11px;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-top:4px;">Maestros activos</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-family:var(--font-serif);font-size:40px;font-weight:500;color:var(--gold);" id="cf-disc">—</div>
+      <div style="font-size:11px;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-top:4px;">Disciplinas</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-family:var(--font-serif);font-size:40px;font-weight:500;color:var(--gold);" id="cf-rel">—</div>
+      <div style="font-size:11px;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-top:4px;">Relaciones activas</div>
+    </div>
+  </div>
+
   <div class="cta-section">
     <h2 class="cta-title">¿Listo para formar<br>parte de la <em>cadena</em>?</h2>
     <div class="cta-btns">
@@ -127,6 +143,31 @@
   <script>
     document.getElementById('nav-container').innerHTML = renderNavPublic('como-funciona');
     document.getElementById('footer-container').innerHTML = renderFooter();
+  </script>
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+
+    const [mRes, dRes, rRes] = await Promise.all([
+      supabase.from('maestro_perfiles').select('*', { count:'exact', head:true })
+        .eq('acepta_solicitudes', true),
+      supabase.from('maestro_perfiles').select('disciplina')
+        .not('disciplina', 'eq', 'Sin especificar').not('disciplina', 'is', null),
+      supabase.from('relaciones').select('*', { count:'exact', head:true })
+        .in('estado', ['prueba','consolidada']),
+    ]);
+    const uniq = new Set((dRes.data||[]).map(r=>r.disciplina).filter(Boolean));
+    document.getElementById('cf-maestros').textContent = mRes.count || 0;
+    document.getElementById('cf-disc').textContent     = uniq.size || 0;
+    document.getElementById('cf-rel').textContent      = rRes.count || 0;
+
+    // Nav inteligente
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const { data: p } = await supabase.from('profiles')
+        .select('nombre, apellido').eq('id', session.user.id).single();
+      const ini = p ? ((p.nombre||'')[0]+(p.apellido||'')[0]).toUpperCase()||'?' : '?';
+      document.getElementById('nav-container').innerHTML = renderNavAuth('como-funciona', ini);
+    }
   </script>
 </body>
 </html>

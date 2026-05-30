@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -12,43 +12,65 @@
     .quote-rotator{min-height:140px;margin-bottom:32px;}
     .quote-text{font-family:var(--font-serif);font-size:36px;font-weight:500;line-height:1.15;color:var(--text-primary);transition:opacity 0.6s;}
     .quote-text em{font-style:italic;color:var(--gold);}
-    .quote-author{font-size:11px;font-weight:300;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin-top:14px;transition:opacity 0.6s;}
+    .quote-author{font-size:11px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin-top:14px;transition:opacity 0.6s;}
     .hero-actions{display:flex;align-items:center;gap:20px;}
-    .maestro-card{background:var(--night-mid);border:0.5px solid var(--border-soft);border-radius:16px;width:100%;max-width:340px;overflow:hidden;}
-    .card-top{background:#2A1F14;padding:24px 24px 18px;display:flex;align-items:center;gap:14px;border-bottom:0.5px solid var(--border);}
-    .card-avatar{width:52px;height:52px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:20px;font-weight:600;color:var(--night);flex-shrink:0;}
+
+    /* Tarjeta de maestro */
+    .maestro-card{background:var(--night-mid);border:0.5px solid var(--border-soft);border-radius:16px;width:100%;max-width:340px;overflow:hidden;transition:border-color 0.2s;}
+    .maestro-card:hover{border-color:var(--border-gold);}
+    .card-top{background:var(--night-deep);padding:24px 24px 18px;display:flex;align-items:center;gap:14px;border-bottom:0.5px solid var(--border);}
+    .card-avatar{width:52px;height:52px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:20px;font-weight:600;color:var(--night);flex-shrink:0;overflow:hidden;}
+    .card-avatar img{width:100%;height:100%;object-fit:cover;}
     .card-name{font-family:var(--font-serif);font-size:19px;font-weight:500;color:var(--text-primary);}
-    .card-disc{font-size:10px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-top:3px;}
+    .card-disc{font-size:10px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-top:3px;}
     .card-body{padding:18px 24px;}
     .card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;}
     .card-tag{font-size:9px;color:var(--text-faint);border:0.5px solid var(--border);padding:2px 8px;border-radius:100px;}
-    .card-bio{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-secondary);line-height:1.6;margin-bottom:18px;}
+    .card-bio{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-secondary);line-height:1.6;margin-bottom:18px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
     .card-stats{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:0.5px solid var(--border);padding-top:14px;}
     .stat{text-align:center;}
     .stat-n{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--gold);}
-    .stat-l{font-size:8px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-faint);margin-top:2px;}
+    .stat-l{font-size:8px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-faint);margin-top:2px;}
     .card-footer{padding:14px 24px;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-    .card-plazas{font-size:11px;color:var(--text-muted);font-weight:300;}
+    .card-plazas{font-size:11px;color:var(--text-muted);font-weight:400;}
     .card-plazas span{color:var(--gold);}
-    .btn-sol{font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;background:var(--gold);color:var(--night);border:none;padding:8px 16px;border-radius:4px;cursor:pointer;}
+    .btn-sol{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;background:var(--gold);color:var(--night);border:none;padding:8px 16px;border-radius:4px;cursor:pointer;transition:opacity 0.2s;}
+    .btn-sol:hover{opacity:0.85;}
+    .card-skeleton{opacity:0.4;animation:pulse 1.5s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:0.4}50%{opacity:0.7}}
+
+    /* Separador */
     .divider-text{padding:48px 80px;display:flex;align-items:center;gap:24px;border-bottom:0.5px solid var(--border);}
     .divider-line{flex:1;height:0.5px;background:var(--border);}
     .divider-quote{font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--text-faint);white-space:nowrap;}
+
+    /* Proceso */
     .how{padding:80px;border-bottom:0.5px solid var(--border);}
     .how-eyebrow{font-size:10px;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:var(--text-muted);margin-bottom:40px;}
     .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;}
     .step{border-top:0.5px solid var(--border-soft);padding-top:24px;}
     .step-n{font-family:var(--font-serif);font-size:48px;font-weight:400;color:var(--text-faint);line-height:1;margin-bottom:16px;}
     .step-title{font-family:var(--font-serif);font-size:22px;font-weight:500;color:var(--text-primary);margin-bottom:10px;}
-    .step-desc{font-size:13px;font-weight:300;line-height:1.7;color:var(--text-muted);}
+    .step-desc{font-size:13px;font-weight:400;line-height:1.7;color:var(--text-muted);}
+
+    /* Categorías / disciplinas */
     .disciplines{padding:80px;border-bottom:0.5px solid var(--border);}
     .disc-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:40px;}
-    .disc-pill{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--text-secondary);border:0.5px solid var(--border);padding:10px 22px;border-radius:100px;cursor:pointer;transition:all 0.25s;}
+    .disc-pill{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--text-secondary);border:0.5px solid var(--border);padding:10px 22px;border-radius:100px;cursor:pointer;transition:all 0.25s;text-decoration:none;display:inline-block;}
     .disc-pill:hover{color:var(--gold);border-color:var(--gold);}
+    .disc-pill.real{border-color:var(--border-soft);color:var(--text-primary);}
+
+    /* CTA */
     .cta-band{padding:100px 80px;text-align:center;}
     .cta-title{font-family:var(--font-serif);font-size:48px;font-weight:500;color:var(--text-primary);line-height:1.05;margin-bottom:40px;}
     .cta-title em{color:var(--gold);font-style:italic;}
     .cta-actions{display:flex;align-items:center;justify-content:center;gap:20px;}
+
+    /* Stats strip */
+    .stats-strip{display:flex;justify-content:center;gap:60px;padding:40px 80px;border-bottom:0.5px solid var(--border);background:var(--night-soft);}
+    .strip-stat{text-align:center;}
+    .strip-n{font-family:var(--font-serif);font-size:40px;font-weight:500;color:var(--gold);}
+    .strip-l{font-size:11px;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-top:4px;}
   </style>
 </head>
 <body>
@@ -66,28 +88,38 @@
         <a href="discover.html" class="btn-ghost">Ver maestros</a>
       </div>
     </div>
+
+    <!-- Tarjeta de maestro real (o skeleton mientras carga) -->
     <div style="display:flex;justify-content:center;">
-      <div class="maestro-card">
+      <div class="maestro-card card-skeleton" id="featured-card">
         <div class="card-top">
-          <div class="card-avatar">RM</div>
-          <div><div class="card-name">Rafael Montoya</div><div class="card-disc">Filosofía estoica</div></div>
+          <div class="card-avatar" id="fc-avatar"></div>
+          <div><div class="card-name" id="fc-name">Cargando…</div><div class="card-disc" id="fc-disc"></div></div>
         </div>
         <div class="card-body">
-          <div class="card-tags"><span class="card-tag">#presencial · Madrid</span><span class="card-tag">12 años</span><span class="card-tag">Nivel intermedio</span></div>
-          <p class="card-bio">"Enseño a quien viene dispuesto a cambiar su forma de ver el mundo, no a quien busca un curso."</p>
+          <div class="card-tags" id="fc-tags"></div>
+          <p class="card-bio" id="fc-bio"></p>
           <div class="card-stats">
-            <div class="stat"><div class="stat-n">3</div><div class="stat-l">Discípulos</div></div>
-            <div class="stat"><div class="stat-n">4.9</div><div class="stat-l">Reputación</div></div>
-            <div class="stat"><div class="stat-n">1</div><div class="stat-l">Plaza libre</div></div>
+            <div class="stat"><div class="stat-n" id="fc-rep">—</div><div class="stat-l">Reputación</div></div>
+            <div class="stat"><div class="stat-n" id="fc-exp">—</div><div class="stat-l">Años exp.</div></div>
+            <div class="stat"><div class="stat-n" id="fc-disc-n">—</div><div class="stat-l">Discípulos</div></div>
           </div>
         </div>
         <div class="card-footer">
-          <span class="card-plazas"><span>1 plaza</span> disponible</span>
-          <button class="btn-sol" onclick="location.href='registro.html'">Solicitar</button>
+          <span class="card-plazas" id="fc-plazas"></span>
+          <button class="btn-sol" id="fc-btn" onclick="location.href='registro.html'">Solicitar</button>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- Stats en tiempo real -->
+  <div class="stats-strip">
+    <div class="strip-stat"><div class="strip-n" id="st-maestros">—</div><div class="strip-l">Maestros activos</div></div>
+    <div class="strip-stat"><div class="strip-n" id="st-discipulos">—</div><div class="strip-l">Discípulos</div></div>
+    <div class="strip-stat"><div class="strip-n" id="st-disciplinas">—</div><div class="strip-l">Disciplinas</div></div>
+    <div class="strip-stat"><div class="strip-n" id="st-relaciones">—</div><div class="strip-l">Relaciones activas</div></div>
+  </div>
 
   <div class="divider-text">
     <div class="divider-line"></div>
@@ -98,25 +130,40 @@
   <section class="how">
     <p class="how-eyebrow">El proceso</p>
     <div class="steps">
-      <div class="step"><div class="step-n">01</div><div class="step-title">Crea tu perfil</div><p class="step-desc">Define quién eres, qué sabes y qué buscas. Tu perfil es tu carta de presentación — cuídalo.</p></div>
-      <div class="step"><div class="step-n">02</div><div class="step-title">Encuentra y solicita</div><p class="step-desc">Explora maestros por disciplina, distancia y disponibilidad. Envía una solicitud con tu motivación real.</p></div>
-      <div class="step"><div class="step-n">03</div><div class="step-title">El match decide</div><p class="step-desc">El maestro elige. Si hay afinidad, comienza un periodo de prueba de tres sesiones antes de comprometerse.</p></div>
+      <div class="step">
+        <div class="step-n">01</div>
+        <div class="step-title">Crea tu perfil</div>
+        <p class="step-desc">Define quién eres, qué sabes y qué buscas. Elige tu categoría y disciplina. Tu perfil es tu carta de presentación — cuídalo.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <div class="step-title">Encuentra y solicita</div>
+        <p class="step-desc">Explora maestros por disciplina, categoría, ubicación y disponibilidad. Envía una solicitud con tu motivación real.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <div class="step-title">El match decide</div>
+        <p class="step-desc">El maestro elige. Si hay afinidad, comienza un periodo de prueba con chat libre y hasta 3 sesiones antes de comprometerse.</p>
+      </div>
     </div>
   </section>
 
+  <!-- Categorías reales de la plataforma -->
   <section class="disciplines">
-    <p class="how-eyebrow">Disciplinas</p>
-    <div class="disc-grid">
-      <span class="disc-pill">Filosofía</span><span class="disc-pill">Carpintería</span><span class="disc-pill">Caligrafía</span><span class="disc-pill">Cocina tradicional</span><span class="disc-pill">Estoicismo</span><span class="disc-pill">Cerámica</span><span class="disc-pill">Astronomía</span><span class="disc-pill">Artes marciales</span><span class="disc-pill">Luthería</span><span class="disc-pill">Medicina herbal</span><span class="disc-pill">Pintura al óleo</span><span class="disc-pill">Tejido</span><span class="disc-pill">Meditación</span><span class="disc-pill">Ajedrez</span><span class="disc-pill">Fotografía analógica</span><span class="disc-pill">Encuadernación</span><span class="disc-pill">Y todo lo que sabes.</span>
+    <p class="how-eyebrow">Categorías en Aurea</p>
+    <div class="disc-grid" id="disc-grid">
+      <!-- Rellenado por JS con categorías reales + disciplinas de la BD -->
     </div>
   </section>
 
   <section class="cta-band">
-    <div style="margin-bottom:40px;"><img src="assets/logo.png" alt="Aurea" style="width:240px;height:240px;object-fit:contain;margin:0 auto;opacity:0.85;"></div>
-    <h2 class="cta-title">Aurea es gratuito.</h2>
+    <div style="margin-bottom:40px;">
+      <img src="assets/logo.png" alt="Aurea" style="width:200px;height:200px;object-fit:contain;margin:0 auto;opacity:0.85;">
+    </div>
+    <h2 class="cta-title">Aurea es gratuito,<br>para <em>siempre.</em></h2>
     <div class="cta-actions">
-      <a href="registro.html" class="btn-primary">Registrarme como maestro</a>
-      <a href="discover.html" class="btn-ghost">Buscar un maestro</a>
+      <a href="registro.html" class="btn-primary">Registrarme ahora</a>
+      <a href="discover.html" class="btn-ghost">Explorar maestros</a>
     </div>
   </section>
 
@@ -127,10 +174,12 @@
   <script>
     document.getElementById('nav-container').innerHTML = renderNavPublic('index');
     document.getElementById('footer-container').innerHTML = renderFooter();
+
+    // Carrusel de citas
     const quotes=[
       {t:'"El que aprende y no reflexiona pierde su tiempo; el que reflexiona y no aprende <em>se expone al peligro.</em>"',a:'— Confucio'},
       {t:'"<em>Enseñando</em> aprendemos."',a:'— Séneca, Cartas a Lucilio'},
-      {t:'"Si el maestro es sabio, no te invita a entrar en la mansión de su sabiduría, sino que te conduce <em>al umbral de tu propia mente.</em>"',a:'— Khalil Gibran, El Profeta'},
+      {t:'"Si el maestro es sabio, no te invita a entrar en la mansión de su sabiduría, sino que te conduce <em>al umbral de tu propia mente.</em>"',a:'— Khalil Gibran'},
       {t:'"Nadie educa a nadie, nadie se educa a sí mismo; <em>los hombres se educan entre sí</em> con la mediación del mundo."',a:'— Paulo Freire'},
       {t:'"El mayor signo de éxito de un maestro es poder decir: <em>los alumnos trabajan como si yo no existiera.</em>"',a:'— María Montessori'},
     ];
@@ -148,32 +197,163 @@
   <!-- Modal ¿Tienes cuenta? -->
   <div class="overlay" id="modal-empezar">
     <div class="modal" style="width:400px;text-align:center;padding:40px 36px;display:flex;flex-direction:column;align-items:center;gap:20px;">
-      <div style="font-size:28px;line-height:1;">✦</div>
+      <div style="font-size:28px;">✦</div>
       <div style="font-family:var(--font-serif);font-size:24px;font-weight:500;color:var(--text-primary);line-height:1.2;">¿Ya tienes<br>una cuenta en Aurea?</div>
       <div style="display:flex;flex-direction:column;gap:10px;width:100%;margin-top:6px;">
         <a href="login.html" class="btn-primary" style="text-align:center;display:block;padding:14px;">Sí, quiero entrar</a>
-        <a href="registro.html" style="font-family:var(--font-serif);font-size:16px;font-style:italic;color:var(--text-muted);background:none;border:0.5px solid var(--border);padding:14px;border-radius:100px;display:block;text-align:center;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--border-gold)';this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">No, quiero registrarme</a>
+        <a href="registro.html" style="font-family:var(--font-serif);font-size:16px;font-style:italic;color:var(--text-muted);background:none;border:0.5px solid var(--border);padding:14px;border-radius:100px;display:block;text-align:center;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--border-gold)';this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">No, crear una cuenta</a>
       </div>
-      <button onclick="document.getElementById('modal-empezar').classList.remove('open')" style="font-size:10px;font-weight:300;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-ghost);background:none;border:none;cursor:pointer;margin-top:-8px;">Volver</button>
+      <button onclick="document.getElementById('modal-empezar').classList.remove('open')" style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-ghost);background:none;border:none;cursor:pointer;margin-top:-8px;">Volver</button>
     </div>
   </div>
   <script>
-    document.getElementById('modal-empezar').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
+    document.getElementById('modal-empezar').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
   </script>
 
-  <!-- Nav inteligente: si hay sesión activa, sustituye el nav público -->
+  <!-- Datos desde Supabase -->
   <script type="module">
     import { supabase } from './js/supabase.js';
+    import { CATS } from './js/categorias.js';
+
+    // — Nav inteligente —
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       const { data: p } = await supabase.from('profiles')
         .select('nombre, apellido').eq('id', session.user.id).single();
-      const ini = p ? ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?' : '?';
+      const ini = p ? ((p.nombre||'')[0]+(p.apellido||'')[0]).toUpperCase()||'?' : '?';
       document.getElementById('nav-container').innerHTML = renderNavAuth('', ini);
-      // Si ya está logueado, "Empezar ahora" va directo a discover
       const btnEmpezar = document.querySelector('[onclick*="modal-empezar"]');
       if (btnEmpezar) btnEmpezar.setAttribute('onclick', "location.href='discover.html'");
     }
+
+    // — Maestro destacado —
+    async function loadFeatured() {
+      const { data: maestros } = await supabase
+        .from('maestro_perfiles')
+        .select(`
+          id, disciplina, categoria, subcategoria, hashtags,
+          reputacion, num_resenas, experiencia_anos,
+          max_discipulos, acepta_solicitudes, formato,
+          profiles!id(nombre, apellido, avatar_color, avatar_url, ubicacion, frase)
+        `)
+        .eq('acepta_solicitudes', true)
+        .not('disciplina', 'eq', 'Sin especificar')
+        .not('disciplina', 'is', null)
+        .order('reputacion', { ascending: false, nullsFirst: false })
+        .limit(5);
+
+      const card = document.getElementById('featured-card');
+      if (!maestros?.length) {
+        card.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-faint);">
+          <div style="font-size:32px;margin-bottom:12px;">✦</div>
+          <div style="font-family:var(--font-serif);font-size:18px;font-style:italic;margin-bottom:8px;">Los primeros maestros<br>están llegando</div>
+          <div style="font-size:12px;line-height:1.7;">Regístrate como maestro y sé<br>de los primeros en unirte a Aurea.</div>
+        </div>`;
+        card.classList.remove('card-skeleton');
+        return;
+      }
+
+      // Elegir uno al azar de los mejores
+      const m  = maestros[Math.floor(Math.random() * maestros.length)];
+      const p  = m.profiles || {};
+      const nombre = ((p.nombre||'') + ' ' + (p.apellido||'')).trim();
+      const ini    = ((p.nombre||'')[0]+(p.apellido||'')[0]).toUpperCase() || '?';
+
+      // Contar discípulos activos
+      const { count: discCount } = await supabase
+        .from('relaciones').select('*', { count: 'exact', head: true })
+        .eq('maestro_id', m.id).in('estado', ['prueba','consolidada']);
+
+      const plazas = Math.max(0, (m.max_discipulos || 4) - (discCount || 0));
+
+      // Avatar
+      const avEl = document.getElementById('fc-avatar');
+      if (p.avatar_url) {
+        avEl.innerHTML = `<img src="${p.avatar_url}" alt="${ini}">`;
+        avEl.style.background = 'transparent';
+      } else {
+        avEl.textContent = ini;
+        avEl.style.background = p.avatar_color || 'var(--gold)';
+      }
+
+      document.getElementById('fc-name').textContent = nombre;
+      document.getElementById('fc-disc').textContent = m.disciplina || '';
+
+      // Tags
+      const tags = [];
+      if (p.ubicacion) tags.push(p.ubicacion.split(',')[0]);
+      if (m.experiencia_anos) tags.push(m.experiencia_anos + ' años');
+      if (m.categoria) tags.push(m.categoria);
+      if (m.hashtags?.length) m.hashtags.slice(0,2).forEach(h => tags.push(h));
+      document.getElementById('fc-tags').innerHTML =
+        tags.map(t => `<span class="card-tag">${t}</span>`).join('');
+
+      document.getElementById('fc-bio').textContent = p.frase
+        ? `"${p.frase}"`
+        : 'Maestro en Aurea · Listo para enseñar.';
+
+      document.getElementById('fc-rep').textContent =
+        m.reputacion != null ? Number(m.reputacion).toFixed(1) : '—';
+      document.getElementById('fc-exp').textContent = m.experiencia_anos ?? '—';
+      document.getElementById('fc-disc-n').textContent = discCount || 0;
+      document.getElementById('fc-plazas').innerHTML =
+        `<span>${plazas} plaza${plazas!==1?'s':''}</span> disponible${plazas!==1?'s':''}`;
+      document.getElementById('fc-btn').onclick =
+        () => location.href = `perfil-maestro.html?id=${m.id}`;
+
+      card.classList.remove('card-skeleton');
+    }
+
+    // — Stats de la plataforma —
+    async function loadStats() {
+      const [mRes, dRes, discipRes, relRes] = await Promise.all([
+        supabase.from('maestro_perfiles').select('*', { count:'exact', head:true })
+          .eq('acepta_solicitudes', true),
+        supabase.from('maestro_perfiles').select('disciplina').not('disciplina','eq','Sin especificar').not('disciplina','is',null),
+        supabase.from('profiles').select('*', { count:'exact', head:true })
+          .in('rol', ['discipulo','ambos']),
+        supabase.from('relaciones').select('*', { count:'exact', head:true })
+          .in('estado', ['prueba','consolidada']),
+      ]);
+
+      document.getElementById('st-maestros').textContent   = mRes.count || 0;
+      document.getElementById('st-discipulos').textContent = discipRes.count || 0;
+      document.getElementById('st-relaciones').textContent  = relRes.count || 0;
+
+      // Disciplinas únicas
+      const disciplinas = new Set((dRes.data||[]).map(r=>r.disciplina).filter(Boolean));
+      document.getElementById('st-disciplinas').textContent = disciplinas.size || 0;
+    }
+
+    // — Categorías y disciplinas reales —
+    async function loadDiscs() {
+      const { data } = await supabase
+        .from('maestro_perfiles')
+        .select('disciplina, categoria')
+        .not('disciplina', 'eq', 'Sin especificar')
+        .not('disciplina', 'is', null)
+        .eq('acepta_solicitudes', true);
+
+      const grid = document.getElementById('disc-grid');
+
+      // Primero: categorías reales de la plataforma (CATS)
+      const catHtml = Object.keys(CATS)
+        .map(cat => `<a class="disc-pill" href="discover.html">${cat}</a>`)
+        .join('');
+
+      // Después: disciplinas reales de la BD (que no sean redundantes con categorías)
+      const discSet = new Set();
+      (data||[]).forEach(r => { if (r.disciplina) discSet.add(r.disciplina); });
+      const discHtml = [...discSet].slice(0, 12)
+        .map(d => `<a class="disc-pill real" href="discover.html">${d}</a>`)
+        .join('');
+
+      grid.innerHTML = catHtml + (discHtml ? '<div style="width:100%;height:0.5px;background:var(--border);margin:8px 0;"></div>' + discHtml : '');
+    }
+
+    loadFeatured();
+    loadStats();
+    loadDiscs();
   </script>
 </body>
 </html>
