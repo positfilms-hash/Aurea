@@ -6,6 +6,9 @@
   <script src="js/scale.js"></script>
   <title>Editar perfil · Aurea</title>
   <link rel="stylesheet" href="css/global.css">
+  <!-- NSFW detection — se carga en background, no bloquea el render -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/nsfwjs@4.2.0/dist/nsfwjs.min.js" defer></script>
   <style>
     .edit-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 28px;background:#2A1A08;border-bottom:0.5px solid var(--gold-dim);}
     .edit-bar-label{font-size:10px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);}
@@ -334,6 +337,45 @@
       });
     }
 
+    // — Moderación de imágenes con NSFWJS —
+    let _nsfwModel = null;
+
+    async function cargarModeloNSFW() {
+      if (_nsfwModel) return _nsfwModel;
+      try {
+        // Esperar a que tfjs y nsfwjs estén disponibles (cargados con defer)
+        await new Promise(resolve => {
+          const check = setInterval(() => {
+            if (window.nsfwjs && window.tf) { clearInterval(check); resolve(); }
+          }, 100);
+          setTimeout(() => { clearInterval(check); resolve(); }, 8000); // timeout 8s
+        });
+        if (!window.nsfwjs) return null;
+        _nsfwModel = await window.nsfwjs.load();
+        return _nsfwModel;
+      } catch { return null; }
+    }
+
+    async function esImagenInapropiada(file) {
+      const model = await cargarModeloNSFW();
+      if (!model) return false; // si el modelo no cargó, permitir (fail-open)
+
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      try {
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+        const preds = await model.classify(img);
+        // Bloquear si Porn, Hentai o Sexy supera el umbral
+        return preds.some(p =>
+          ['Porn', 'Hentai', 'Sexy'].includes(p.className) && p.probability > 0.55
+        );
+      } catch { return false; }
+      finally { URL.revokeObjectURL(url); }
+    }
+
+    // Precargar modelo en background al abrir la página
+    cargarModeloNSFW();
+
     // — Render avatar en el editor —
     function renderAvatar(url, initials, color) {
       const el = document.getElementById('ea-avatar');
@@ -354,6 +396,17 @@
         if (!file || !_uid) return;
         if (file.size > 5 * 1024 * 1024) { document.getElementById('avatar-upload-msg').textContent = 'El archivo supera 5 MB.'; return; }
         const msg = document.getElementById('avatar-upload-msg');
+        // — Verificar contenido apropiado —
+        msg.textContent = '🔍 Verificando imagen…';
+        const inapropiada = await esImagenInapropiada(file);
+        if (inapropiada) {
+          msg.style.color = '#E87070';
+          msg.textContent = '⚠ Imagen no permitida. Por favor sube una foto apropiada.';
+          e.target.value = '';
+          setTimeout(() => { msg.textContent = ''; msg.style.color = ''; }, 5000);
+          return;
+        }
+        msg.style.color = '';
         msg.textContent = 'Subiendo…';
         try {
           const blob = await resizeImg(file, 400);
