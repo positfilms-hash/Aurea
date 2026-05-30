@@ -35,6 +35,39 @@
   --nav-height: 57px;
 }
 
+/* ── TEMA ARENA (vista discípulo) ─────────────────────────────── */
+html.theme-arena {
+  --night:        #F5EDE0;
+  --night-mid:    #EDE0C8;
+  --night-soft:   #F0E4CE;
+  --night-deep:   #E4D0B4;
+  --text-primary:   #2A1608;
+  --text-secondary: #5A3A1A;
+  --text-muted:     #7A5030;
+  --text-faint:     #9A7050;
+  --text-ghost:     #B89068;
+  --border:         #C8A870;
+  --border-soft:    #D4B888;
+  --border-gold:    #7A4F2A33;
+  --gold:           #7A4F2A;
+  --gold-light:     #9A6A3A;
+  --gold-dark:      #5A3010;
+  --gold-dim:       #7A4F2A33;
+  --green:  #2A5A08;
+  --red:    #8A1A08;
+}
+html.theme-arena body { background: var(--night); color: var(--text-primary); }
+html.theme-arena ::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* Transición suave al cambiar de tema */
+body, .nav, .col-left, .col-right, .stat-box, .tag,
+.field-input, .edit-input, .avail-row, .tl-item,
+.role-toggle, .role-btn, .btn-editar, .constancia-wrap,
+.divider, .page-footer-bar, .footer {
+  transition: background-color 0.4s ease, color 0.4s ease,
+              border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body { font-family: var(--font-sans); background: var(--night); color: var(--text-primary); min-height: var(--real-vh, 100vh); -webkit-font-smoothing: antialiased; }
