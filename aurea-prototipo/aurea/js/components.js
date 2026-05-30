@@ -270,4 +270,108 @@ function sendMed(){
 document.addEventListener('DOMContentLoaded',()=>{
   const c=document.getElementById('chat-container');
   if(c){c.innerHTML=renderChatWidget()+renderMediador();}
+  initChatFabDrag();
 });
+
+// — FAB: drag hacia las 4 esquinas + opacidad —
+function initChatFabDrag() {
+  var fab = document.getElementById('chat-fab');
+  if (!fab) return;
+
+  var GAP    = 28;
+  var NAV_H  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 57;
+
+  // Colocar en la esquina guardada (o br por defecto)
+  function posicionarEsquina(corner, animate) {
+    var fab    = document.getElementById('chat-fab');
+    var widget = document.getElementById('chat-widget');
+    if (!fab) return;
+
+    if (animate) {
+      fab.style.transition = 'all 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s';
+    } else {
+      fab.style.transition = 'opacity 0.2s';
+    }
+
+    fab.style.left   = corner.endsWith('l') ? GAP+'px' : 'auto';
+    fab.style.right  = corner.endsWith('r') ? GAP+'px' : 'auto';
+    fab.style.top    = corner.startsWith('t') ? (NAV_H+GAP)+'px' : 'auto';
+    fab.style.bottom = corner.startsWith('b') ? GAP+'px' : 'auto';
+
+    if (widget) {
+      widget.style.left   = corner.endsWith('l') ? GAP+'px' : 'auto';
+      widget.style.right  = corner.endsWith('r') ? GAP+'px' : 'auto';
+      widget.style.bottom = corner.startsWith('b') ? (GAP+52+12)+'px' : 'auto';
+      widget.style.top    = corner.startsWith('t') ? (NAV_H+GAP+52+12)+'px' : 'auto';
+    }
+  }
+
+  var savedCorner = localStorage.getItem('aurea-chat-corner') || 'br';
+  posicionarEsquina(savedCorner, false);
+
+  var dragging = false, didMove = false;
+  var startX, startY, origLeft, origTop;
+
+  function onStart(e) {
+    var touch = e.touches ? e.touches[0] : e;
+    startX = touch.clientX;
+    startY = touch.clientY;
+    var rect = fab.getBoundingClientRect();
+    origLeft = rect.left;
+    origTop  = rect.top;
+    dragging = true;
+    didMove  = false;
+
+    fab.style.transition = 'opacity 0.2s';
+    fab.style.left   = origLeft + 'px';
+    fab.style.top    = origTop  + 'px';
+    fab.style.right  = 'auto';
+    fab.style.bottom = 'auto';
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('mouseup',   onEnd);
+    document.addEventListener('touchend',  onEnd);
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    e.preventDefault();
+    var touch = e.touches ? e.touches[0] : e;
+    var dx = touch.clientX - startX;
+    var dy = touch.clientY - startY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+      didMove = true;
+      fab.classList.add('dragging');
+    }
+    if (didMove) {
+      fab.style.left = (origLeft + dx) + 'px';
+      fab.style.top  = (origTop  + dy) + 'px';
+    }
+  }
+
+  function onEnd() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('mouseup',   onEnd);
+    document.removeEventListener('touchend',  onEnd);
+    fab.classList.remove('dragging');
+    dragging = false;
+
+    if (!didMove) return; // fue un click, no arrastre → toggleChat se encarga
+
+    // Calcular esquina más cercana
+    var rect  = fab.getBoundingClientRect();
+    var cx    = rect.left + rect.width  / 2;
+    var cy    = rect.top  + rect.height / 2;
+    var w     = window.innerWidth;
+    var h     = window.innerHeight;
+    var corner = (cy < h / 2 ? 't' : 'b') + (cx < w / 2 ? 'l' : 'r');
+
+    localStorage.setItem('aurea-chat-corner', corner);
+    posicionarEsquina(corner, true);
+  }
+
+  fab.addEventListener('mousedown',  onStart);
+  fab.addEventListener('touchstart', onStart, { passive: false });
+}
