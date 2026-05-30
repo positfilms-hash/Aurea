@@ -15,6 +15,11 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     await supabase.auth.signOut();
+    // Limpiar tema y rol al cerrar sesión
+    localStorage.removeItem('aurea-rol');
+    localStorage.removeItem('aurea-rol-ts');
+    localStorage.removeItem('aurea-tema');
+    document.documentElement.classList.remove('theme-arena');
     window.location.href = 'index.html';
   </script>
 </body>

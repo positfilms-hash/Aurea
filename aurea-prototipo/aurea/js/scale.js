@@ -20,14 +20,27 @@
   });
 
   // — Tema arena persistente —
-  // Se aplica ANTES del render para evitar flash de tema incorrecto
-  if (localStorage.getItem('aurea-tema') === 'arena') {
+  // Reglas de prioridad:
+  //   rol=discipulo  → siempre arena
+  //   rol=maestro    → siempre oscuro
+  //   rol=ambos      → sigue la preferencia guardada (aurea-tema)
+  //   sin rol        → sigue aurea-tema (fallback)
+  var rol  = localStorage.getItem('aurea-rol');
+  var tema = localStorage.getItem('aurea-tema');
+  var arena = (rol === 'discipulo') ||
+              (rol === 'ambos' && tema === 'arena') ||
+              (!rol && tema === 'arena');
+  if (arena) {
     document.documentElement.classList.add('theme-arena');
+  } else {
+    document.documentElement.classList.remove('theme-arena');
   }
 })();
 
 // Función global para cambiar tema desde cualquier página
-function aureaSetTema(tema) {
+// rol: 'maestro' | 'discipulo' | 'ambos' | null  (null = no actualizar)
+function aureaSetTema(tema, rol) {
+  if (rol)  localStorage.setItem('aurea-rol',  rol);
   if (tema === 'arena') {
     document.documentElement.classList.add('theme-arena');
     localStorage.setItem('aurea-tema', 'arena');
