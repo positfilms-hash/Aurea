@@ -140,6 +140,18 @@
             <div class="edit-field"><span class="edit-label">Hashtags (separados por comas)</span><input class="edit-input" id="f-hashtags" type="text" placeholder="#presencial, #riguroso, #avanzado"></div>
           </div>
 
+          <!-- AÑADIR ROL -->
+          <div id="sec-anadir-rol" style="display:none;margin-top:8px;">
+            <div style="height:0.5px;background:var(--border);margin:8px 0 20px;"></div>
+            <div style="background:var(--night-mid);border:0.5px solid var(--border-soft);border-radius:10px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+              <div>
+                <div id="anadir-rol-title" style="font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--text-primary);margin-bottom:5px;"></div>
+                <div id="anadir-rol-sub" style="font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.6;"></div>
+              </div>
+              <button onclick="añadirRol()" style="font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--night);background:var(--gold);border:none;padding:10px 22px;border-radius:100px;cursor:pointer;white-space:nowrap;flex-shrink:0;" id="btn-anadir-rol">Activar rol</button>
+            </div>
+          </div>
+
           <!-- DISCÍPULO -->
           <div id="sec-discipulo" style="display:none;">
             <div style="height:0.5px;background:var(--border);margin:8px 0 20px;"></div>
@@ -252,7 +264,42 @@
 
     document.getElementById('nav-container').innerHTML = renderNavAuth('perfil');
 
-    let _uid = null, _esMaestro = false, _esDiscipulo = false;
+    let _uid = null, _esMaestro = false, _esDiscipulo = false, _rol = null;
+
+    // — Añadir otro rol —
+    window.añadirRol = async function() {
+      const nuevoRol = _esMaestro ? 'discípulo' : 'maestro';
+      if (!confirm(`¿Activar el rol de ${nuevoRol}? Se añadirán nuevos campos a tu perfil que podrás editar.`)) return;
+      const btn = document.getElementById('btn-anadir-rol');
+      btn.textContent = 'Activando…';
+      btn.disabled = true;
+      try {
+        // 1. Actualizar rol en profiles
+        const { error: pErr } = await supabase.from('profiles')
+          .update({ rol: 'ambos' }).eq('id', _uid);
+        if (pErr) throw pErr;
+
+        // 2. Crear la entrada que falta
+        if (_esMaestro) {
+          // Añadir rol discipulo
+          const { error: dErr } = await supabase
+            .from('discipulo_perfiles').upsert({ id: _uid });
+          if (dErr) throw dErr;
+        } else {
+          // Añadir rol maestro
+          const { error: mErr } = await supabase
+            .from('maestro_perfiles')
+            .upsert({ id: _uid, disciplina: 'Sin especificar', categoria: 'Otra', formato: 'ambos' });
+          if (mErr) throw mErr;
+        }
+        // Recargar para mostrar los nuevos campos
+        window.location.reload();
+      } catch (err) {
+        console.error('Error añadiendo rol:', err);
+        btn.textContent = '✕ Error: ' + (err.message || err);
+        btn.disabled = false;
+      }
+    };
 
     // — Geolocalización —
     window.usarGeolocalizacion = function() {
@@ -402,7 +449,8 @@
           const reqLibres  = reqLibresRaw.split('\n').map(r => r.trim()).filter(Boolean);
 
           const { error: mErr } = await supabase.from('maestro_perfiles')
-            .update({
+            .upsert({
+              id: _uid,
               disciplina, categoria, formato,
               experiencia_anos:     anosStr   ? parseInt(anosStr)  : null,
               radio_km:             radioStr  ? parseInt(radioStr) : null,
@@ -415,8 +463,7 @@
               motivacion_obligatoria: motivacion,
               nivel_requerido:      nivel || null,
               requisitos_libres:    reqLibres,
-            })
-            .eq('id', _uid);
+            });
           if (mErr) throw mErr;
 
           // 3. Trayectoria: borrar todas las existentes y reinsertar
@@ -496,8 +543,22 @@
       const p = pRes.data;
       const m = mRes.error ? null : mRes.data;
       const d = dRes.data  || null;
-      _esMaestro   = !!m;
-      _esDiscipulo = p?.rol === 'discipulo' || p?.rol === 'ambos';
+      _rol         = p?.rol || 'discipulo';
+      _esMaestro   = _rol === 'maestro' || _rol === 'ambos';
+      _esDiscipulo = _rol === 'discipulo' || _rol === 'ambos';
+
+      // Mostrar botón "Añadir rol" si no es ambos todavía
+      if (_rol !== 'ambos') {
+        const secRol = document.getElementById('sec-anadir-rol');
+        secRol.style.display = '';
+        if (_rol === 'maestro') {
+          document.getElementById('anadir-rol-title').textContent = '¿Quieres ser también discípulo?';
+          document.getElementById('anadir-rol-sub').textContent   = 'Puedes aprender de otro maestro mientras tú enseñas en tu disciplina.';
+        } else {
+          document.getElementById('anadir-rol-title').textContent = '¿Quieres ser también maestro?';
+          document.getElementById('anadir-rol-sub').textContent   = 'Puedes enseñar en lo que dominas mientras aprendes en otra disciplina.';
+        }
+      }
 
       if (p) {
         // Perfil básico
