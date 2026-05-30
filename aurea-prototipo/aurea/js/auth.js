@@ -18,8 +18,8 @@ export async function getUser() {
 
 /**
  * Redirige a login.html si no hay sesión activa.
- * Además cachea el rol del usuario en localStorage para que
- * scale.js pueda aplicar el tema correcto en todas las páginas.
+ * Siempre refresca el rol desde Supabase para mantener el nav y el
+ * tema actualizados (la query es mínima: SELECT rol WHERE id = $1).
  */
 export async function requireAuth() {
   const session = await getSession();
@@ -27,28 +27,39 @@ export async function requireAuth() {
     window.location.href = 'login.html';
     return null;
   }
-  // Cachear rol si no está guardado todavía (o ha pasado >5 min)
-  const rolCached = localStorage.getItem('aurea-rol');
-  const rolTs     = parseInt(localStorage.getItem('aurea-rol-ts') || '0');
-  const stale     = Date.now() - rolTs > 5 * 60 * 1000; // 5 minutos
-  if (!rolCached || stale) {
-    try {
-      const { data: p } = await supabase.from('profiles')
-        .select('rol').eq('id', session.user.id).single();
-      if (p?.rol) {
-        localStorage.setItem('aurea-rol',    p.rol);
-        localStorage.setItem('aurea-rol-ts', String(Date.now()));
-        // Para roles únicos, forzar el tema correcto
-        // Para 'ambos', respetar la preferencia guardada en aurea-tema
-        if (p.rol === 'discipulo') {
+
+  try {
+    const { data: p } = await supabase.from('profiles')
+      .select('rol').eq('id', session.user.id).single();
+
+    if (p?.rol) {
+      const rolAnterior = localStorage.getItem('aurea-rol');
+      const rolActual   = p.rol;
+
+      // Siempre actualizar la caché
+      localStorage.setItem('aurea-rol', rolActual);
+
+      // Si el rol ha cambiado (o no estaba cacheado) → actualizar tema y nav
+      if (rolActual !== rolAnterior) {
+        // Aplicar tema correcto para roles únicos
+        if (rolActual === 'discipulo') {
           if (typeof aureaSetTema === 'function') aureaSetTema('arena');
-        } else if (p.rol === 'maestro') {
+        } else if (rolActual === 'maestro') {
           if (typeof aureaSetTema === 'function') aureaSetTema('dark');
         }
-        // 'ambos': scale.js ya aplica el tema correcto desde aurea-tema
+        // 'ambos': respetar aurea-tema ya guardado
+
+        // Re-renderizar el nav para que el dropdown muestre el estado correcto
+        const navEl = document.getElementById('nav-container');
+        if (navEl && typeof renderNavAuth === 'function') {
+          // Detectar la página activa desde la URL
+          const page = window.location.pathname.split('/').pop()?.replace('.html','') || '';
+          navEl.innerHTML = renderNavAuth(page);
+        }
       }
-    } catch { /* silencioso — usará el valor cacheado */ }
-  }
+    }
+  } catch { /* silencioso */ }
+
   return session;
 }
 
