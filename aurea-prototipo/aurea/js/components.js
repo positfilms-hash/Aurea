@@ -278,49 +278,47 @@ function initChatFabDrag() {
   var fab = document.getElementById('chat-fab');
   if (!fab) return;
 
-  var GAP    = 28;
-  var NAV_H  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 57;
+  var GAP   = 28;
+  var NAV_H = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 57;
+  // Factor de zoom CSS (scale.js puede aplicar zoom al html)
+  function getZoom() { return parseFloat(document.documentElement.style.zoom) || 1; }
 
-  // Colocar en la esquina guardada (o br por defecto)
   function posicionarEsquina(corner, animate) {
-    var fab    = document.getElementById('chat-fab');
-    var widget = document.getElementById('chat-widget');
-    if (!fab) return;
-
-    if (animate) {
-      fab.style.transition = 'all 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s';
-    } else {
-      fab.style.transition = 'opacity 0.2s';
-    }
-
-    fab.style.left   = corner.endsWith('l') ? GAP+'px' : 'auto';
-    fab.style.right  = corner.endsWith('r') ? GAP+'px' : 'auto';
-    fab.style.top    = corner.startsWith('t') ? (NAV_H+GAP)+'px' : 'auto';
-    fab.style.bottom = corner.startsWith('b') ? GAP+'px' : 'auto';
-
-    if (widget) {
-      widget.style.left   = corner.endsWith('l') ? GAP+'px' : 'auto';
-      widget.style.right  = corner.endsWith('r') ? GAP+'px' : 'auto';
-      widget.style.bottom = corner.startsWith('b') ? (GAP+52+12)+'px' : 'auto';
-      widget.style.top    = corner.startsWith('t') ? (NAV_H+GAP+52+12)+'px' : 'auto';
+    var f = document.getElementById('chat-fab');
+    var w = document.getElementById('chat-widget');
+    if (!f) return;
+    f.style.transition = animate
+      ? 'left 0.35s cubic-bezier(0.34,1.56,0.64,1), right 0.35s cubic-bezier(0.34,1.56,0.64,1), top 0.35s cubic-bezier(0.34,1.56,0.64,1), bottom 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s'
+      : 'opacity 0.2s';
+    f.style.left   = corner.endsWith('l')   ? GAP+'px'          : 'auto';
+    f.style.right  = corner.endsWith('r')   ? GAP+'px'          : 'auto';
+    f.style.top    = corner.startsWith('t') ? (NAV_H+GAP)+'px'  : 'auto';
+    f.style.bottom = corner.startsWith('b') ? GAP+'px'          : 'auto';
+    if (w) {
+      w.style.left   = corner.endsWith('l')   ? GAP+'px'             : 'auto';
+      w.style.right  = corner.endsWith('r')   ? GAP+'px'             : 'auto';
+      w.style.bottom = corner.startsWith('b') ? (GAP+52+12)+'px'     : 'auto';
+      w.style.top    = corner.startsWith('t') ? (NAV_H+GAP+52+12)+'px' : 'auto';
     }
   }
 
-  var savedCorner = localStorage.getItem('aurea-chat-corner') || 'br';
-  posicionarEsquina(savedCorner, false);
+  posicionarEsquina(localStorage.getItem('aurea-chat-corner') || 'br', false);
 
-  var dragging = false, didMove = false;
+  var didMove = false;
   var startX, startY, origLeft, origTop;
 
   function onStart(e) {
     var touch = e.touches ? e.touches[0] : e;
+    var zoom  = getZoom();
     startX = touch.clientX;
     startY = touch.clientY;
+    didMove = false;
+
+    // Obtener posición actual en CSS px (getBoundingClientRect devuelve px de viewport,
+    // dividimos por zoom para convertir a px CSS donde están los estilos)
     var rect = fab.getBoundingClientRect();
-    origLeft = rect.left;
-    origTop  = rect.top;
-    dragging = true;
-    didMove  = false;
+    origLeft = rect.left / zoom;
+    origTop  = rect.top  / zoom;
 
     fab.style.transition = 'opacity 0.2s';
     fab.style.left   = origLeft + 'px';
@@ -335,11 +333,12 @@ function initChatFabDrag() {
   }
 
   function onMove(e) {
-    if (!dragging) return;
     e.preventDefault();
     var touch = e.touches ? e.touches[0] : e;
-    var dx = touch.clientX - startX;
-    var dy = touch.clientY - startY;
+    var zoom  = getZoom();
+    // clientX/Y están en viewport px; dividimos por zoom para tener CSS px
+    var dx = (touch.clientX - startX) / zoom;
+    var dy = (touch.clientY - startY) / zoom;
     if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
       didMove = true;
       fab.classList.add('dragging');
@@ -356,16 +355,15 @@ function initChatFabDrag() {
     document.removeEventListener('mouseup',   onEnd);
     document.removeEventListener('touchend',  onEnd);
     fab.classList.remove('dragging');
-    dragging = false;
 
-    if (!didMove) return; // fue un click, no arrastre → toggleChat se encarga
+    if (!didMove) return; // fue un click
 
-    // Calcular esquina más cercana
-    var rect  = fab.getBoundingClientRect();
-    var cx    = rect.left + rect.width  / 2;
-    var cy    = rect.top  + rect.height / 2;
-    var w     = window.innerWidth;
-    var h     = window.innerHeight;
+    // Detectar esquina más cercana (en viewport px, consistente con getBoundingClientRect)
+    var rect   = fab.getBoundingClientRect();
+    var cx     = rect.left + rect.width  / 2;
+    var cy     = rect.top  + rect.height / 2;
+    var w      = window.innerWidth;
+    var h      = window.innerHeight;
     var corner = (cy < h / 2 ? 't' : 'b') + (cx < w / 2 ? 'l' : 'r');
 
     localStorage.setItem('aurea-chat-corner', corner);
