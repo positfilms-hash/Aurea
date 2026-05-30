@@ -118,7 +118,7 @@
         <div class="avail-row"><span class="avail-label">Horas semanales</span><span class="avail-val">2–3 h</span></div>
         <div class="avail-row"><span class="avail-label">Prácticas activas</span><span class="avail-val">2 / 3</span></div>
       </div>
-      <button class="btn-editar" onclick="location.href='perfil-edicion.html'">Editar perfil</button>
+      <button class="btn-editar" id="btn-editar" onclick="location.href='perfil-edicion.html'">Editar perfil</button>
     </div>
     <div class="col-right" id="col-right"></div>
   </div>
@@ -146,12 +146,19 @@
       btn.classList.add('active');
       const esMaestro = role === 'maestro';
 
-      // — Cambiar tema y sincronizar con el dropdown del nav —
-      if (typeof cambiarRolNav === 'function') {
-        cambiarRolNav(esMaestro ? 'maestro' : 'discipulo');
-      } else {
-        aureaSetTema(esMaestro ? 'dark' : 'arena', _profile?.rol || null);
-      }
+      // — Cambiar tema directamente (sin llamar a cambiarRolNav para evitar recursión) —
+      if (typeof aureaSetTema === 'function') aureaSetTema(esMaestro ? 'dark' : 'arena');
+      // Sincronizar badge del nav y dropdown
+      const _badge = document.getElementById('nav-rol-badge');
+      if (_badge) _badge.textContent = '· ' + (esMaestro ? 'Maestro' : 'Discípulo');
+      document.querySelectorAll('#nav-perfil-dd .nav-dd-item').forEach(function(el) {
+        if (el.tagName === 'BUTTON') {
+          el.classList.toggle('active',
+            (esMaestro && el.textContent.includes('Maestro')) ||
+            (!esMaestro && el.textContent.includes('Discípulo'))
+          );
+        }
+      });
 
       // — Etiqueta de rol —
       document.getElementById('role-label').textContent = esMaestro ? 'Maestro' : 'Discípulo';
@@ -171,11 +178,26 @@
         const buscada = _discipulo?.disciplina_buscada || '';
         discEl.textContent = buscada ? `Buscando: ${buscada}` : '';
       }
+      // Mostrar/ocultar secciones del sidebar según rol
       ['stats-maestro','tags-maestro','avail-maestro'].forEach(id =>
         document.getElementById(id).classList.toggle('hidden', !esMaestro));
       ['stats-discipulo','tags-discipulo','avail-discipulo'].forEach(id =>
         document.getElementById(id).classList.toggle('hidden', esMaestro));
-      document.getElementById('col-right').innerHTML = esMaestro ? buildMaestroHTML() : buildDiscipuloHTML();
+
+      // Botón "Editar perfil" lleva a la sección correcta
+      const btnEd = document.getElementById('btn-editar');
+      if (btnEd) btnEd.onclick = () => {
+        location.href = esMaestro ? 'perfil-edicion.html#sec-maestro' : 'perfil-edicion.html#sec-discipulo';
+      };
+
+      // Construir contenido derecho (con try local para no romper toda la init)
+      try {
+        document.getElementById('col-right').innerHTML = esMaestro ? buildMaestroHTML() : buildDiscipuloHTML();
+      } catch(e) {
+        console.error('Error renderizando perfil:', e);
+        document.getElementById('col-right').innerHTML =
+          `<div style="padding:40px;font-size:13px;color:var(--text-faint);">Error al cargar el contenido. <a href="javascript:location.reload()" style="color:var(--gold);">Reintentar</a></div>`;
+      }
     };
 
     function días(fecha) {

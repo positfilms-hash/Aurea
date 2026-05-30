@@ -85,17 +85,19 @@ function cambiarRolNav(rol) {
   var dd = document.getElementById('nav-perfil-dd');
   if (dd) dd.classList.remove('open');
 
-  // 5. Si estamos en perfil.html (tiene .role-btn), actualizar el contenido de la página
-  //    directamente, sin recargar
+  // 5. Si estamos en perfil.html (tiene .role-btn), actualizar el contenido.
+  //    setRole() ya NO llama a cambiarRolNav() → no hay recursión.
   var roleBtns = document.querySelectorAll('.role-btn:not(.add-role)');
   if (roleBtns.length > 0 && typeof window.setRole === 'function') {
+    var targetBtn = null;
     roleBtns.forEach(function(btn) {
       var txt = btn.textContent.trim().toLowerCase();
-      var coincide =
-        (rol === 'maestro'   && txt.indexOf('maestro')   !== -1) ||
-        (rol === 'discipulo' && (txt.indexOf('discípulo') !== -1 || txt.indexOf('discipulo') !== -1));
-      if (coincide) window.setRole(rol, btn);
+      if ((rol === 'maestro'   && txt.indexOf('maestro')   !== -1) ||
+          (rol === 'discipulo' && (txt.indexOf('discípulo') !== -1 || txt.indexOf('discipulo') !== -1))) {
+        targetBtn = btn;
+      }
     });
+    if (targetBtn) window.setRole(rol, targetBtn);
   }
 }
 
