@@ -7,11 +7,14 @@ function renderNavPublic(active=''){
 }
 
 function renderNavAuth(active='', user='') {
-  // El dropdown de "Mis relaciones" cambia su primer item según la vista activa
+  // Estado leído de localStorage — una sola vez para todo el nav
   const rol   = localStorage.getItem('aurea-rol')  || 'maestro';
   const tema  = localStorage.getItem('aurea-tema') || 'dark';
-  const arenaView = rol === 'discipulo' || (rol === 'ambos' && tema === 'arena');
-  const relLabel  = arenaView ? 'Mis maestros' : 'Mis discípulos';
+  const arena = rol === 'discipulo' || (rol === 'ambos' && tema === 'arena');
+  const badge = arena ? 'Discípulo' : 'Maestro';
+
+  // Dropdown "Mis relaciones" — el primer item cambia según la vista activa
+  const relLabel  = arena ? 'Mis maestros' : 'Mis discípulos';
   const relActive = ['relaciones','solicitudes','historia'].includes(active);
 
   const relDd = `<div class="nav-rel-wrap" id="nav-rel-wrap">
@@ -29,12 +32,6 @@ function renderNavAuth(active='', user='') {
     {id:'contacto', label:'Contacto', href:'contacto.html'},
     {id:'dona',     label:'Dona',     href:'dona.html'},
   ];
-
-  // Estado actual leído de localStorage (disponible en cualquier página)
-  const rol   = localStorage.getItem('aurea-rol')  || 'maestro';
-  const tema  = localStorage.getItem('aurea-tema') || 'dark';
-  const arena = rol === 'discipulo' || (rol === 'ambos' && tema === 'arena');
-  const badge = arena ? 'Discípulo' : 'Maestro';
 
   // Contenido del dropdown según rol
   let ddItems = '';
