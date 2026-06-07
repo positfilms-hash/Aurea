@@ -150,6 +150,46 @@ function renderFooter(){
   return `<footer class="footer"><div class="footer-top"><div><div class="footer-logo"><img src="${LOGO_URL}" alt="Aurea"><span class="footer-logo-name">Aurea</span></div><p class="footer-tagline">La cadena áurea del conocimiento. Gratuito siempre.</p></div><div><div class="footer-col-title">Plataforma</div><a class="footer-link" href="como-funciona.html">Cómo funciona</a><a class="footer-link" href="discover.html">Maestros</a><a class="footer-link" href="registro.html">Registro</a></div><div><div class="footer-col-title">Proyecto</div><a class="footer-link" href="como-funciona.html">Cómo funciona</a><a class="footer-link" href="contacto.html">Contacto</a></div><div><div class="footer-col-title">Contacto</div><a class="footer-link" href="contacto.html">info.aureacatena@gmail.com</a><a class="footer-link" href="contacto.html">Formulario de contacto</a></div></div><div class="footer-bottom"><span class="footer-copy">© 2026 Aurea · Todos los derechos reservados</span><div class="footer-legal"><a class="footer-legal-link" href="privacidad.html">Política de privacidad</a><a class="footer-legal-link" href="privacidad.html">Términos y condiciones</a><a class="footer-legal-link" href="privacidad.html">Cookies</a></div></div></footer>`;
 }
 
+// — Solicitudes: carta de intención estructurada dentro del campo `motivacion` —
+// Se compone y parsea un texto legible y retrocompatible. Las solicitudes
+// antiguas (texto plano sin cabeceras) se parsean como motivación a secas.
+const _SOL_HEAD = {
+  'Motivación:': 'motivacion',
+  'Objetivo en el periodo de prueba:': 'objetivo',
+  'Ritmo deseado:': 'ritmo',
+};
+
+function formatSolicitud(o) {
+  o = o || {};
+  let out = 'Motivación:\n' + (o.motivacion || '').trim();
+  if ((o.objetivo || '').trim()) out += '\n\nObjetivo en el periodo de prueba:\n' + o.objetivo.trim();
+  if ((o.ritmo || '').trim())    out += '\n\nRitmo deseado:\n' + o.ritmo.trim();
+  return out;
+}
+
+function parseSolicitud(texto) {
+  const out = { motivacion: '', objetivo: '', ritmo: '', estructurada: false };
+  if (!texto) return out;
+  let current = null;
+  texto.split('\n').forEach(function (line) {
+    const key = _SOL_HEAD[line.trim()];
+    if (key) { current = key; out.estructurada = true; return; }
+    if (current) out[current] += (out[current] ? '\n' : '') + line;
+  });
+  if (!out.estructurada) { out.motivacion = texto.trim(); return out; }
+  out.motivacion = out.motivacion.trim();
+  out.objetivo   = out.objetivo.trim();
+  out.ritmo      = out.ritmo.trim();
+  return out;
+}
+
+// Escape básico para insertar texto de usuario en innerHTML
+function escHtml(s) {
+  return (s == null ? '' : String(s)).replace(/[&<>"']/g, function (m) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+  });
+}
+
 const RESP={'prueba':'El periodo de prueba dura hasta 30 días y permite hasta 3 sesiones de videollamada. El chat es libre. Cualquiera puede aceptar o cancelar en cualquier momento.','discípulo':'Como maestro puedes tener entre 1 y 5 discípulos activos. Al llenarte tu perfil pasa a lista de espera.','plaza':'Las plazas se bloquean al aceptar un discípulo. Se liberan tras cancelar en prueba o tras 1 mes mínimo en relación consolidada.','constancia':'La constancia sube completando relaciones y baja si abandonas antes del mes mínimo.','solicitud':'Puedes enviar hasta 5 solicitudes activas (10 con Pro). Cada una puede requerir mensaje de motivación.','default':'Déjame buscarte la respuesta. Si necesitas más ayuda escríbenos a info.aureacatena@gmail.com o usa el formulario de contacto.'};
 
 function getResp(msg){const m=msg.toLowerCase();for(const[k,v]of Object.entries(RESP)){if(m.includes(k))return v;}return RESP.default;}

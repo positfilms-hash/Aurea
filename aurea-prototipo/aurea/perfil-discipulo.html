@@ -215,8 +215,21 @@
 
     // — Solicitud / mensaje de motivación —
     if (_solData) {
-      document.getElementById('pd-motivacion').textContent =
-        _solData.motivacion ? `"${_solData.motivacion}"` : '(Sin mensaje de motivación)';
+      const motEl = document.getElementById('pd-motivacion');
+      if (!_solData.motivacion) {
+        motEl.textContent = '(Sin mensaje de motivación)';
+      } else {
+        const c = (typeof parseSolicitud === 'function')
+          ? parseSolicitud(_solData.motivacion) : { estructurada: false };
+        if (c.estructurada) {
+          // Carta estructurada: mostrar con cabeceras y saltos de línea
+          motEl.style.fontStyle  = 'normal';
+          motEl.style.whiteSpace = 'pre-wrap';
+          motEl.textContent = _solData.motivacion;
+        } else {
+          motEl.textContent = `"${_solData.motivacion}"`;
+        }
+      }
 
       // Si ya fue respondida, reemplazar botones
       if (_solData.estado === 'aceptada' || _solData.estado === 'rechazada') {
