@@ -180,25 +180,6 @@
       return true;
     }
 
-    // — Validación del paso 3 antes de registrar —
-    function validarPaso3() {
-      const rolTitle   = document.querySelector('.rol-card.selected .rol-title')?.textContent || '';
-      const esDiscipulo = rolTitle === 'Discípulo';
-      const disciplina  = document.getElementById('f-disciplina').value.trim();
-      const categoria   = document.getElementById('f-categoria').value;
-      const formato     = document.getElementById('f-formato').value;
-      const errores     = [];
-      if (!disciplina)             errores.push('f-disciplina');
-      if (!esDiscipulo && !categoria) errores.push('f-categoria');
-      if (!formato)                errores.push('f-formato');
-      errores.forEach(marcarError);
-      if (errores.length) {
-        mostrarError('Completa los campos obligatorios marcados en rojo.');
-        return false;
-      }
-      return true;
-    }
-
     // — Registro en Supabase —
     async function registrar() {
       const btn    = document.getElementById('btn-next');
@@ -261,12 +242,6 @@
       el.classList.add('selected');
       rolOk = true;
       document.getElementById('btn-next').disabled = false;
-      // Adaptar etiquetas del paso 3 según rol
-      const rolTitle = el.querySelector('.rol-title')?.textContent || '';
-      const esDisc = rolTitle === 'Discípulo';
-      document.getElementById('lbl-disciplina').textContent = esDisc ? 'Disciplina que buscas' : 'Disciplina principal';
-      document.getElementById('lbl-formato').textContent    = esDisc ? 'Formato preferido' : 'Formato de enseñanza';
-      // Categoría sigue siendo útil para todos
     };
 
     window.nextStep = async function() {
