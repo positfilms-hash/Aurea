@@ -88,13 +88,13 @@
           <div class="col-head-sub" id="col-head-sub"></div>
         </div>
       </div>
-      <div class="sesiones-title">Sesiones del periodo de prueba</div>
+      <div class="sesiones-title">Sesiones del periodo de prueba · <span id="sesiones-count">—/3</span></div>
       <div class="sesiones-list" id="sesiones-list">
         <!-- Renderizado dinámico -->
       </div>
       <div class="progress-section">
         <div class="prog-label">
-          <span class="prog-text">Días de prueba transcurridos</span>
+          <span class="prog-text" id="prog-text">Periodo de prueba</span>
           <span class="prog-pct" id="prog-pct">— / —</span>
         </div>
         <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%;"></div></div>
@@ -199,14 +199,24 @@
       .order('numero', { ascending: true });
     renderSesiones(sesiones || []);
 
-    // — Barra de progreso —
+    // — Barra de progreso y límites del periodo de prueba —
+    const totalDias = rel.dias_prueba_total || 30;
+    const finMs = new Date(rel.iniciada_at).getTime() + totalDias * 86400000;
+    const vencido = Date.now() > finMs;
+    const diasRestantes = Math.max(0, Math.ceil((finMs - Date.now()) / 86400000));
     const diasTranscurridos = Math.min(
-      Math.floor((Date.now() - new Date(rel.iniciada_at)) / (1000 * 60 * 60 * 24)),
-      rel.dias_prueba_total
+      Math.floor((Date.now() - new Date(rel.iniciada_at)) / 86400000),
+      totalDias
     );
-    const pct = Math.round((diasTranscurridos / rel.dias_prueba_total) * 100);
-    document.getElementById('prog-pct').textContent = `${diasTranscurridos} / ${rel.dias_prueba_total}`;
+    const sesionesUsadas = (sesiones || []).length;
+    const pct = Math.round((diasTranscurridos / totalDias) * 100);
+    document.getElementById('prog-pct').textContent = `${diasTranscurridos} / ${totalDias}`;
     document.getElementById('prog-fill').style.width = `${pct}%`;
+    document.getElementById('prog-text').textContent = vencido
+      ? 'El periodo de prueba ha terminado'
+      : `Quedan ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}`;
+    const sesCountEl = document.getElementById('sesiones-count');
+    if (sesCountEl) sesCountEl.textContent = `${sesionesUsadas}/3`;
 
     // — Banda de decisión (sobre cerrado) —
     await refrescarDecision();
@@ -231,7 +241,9 @@
       document.getElementById('send-btn').disabled = true;
       document.getElementById('msg-input').disabled = true;
     } else {
-      badgeEl.textContent = `⏳ En prueba · ${diasTranscurridos} día${diasTranscurridos !== 1 ? 's' : ''}`;
+      badgeEl.textContent = vencido
+        ? '⏳ Periodo vencido · toca decidir'
+        : `⏳ En prueba · quedan ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}`;
     }
 
     // — Cargar mensajes —

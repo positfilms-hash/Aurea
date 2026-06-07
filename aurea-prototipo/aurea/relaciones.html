@@ -233,6 +233,12 @@
         const esFinalizada = r.estado === 'finalizada';
         const rolLabel = r._rol === 'maestro' ? 'Discípulo' : 'Maestro';
         const disc = r.disciplina || r._disciplina || '—';
+        const totalDias = r.dias_prueba_total || 30;
+        const pruebaVencida = r.estado === 'prueba' && r.iniciada_at &&
+          (Date.now() > new Date(r.iniciada_at).getTime() + totalDias * 86400000);
+        const badgeHTML = pruebaVencida
+          ? '<span class="estado-badge badge-prueba">⏳ Prueba vencida · decidir</span>'
+          : (BADGE_MAP[r.estado] || '');
 
         const actionsHTML = esFinalizada ? '' : (r.estado === 'prueba'
           ? `<button class="btn-small" onclick="location.href='periodo-prueba.html?id=${r.id}'">Chat</button>`
@@ -247,9 +253,9 @@
             <div>
               <div class="rel-nombre">${nombre}</div>
               <div class="rel-disc">${disc}</div>
-              <div class="rel-rol">${rolLabel} ${r.estado === 'prueba' ? '· En periodo de prueba' : r.estado === 'finalizada' ? '· Finalizado' : '· Aceptado'}</div>
+              <div class="rel-rol">${rolLabel} ${r.estado === 'prueba' ? (pruebaVencida ? '· Prueba vencida' : '· En periodo de prueba') : r.estado === 'finalizada' ? '· Finalizado' : '· Aceptado'}</div>
             </div>
-            ${BADGE_MAP[r.estado] || ''}
+            ${badgeHTML}
             <div>
               <div class="rel-desde">${r.iniciada_at ? new Date(r.iniciada_at).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}) : '—'}</div>
               <div class="rel-duracion">${tiempoDesde(dias)}</div>
@@ -292,7 +298,7 @@
       if (maestro) {
         fetches.push(
           supabase.from('relaciones')
-            .select('id, disciplina, estado, iniciada_at, discipulo_id, profiles!discipulo_id(nombre, apellido, avatar_color)')
+            .select('id, disciplina, estado, iniciada_at, dias_prueba_total, discipulo_id, profiles!discipulo_id(nombre, apellido, avatar_color)')
             .eq('maestro_id', maestro.id)
         );
       } else {
@@ -302,7 +308,7 @@
       // Relaciones como discípulo
       fetches.push(
         supabase.from('relaciones')
-          .select('id, disciplina, estado, iniciada_at, maestro_id, profiles!maestro_id(nombre, apellido, avatar_color)')
+          .select('id, disciplina, estado, iniciada_at, dias_prueba_total, maestro_id, profiles!maestro_id(nombre, apellido, avatar_color)')
           .eq('discipulo_id', uid)
       );
 
