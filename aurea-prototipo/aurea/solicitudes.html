@@ -151,7 +151,7 @@
       if (sol.estado === 'aceptada') return `<span style="font-size:10px;font-style:italic;font-family:var(--font-serif);color:var(--green);">En periodo de prueba</span>`;
       if (sol.estado === 'rechazada') return `<span style="font-size:10px;font-style:italic;font-family:var(--font-serif);color:var(--red);">Solicitud rechazada</span>`;
       return `<button class="btn-small" onclick="verPerfil('${sol.discipulo_id}','${sol.id}')">Ver perfil</button>
-              <button class="btn-ac" onclick="aceptar('${sol.id}','${sol.discipulo_id}','${sol.disciplina || ''}')">Aceptar</button>
+              <button class="btn-ac" onclick="aceptar('${sol.id}')">Aceptar</button>
               <button class="btn-re" onclick="rechazar('${sol.id}')">✕</button>`;
     }
 
@@ -170,10 +170,12 @@
 
       lista.innerHTML = sols.map(s => {
         const p = s.profiles || {};
-        const nombre = ((p.nombre || '') + ' ' + (p.apellido || '')).trim() || 'Discípulo';
-        const initials = ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?';
-        const bg = p.avatar_color || 'var(--gold)';
-        const loc = p.ubicacion || '—';
+        const nombre = escHtml(((p.nombre || '') + ' ' + (p.apellido || '')).trim() || 'Discípulo');
+        const initials = escHtml(((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?');
+        const rawColor = p.avatar_color || 'var(--gold)';
+        const bg = (/^#[0-9A-Fa-f]{3,8}$/.test(rawColor) || /^var\(--[\w-]+\)$/.test(rawColor)) ? rawColor : 'var(--gold)';
+        const loc = escHtml(p.ubicacion || '—');
+        const disc = escHtml(s.disciplina || '—');
         const fecha = fechaRelativa(s.created_at);
         const constancia = 0; // sin datos de constancia aún
         return `
@@ -183,7 +185,7 @@
               <div class="avatar" style="background:${bg};">${initials}</div>
               <div>
                 <div class="sol-nombre">${nombre}</div>
-                <div class="sol-disc">${s.disciplina || '—'}</div>
+                <div class="sol-disc">${disc}</div>
                 <div class="sol-loc">${loc}</div>
                 <div class="sol-expand-hint">Pulsa para ver la solicitud ▾</div>
               </div>
@@ -255,13 +257,15 @@
       location.href = `perfil-discipulo.html?id=${discipuloId}&sol=${solId}`;
     };
 
-    window.aceptar = async function(solId, discipuloId, disciplina) {
+    window.aceptar = async function(solId) {
+      const sol = _allSols.find(s => s.id === solId);
+      if (!sol) return;
       const { error: e1 } = await supabase.from('solicitudes').update({ estado: 'aceptada' }).eq('id', solId);
       if (e1) { alert('Error al aceptar. Inténtalo de nuevo.'); return; }
       const { data: rel, error: e2 } = await supabase.from('relaciones').insert({
         maestro_id:   _maestroId,
-        discipulo_id: discipuloId,
-        disciplina:   disciplina || '',
+        discipulo_id: sol.discipulo_id,
+        disciplina:   sol.disciplina || '',
         estado:       'prueba',
       }).select('id').single();
       if (e2) { alert('Error al crear la relación: ' + e2.message); return; }

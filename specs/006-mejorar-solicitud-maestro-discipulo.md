@@ -144,3 +144,21 @@ motivación, objetivo y ritmo → acepta o rechaza igual que antes.
   migración (spec específica).
 - `mensajes.html` y `relaciones.html` no necesitaron cambios: no muestran el
   cuerpo de la solicitud.
+
+## Revisión de Codex (post-implementación)
+
+- **Recomendado — XSS en el render de `solicitudes.html`:** resuelto. Se escapan
+  con `escHtml()` los campos de usuario (nombre, iniciales, ubicación,
+  disciplina), se sanea `avatar_color` (solo hex o `var(--...)`) y se quitó
+  `disciplina` del `onclick` de aceptar (ahora se busca en los datos cargados).
+- **Recomendado — parser demasiado agresivo:** resuelto. `parseSolicitud()` solo
+  trata el texto como carta estructurada si **empieza** por la cabecera
+  `Motivación:`; así un texto antiguo libre que contenga una línea-cabecera no se
+  malinterpreta.
+- **Bloqueante — validación solo en cliente:** reconocido como limitación. La
+  validación 120/60 + casilla cubre a usuarios normales (incluido pegar/espacios),
+  pero un usuario autenticado podría insertar vía consola saltándose el cliente.
+  La garantía real exige validación en servidor (CHECK/RLS), que es un cambio de
+  Supabase y, por las reglas de esta spec, **queda para una spec aparte (007)**.
+  Riesgo real bajo: solo permitiría una solicitud de baja calidad (el maestro la
+  rechaza); RLS ya impide suplantar al discípulo.
