@@ -411,7 +411,12 @@
         try {
           const blob = await resizeImg(file, 400);
           const path = `${_uid}/avatar.jpg`;
-          const { error: upErr } = await supabase.storage.from('avatars').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
+          // Borrar el avatar anterior del propio usuario antes de subir el nuevo.
+          // Evitamos upsert para depender solo de las policies insert/delete
+          // (carpeta propia) definidas en la migración 007. remove() sobre una
+          // ruta inexistente no falla (primer avatar del usuario).
+          await supabase.storage.from('avatars').remove([path]);
+          const { error: upErr } = await supabase.storage.from('avatars').upload(path, blob, { contentType: 'image/jpeg' });
           if (upErr) throw upErr;
           const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
           const urlFinal = publicUrl + '?t=' + Date.now();
