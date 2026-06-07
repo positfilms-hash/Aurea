@@ -29,6 +29,11 @@ declare
   v_fin         timestamptz;
   v_total       integer;
 begin
+  -- Serializar por relación para evitar la carrera en el conteo de sesiones:
+  -- dos inserts concurrentes podrían contar ambos 2 y acabar en 4. FOR NO KEY
+  -- UPDATE es compatible con el FOR KEY SHARE que el INSERT toma por el FK.
+  perform 1 from public.relaciones where id = new.relacion_id for no key update;
+
   select r.iniciada_at, coalesce(r.dias_prueba_total, 30), r.estado
     into v_iniciada_at, v_dias, v_estado
   from public.relaciones r
@@ -38,21 +43,32 @@ begin
     raise exception 'No existe la relación o no tiene fecha de inicio de prueba.';
   end if;
 
-  -- Las sesiones de prueba solo se registran mientras la relación está en prueba.
-  if v_estado <> 'prueba' then
-    raise exception 'La relación no está en periodo de prueba.';
-  end if;
-
   -- Fin del periodo = inicio + duración (sin columna redundante).
   v_fin := v_iniciada_at + (v_dias || ' days')::interval;
-  if now() > v_fin then
-    raise exception 'El periodo de prueba ha terminado.';
+
+  -- Una sesión no puede programarse más allá del fin del periodo (insert o update).
+  if new.programada_at is not null and new.programada_at > v_fin then
+    raise exception 'No se puede programar una sesión después del fin del periodo de prueba.';
   end if;
 
-  -- Máximo 3 sesiones por relación.
+  -- Solo al CREAR: la relación debe estar en prueba y el periodo no vencido.
+  -- En UPDATE no se bloquea por now()/estado, para permitir p. ej. marcar una
+  -- sesión como completada tras el periodo.
+  if TG_OP = 'INSERT' then
+    if v_estado <> 'prueba' then
+      raise exception 'La relación no está en periodo de prueba.';
+    end if;
+    if now() > v_fin then
+      raise exception 'El periodo de prueba ha terminado.';
+    end if;
+  end if;
+
+  -- Máximo 3 sesiones por relación. En UPDATE se excluye la propia fila
+  -- (cubre además mover una sesión a otra relación que ya tenga 3).
   select count(*) into v_total
   from public.sesiones_prueba sp
-  where sp.relacion_id = new.relacion_id;
+  where sp.relacion_id = new.relacion_id
+    and (TG_OP = 'INSERT' or sp.id <> new.id);
 
   if v_total >= 3 then
     raise exception 'La relación ya ha usado las 3 sesiones de prueba.';
@@ -65,6 +81,6 @@ $$;
 drop trigger if exists trg_validar_limites_sesion_prueba on public.sesiones_prueba;
 
 create trigger trg_validar_limites_sesion_prueba
-before insert on public.sesiones_prueba
+before insert or update on public.sesiones_prueba
 for each row
 execute function public.validar_limites_sesion_prueba();
