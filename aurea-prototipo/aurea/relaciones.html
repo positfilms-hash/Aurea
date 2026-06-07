@@ -93,13 +93,12 @@
     </div>
   </div>
 
-  <!-- Modal incidencia -->
+  <!-- Modal incidencia (honesto: deriva a contacto, sin envío simulado) -->
   <div class="overlay" id="overlay-inc">
     <div class="modal" style="width:400px;">
-      <div class="modal-title">Notificar incidencia</div>
-      <div class="modal-sub" id="inc-sub">Describe lo ocurrido. El equipo de Aurea lo revisará.</div>
-      <textarea class="modal-textarea" placeholder="Describe la incidencia…"></textarea>
-      <div class="modal-actions"><button class="btn-modal-back" onclick="closeModals()">Cancelar</button><button class="btn-modal-warn" onclick="closeModals()">Enviar incidencia</button></div>
+      <div class="modal-title">¿Necesitas ayuda con una relación?</div>
+      <div class="modal-sub" id="inc-sub">Por ahora las incidencias se gestionan desde Contacto. Escríbenos y el equipo de Aurea te responderá.</div>
+      <div class="modal-actions"><button class="btn-modal-back" onclick="closeModals()">Cancelar</button><button class="btn-modal-warn" onclick="location.href='contacto.html'">Ir a Contacto</button></div>
     </div>
   </div>
 
@@ -136,7 +135,7 @@
 
     window.closeModals   = closeModals;
     window.openMediador  = function(nombre) {
-      document.getElementById('inc-sub').textContent = `Describe lo ocurrido con ${nombre}. El equipo de Aurea lo revisará de forma confidencial.`;
+      document.getElementById('inc-sub').textContent = `Por ahora las incidencias (por ejemplo con ${nombre}) se gestionan desde Contacto. Escríbenos y el equipo de Aurea te responderá.`;
       document.getElementById('overlay-inc').classList.add('open');
     };
     window.openFinalizar = function(relId, nombre) {
