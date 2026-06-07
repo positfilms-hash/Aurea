@@ -100,8 +100,8 @@
         <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%;"></div></div>
       </div>
       <div class="decision-band" id="decision-band">
-        <button class="btn-decision btn-accept" onclick="openModal('aceptar')">Aceptar la cadena</button>
-        <button class="btn-decision btn-cancel" onclick="openModal('cancelar')">Cancelar</button>
+        <button class="btn-decision btn-accept" onclick="openDecision('consolidar')">Sí, consolidar</button>
+        <button class="btn-decision btn-cancel" onclick="openDecision('no_consolidar')">No consolidar</button>
       </div>
     </div>
     <div class="col-right">
@@ -127,35 +127,18 @@
     </div>
   </div>
 
-  <!-- Modal aceptar -->
-  <div class="overlay" id="modal-aceptar">
+  <!-- Modal decisión (sobre cerrado) -->
+  <div class="overlay" id="modal-decision">
     <div class="modal" style="width:440px;">
       <div class="sobre-cerrado">
         <div class="sobre-icon">◎</div>
         <div class="sobre-title">Decisión en sobre cerrado</div>
-        <div class="sobre-sub" id="sobre-sub">
-          Si confirmas, tu decisión quedará registrada pero la otra persona no la verá hasta que ella también decida.<br>
-          Si ambos aceptáis, la cadena quedará consolidada.
-        </div>
+        <div class="sobre-sub" id="decision-sub"></div>
       </div>
+      <div class="modal-sub" style="margin-top:10px;">Esta decisión no podrá cambiarse desde Aurea después de enviarla.</div>
       <div class="modal-actions">
         <button class="btn-mb" onclick="closeModals()">Volver</button>
-        <button class="btn-mac" onclick="confirmarAceptar()">Confirmar aceptación</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal cancelar -->
-  <div class="overlay" id="modal-cancelar">
-    <div class="modal" style="width:440px;">
-      <div class="modal-title">Cancelar el periodo de prueba</div>
-      <div class="modal-sub" id="cancelar-sub">
-        Puedes dejar un mensaje opcional. No es obligatorio, pero puede ser un gesto generoso.
-      </div>
-      <textarea class="modal-ta" id="modal-cancelar-msg" placeholder="Un mensaje de despedida (opcional)…"></textarea>
-      <div class="modal-actions">
-        <button class="btn-mb" onclick="closeModals()">Volver</button>
-        <button class="btn-mca" onclick="confirmarCancelar()">Cancelar el periodo</button>
+        <button class="btn-mac" id="decision-confirm-btn" onclick="confirmarDecision()">Confirmar</button>
       </div>
     </div>
   </div>
@@ -197,7 +180,6 @@
 
     const esMaestro = rel.maestro_id === uid;
     const otroP = esMaestro ? rel.discipulo : rel.maestro;
-    const miDecision = esMaestro ? rel.decision_maestro : rel.decision_discipulo;
 
     // — Panel izquierdo: datos del otro —
     const otroNombre = `${otroP.nombre} ${otroP.apellido || ''}`.trim();
@@ -226,13 +208,8 @@
     document.getElementById('prog-pct').textContent = `${diasTranscurridos} / ${rel.dias_prueba_total}`;
     document.getElementById('prog-fill').style.width = `${pct}%`;
 
-    // — Banda de decisión —
-    const bandEl = document.getElementById('decision-band');
-    if (rel.estado !== 'prueba') {
-      bandEl.style.display = 'none';
-    } else if (miDecision !== null && miDecision !== undefined) {
-      bandEl.innerHTML = `<div class="ya-decidio">Ya has tomado tu decisión · Esperando la de ${otroP.nombre}</div>`;
-    }
+    // — Banda de decisión (sobre cerrado) —
+    refrescarDecision();
 
     // — Chat header / badge —
     document.getElementById('chat-title').textContent = otroNombre;
@@ -248,15 +225,14 @@
       badgeEl.className = 'chat-badge cancelada';
       document.getElementById('send-btn').disabled = true;
       document.getElementById('msg-input').disabled = true;
+    } else if (rel.estado === 'finalizada') {
+      badgeEl.textContent = '— Periodo finalizado';
+      badgeEl.className = 'chat-badge cancelada';
+      document.getElementById('send-btn').disabled = true;
+      document.getElementById('msg-input').disabled = true;
     } else {
       badgeEl.textContent = `⏳ En prueba · ${diasTranscurridos} día${diasTranscurridos !== 1 ? 's' : ''}`;
     }
-
-    // — Textos de modales con nombre real —
-    document.getElementById('sobre-sub').innerHTML =
-      `Si confirmas, tu decisión quedará registrada pero ${otroP.nombre} no la verá hasta que ella también decida.<br>Si ambos aceptáis, la cadena quedará consolidada.`;
-    document.getElementById('cancelar-sub').textContent =
-      `Puedes dejar un mensaje opcional para ${otroP.nombre}. No es obligatorio, pero puede ser un gesto generoso.`;
 
     // — Cargar mensajes —
     const { data: msgs } = await supabase
@@ -407,40 +383,80 @@
       document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open'));
     };
 
-    window.confirmarAceptar = async function() {
-      const campo = esMaestro ? 'decision_maestro' : 'decision_discipulo';
-      const { error } = await supabase.from('relaciones')
-        .update({ [campo]: true })
-        .eq('id', relacionId);
-      if (error) { alert('Error al guardar la decisión.'); return; }
+    // ─── Decisión de consolidación (sobre cerrado) ───────────
+    let _decisionElegida = null;
 
-      // Comprobar si ambos han aceptado → consolidar
-      const { data: updated } = await supabase.from('relaciones')
-        .select('decision_maestro, decision_discipulo')
-        .eq('id', relacionId)
-        .single();
-      if (updated?.decision_maestro === true && updated?.decision_discipulo === true) {
-        await supabase.from('relaciones').update({
-          estado: 'consolidada',
-          consolidada_at: new Date().toISOString()
-        }).eq('id', relacionId);
+    window.openDecision = function(tipo) {
+      _decisionElegida = tipo;
+      const nombre = esc(otroP.nombre || 'la otra persona');
+      document.getElementById('decision-sub').innerHTML = tipo === 'consolidar'
+        ? `Vas a indicar que <strong>sí</strong> quieres consolidar esta relación.<br>Tu decisión será privada hasta que ${nombre} también decida.`
+        : `Vas a indicar que <strong>prefieres no</strong> consolidar esta relación.<br>Tu decisión será privada hasta que ${nombre} también decida.`;
+      document.getElementById('decision-confirm-btn').textContent =
+        tipo === 'consolidar' ? 'Confirmar: consolidar' : 'Confirmar: no consolidar';
+      document.getElementById('modal-decision').classList.add('open');
+    };
+
+    window.confirmarDecision = async function() {
+      if (!_decisionElegida) return;
+      const btn = document.getElementById('decision-confirm-btn');
+      btn.disabled = true;
+      const { error } = await supabase.from('decisiones_consolidacion').insert({
+        relacion_id: relacionId,
+        user_id: uid,
+        decision: _decisionElegida,
+      });
+      btn.disabled = false;
+      if (error) {
+        alert(error.code === '23505'
+          ? 'Ya habías enviado tu decisión para esta relación.'
+          : ('No se pudo guardar la decisión: ' + (error.message || error)));
+        return;
+      }
+      closeModals();
+      await refrescarDecision();
+    };
+
+    async function refrescarDecision() {
+      const band = document.getElementById('decision-band');
+      if (!band) return;
+
+      // Resultado: solo existe (y es visible) cuando ambas partes han decidido.
+      const { data: resultado } = await supabase
+        .from('resultados_consolidacion')
+        .select('resultado')
+        .eq('relacion_id', relacionId)
+        .maybeSingle();
+      if (resultado) {
+        band.style.display = '';
+        band.innerHTML = resultado.resultado === 'consolidada'
+          ? `<div class="ya-decidio">✓ La relación se ha consolidado.</div>`
+          : `<div class="ya-decidio">La relación no se ha consolidado.</div>`;
+        return;
       }
 
-      closeModals();
-      document.getElementById('decision-band').innerHTML =
-        `<div class="ya-decidio">Ya has tomado tu decisión · Esperando la de ${otroP.nombre}</div>`;
-    };
+      // ¿He decidido ya? Solo puedo leer mi propia decisión (sobre cerrado).
+      const { data: miDec } = await supabase
+        .from('decisiones_consolidacion')
+        .select('decision')
+        .eq('relacion_id', relacionId)
+        .eq('user_id', uid)
+        .maybeSingle();
+      if (miDec) {
+        band.style.display = '';
+        band.innerHTML = `<div class="ya-decidio">Tu decisión está guardada · El resultado se mostrará cuando ${esc(otroP.nombre || 'la otra persona')} también decida.</div>`;
+        return;
+      }
 
-    window.confirmarCancelar = async function() {
-      const msg = document.getElementById('modal-cancelar-msg').value.trim() || null;
-      const { error } = await supabase.from('relaciones').update({
-        estado: 'cancelada',
-        mensaje_cancelacion: msg
-      }).eq('id', relacionId);
-      if (error) { alert('Error al cancelar el periodo.'); return; }
-      closeModals();
-      location.href = 'relaciones.html';
-    };
+      // Relación ya cerrada por otra vía (legacy) → ocultar la banda.
+      if (rel.estado !== 'prueba') { band.style.display = 'none'; return; }
+
+      // Aún no he decidido: mostrar las opciones.
+      band.style.display = '';
+      band.innerHTML =
+        `<button class="btn-decision btn-accept" onclick="openDecision('consolidar')">Sí, consolidar</button>
+         <button class="btn-decision btn-cancel" onclick="openDecision('no_consolidar')">No consolidar</button>`;
+    }
 
     document.querySelectorAll('.overlay').forEach(o =>
       o.addEventListener('click', function(e) { if (e.target === this) closeModals(); })
