@@ -428,10 +428,19 @@
         .eq('relacion_id', relacionId)
         .maybeSingle();
       if (resultado) {
+        const consolidada = resultado.resultado === 'consolidada';
         band.style.display = '';
-        band.innerHTML = resultado.resultado === 'consolidada'
+        band.innerHTML = consolidada
           ? `<div class="ya-decidio">✓ La relación se ha consolidado.</div>`
           : `<div class="ya-decidio">La relación no se ha consolidado.</div>`;
+        // Reflejar el cierre en el chat sin necesidad de recargar la página.
+        const badge = document.getElementById('chat-badge');
+        if (badge) {
+          badge.textContent = consolidada ? '✓ Cadena consolidada' : '— Periodo finalizado';
+          badge.className = 'chat-badge ' + (consolidada ? 'consolidada' : 'cancelada');
+        }
+        const sb = document.getElementById('send-btn'); if (sb) sb.disabled = true;
+        const mi = document.getElementById('msg-input'); if (mi) mi.disabled = true;
         return;
       }
 
