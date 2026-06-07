@@ -160,11 +160,12 @@ function renderChatWidget(){
   <div class="chat-widget" id="chat-widget">
     <div style="padding:14px 16px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--night-soft);">
       <div style="width:32px;height:32px;border-radius:50%;background:var(--night-deep);border:0.5px solid var(--border-gold);display:flex;align-items:center;justify-content:center;font-size:14px;">✦</div>
-      <div><div style="font-family:var(--font-serif);font-size:15px;font-weight:500;color:var(--text-primary);">Aurea · Asistente</div><div style="font-size:9px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);">● En línea</div></div>
+      <div><div style="font-family:var(--font-serif);font-size:15px;font-weight:500;color:var(--text-primary);">Aurea · Asistente</div><div style="font-size:9px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);">Asistente informativo</div></div>
       <button onclick="toggleChat()" style="margin-left:auto;font-size:18px;color:var(--text-faint);background:none;border:none;cursor:pointer;">×</button>
     </div>
+    <div style="padding:9px 16px;background:var(--night-deep);border-bottom:0.5px solid var(--border);font-size:10px;font-weight:300;line-height:1.5;color:var(--text-muted);">No es un chat en vivo. No guarda mensajes ni contacta con el equipo. Para hablar con una persona, usa <a href="contacto.html" style="color:var(--gold);text-decoration:none;">Contacto</a>.</div>
     <div id="chat-messages" style="height:260px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;">
-      <div style="max-width:85%;align-self:flex-start;"><div style="padding:9px 12px;border-radius:2px 10px 10px 10px;font-size:12px;line-height:1.6;background:var(--night-soft);border:0.5px solid var(--border);color:var(--text-primary);">Hola. Soy el asistente de Aurea. ¿En qué puedo ayudarte?</div><div style="font-size:9px;color:var(--text-ghost);margin-top:3px;">Aurea · Ahora</div></div>
+      <div style="max-width:85%;align-self:flex-start;"><div style="padding:9px 12px;border-radius:2px 10px 10px 10px;font-size:12px;line-height:1.6;background:var(--night-soft);border:0.5px solid var(--border);color:var(--text-primary);">Hola. Soy un asistente informativo. Puedo orientarte sobre cómo funciona Aurea: el periodo de prueba, las solicitudes o consolidar una relación. Para hablar con una persona del equipo, escríbenos desde Contacto.</div><div style="font-size:9px;color:var(--text-ghost);margin-top:3px;">Aurea · Información</div></div>
     </div>
     <div id="chat-sugs" style="display:flex;flex-wrap:wrap;gap:5px;padding:0 14px 10px;">
       <span class="chip" onclick="chatSug(this,'¿Cómo funciona el periodo de prueba?')">¿Cómo funciona el periodo de prueba?</span>
@@ -196,84 +197,16 @@ function addChatMsg(text,who){
 function sendChat(){const i=document.getElementById('chat-input');const v=i.value.trim();if(!v)return;document.getElementById('chat-sugs').style.display='none';addChatMsg(v,'user');i.value='';setTimeout(()=>addChatMsg(getResp(v),'bot'),600);}
 function chatSug(el,text){document.getElementById('chat-sugs').style.display='none';addChatMsg(text,'user');setTimeout(()=>addChatMsg(getResp(text),'bot'),600);}
 
-function renderMediador(){
-  return `<div class="overlay" id="mediador-overlay">
-    <div style="background:var(--night-mid);border:0.5px solid var(--border-soft);border-radius:16px;width:460px;max-height:580px;display:flex;flex-direction:column;overflow:hidden;">
-      <div style="padding:18px 22px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--night-soft);flex-shrink:0;">
-        <div style="width:36px;height:36px;border-radius:50%;background:var(--night-deep);border:0.5px solid #E8A03044;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">⚖</div>
-        <div><div style="font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--text-primary);">Mediador de incidencias</div><div style="font-size:9px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--amber);">Agente Aurea · Confidencial</div></div>
-        <button onclick="closeMediador()" style="margin-left:auto;font-size:18px;color:var(--text-faint);background:none;border:none;cursor:pointer;">×</button>
-      </div>
-      <div id="med-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;"></div>
-      <div id="med-options" style="display:flex;flex-direction:column;gap:6px;padding:0 16px 12px;">
-        <button onclick="medOpt(this,'Conducta inapropiada')" style="font-size:11px;font-weight:300;color:var(--text-muted);border:0.5px solid var(--border);padding:8px 14px;border-radius:8px;cursor:pointer;background:none;text-align:left;">Conducta inapropiada</button>
-        <button onclick="medOpt(this,'Abandono sin aviso')" style="font-size:11px;font-weight:300;color:var(--text-muted);border:0.5px solid var(--border);padding:8px 14px;border-radius:8px;cursor:pointer;background:none;text-align:left;">Abandono sin aviso del periodo de prueba</button>
-        <button onclick="medOpt(this,'Suplantación de identidad')" style="font-size:11px;font-weight:300;color:var(--text-muted);border:0.5px solid var(--border);padding:8px 14px;border-radius:8px;cursor:pointer;background:none;text-align:left;">Suplantación de identidad</button>
-        <button onclick="medOpt(this,'Otro')" style="font-size:11px;font-weight:300;color:var(--text-muted);border:0.5px solid var(--border);padding:8px 14px;border-radius:8px;cursor:pointer;background:none;text-align:left;">Otro motivo</button>
-      </div>
-      <div id="med-footer" style="display:none;padding:12px 16px;border-top:0.5px solid var(--border);flex-shrink:0;display:none;gap:8px;align-items:center;">
-        <input id="med-input" type="text" placeholder="Escribe aquí…" style="flex:1;background:var(--night-soft);border:0.5px solid var(--border);border-radius:100px;padding:8px 14px;font-size:11px;color:var(--text-primary);outline:none;" onkeydown="if(event.key==='Enter')sendMed()">
-        <button onclick="sendMed()" style="background:var(--amber);border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M2 8L14 2L8 14L7 9L2 8Z" fill="#1C1410"/></svg></button>
-      </div>
-    </div>
-  </div>`;
-}
-
-let _medStep=0,_medTipo='',_medDesc='',_medNombre='';
-
-function openMediador(nombre){
-  _medNombre=nombre||'este usuario';_medStep=0;_medTipo='';_medDesc='';
-  document.getElementById('med-messages').innerHTML=`<div style="max-width:88%;align-self:flex-start;"><div style="padding:10px 14px;border-radius:2px 10px 10px 10px;font-size:12px;line-height:1.6;background:var(--night-soft);border:0.5px solid var(--border);color:var(--text-primary);">Hola. Estoy aquí para ayudarte a gestionar esta incidencia con <strong>${_medNombre}</strong>. Todo es confidencial.<br><br>¿Cuál es el tipo de incidencia?</div></div>`;
-  document.getElementById('med-options').style.display='flex';
-  document.getElementById('med-footer').style.display='none';
-  document.getElementById('mediador-overlay').classList.add('open');
-}
-
-function closeMediador(){document.getElementById('mediador-overlay').classList.remove('open');}
-
-function addMedMsg(text,who){
-  const msgs=document.getElementById('med-messages');
-  const d=document.createElement('div');
-  d.style.cssText=`max-width:88%;align-self:${who==='bot'?'flex-start':'flex-end'};`;
-  const b=document.createElement('div');
-  b.style.cssText=who==='bot'?'padding:10px 14px;border-radius:2px 10px 10px 10px;font-size:12px;line-height:1.6;background:var(--night-soft);border:0.5px solid var(--border);color:var(--text-primary);':'padding:10px 14px;border-radius:10px 2px 10px 10px;font-size:12px;line-height:1.6;background:#2A1408;border:0.5px solid #E8A03022;color:var(--text-primary);';
-  b.innerHTML=text;d.appendChild(b);msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
-}
-
-function medOpt(btn,tipo){
-  _medTipo=tipo;document.getElementById('med-options').style.display='none';addMedMsg(tipo,'user');_medStep=1;
-  const f=document.getElementById('med-footer');f.style.display='flex';
-  setTimeout(()=>addMedMsg(`Entendido — <em>${tipo}</em>. ¿Cuándo ocurrió y qué pasó exactamente?`,'bot'),500);
-}
-
-function sendMed(){
-  const i=document.getElementById('med-input');const v=i.value.trim();if(!v)return;
-  addMedMsg(v,'user');i.value='';_medStep++;
-  setTimeout(()=>{
-    if(_medStep===2){_medDesc=v;addMedMsg('Gracias. ¿Hay algo más que el equipo de Aurea deba tener en cuenta?','bot');}
-    else if(_medStep>=3){
-      document.getElementById('med-footer').style.display='none';
-      addMedMsg('Perfecto. He recogido toda la información. Preparando el resumen…','bot');
-      const ref='INC-'+Math.floor(Math.random()*9000+1000);
-      setTimeout(()=>{
-        const msgs=document.getElementById('med-messages');
-        const r=document.createElement('div');
-        r.style.cssText='background:var(--night-soft);border:0.5px solid #E8A03033;border-radius:10px;padding:14px;margin:4px 0;font-size:11px;color:var(--text-muted);line-height:1.8;';
-        r.innerHTML=`<div style="font-size:10px;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--amber);margin-bottom:8px;">Resumen</div><strong style="color:var(--text-primary);">Tipo:</strong> ${_medTipo}<br><strong style="color:var(--text-primary);">Con:</strong> ${_medNombre}<br><strong style="color:var(--text-primary);">Descripción:</strong> ${_medDesc||v}<br><strong style="color:var(--text-primary);">Referencia:</strong> ${ref}`;
-        msgs.appendChild(r);
-        const btn=document.createElement('button');
-        btn.style.cssText='width:calc(100% - 32px);font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--night);background:var(--amber);border:none;padding:12px;border-radius:100px;cursor:pointer;margin:8px 16px 16px;';
-        btn.textContent='Enviar al equipo de Aurea';
-        btn.onclick=()=>{btn.textContent='✓ Incidencia enviada';btn.style.background='var(--green)';btn.onclick=null;addMedMsg('Tu incidencia ha sido enviada con referencia <strong>'+ref+'</strong>. El equipo de Aurea la revisará en 24–48 horas.','bot');};
-        msgs.appendChild(btn);msgs.scrollTop=msgs.scrollHeight;
-      },800);
-    }
-  },500);
-}
+// — Mediador de incidencias: eliminado (spec 004). —
+// Era un flujo simulado que decía "Incidencia enviada · INC-XXXX" sin
+// guardar ni enviar nada. Hasta que exista un backend real de mediación,
+// las incidencias se derivan a contacto.html (ver modal honesto en
+// relaciones.html). No reintroducir un flujo que aparente abrir un caso
+// si no hay envío real.
 
 document.addEventListener('DOMContentLoaded',()=>{
   const c=document.getElementById('chat-container');
-  if(c){c.innerHTML=renderChatWidget()+renderMediador();}
+  if(c){c.innerHTML=renderChatWidget();}
   initChatFabDrag();
 });
 
