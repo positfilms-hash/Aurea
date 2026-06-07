@@ -66,6 +66,15 @@
     .btn-ms{font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--night);background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));border:none;padding:10px 24px;border-radius:100px;cursor:pointer;}
     .success-send{display:none;background:#1A2A12;border:0.5px solid #3B6D1144;border-radius:10px;padding:16px;text-align:center;}
     .success-send.show{display:block;}
+    .sol-help{font-size:11px;font-weight:300;color:var(--text-faint);margin:3px 0 7px;line-height:1.5;}
+    .sol-counter{font-size:10px;font-weight:300;color:var(--text-ghost);margin-top:4px;text-align:right;}
+    .sol-counter.ok{color:var(--green);}
+    .sol-select{background:var(--night-soft);border:0.5px solid var(--border-soft);border-radius:8px;padding:11px 12px;font-family:var(--font-sans,inherit);font-size:13px;color:var(--text-primary);outline:none;width:100%;cursor:pointer;}
+    .sol-select:focus{border-color:var(--gold);}
+    .sol-confirm{display:flex;align-items:flex-start;gap:10px;margin-top:16px;cursor:pointer;font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.6;}
+    .sol-confirm input{margin-top:2px;accent-color:var(--gold);flex-shrink:0;width:15px;height:15px;}
+    .sol-error{display:none;color:var(--red);font-size:11px;font-weight:300;margin-top:10px;line-height:1.5;}
+    .sol-error.show{display:block;}
     .page-footer-bar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:36px;border-top:0.5px solid var(--border);background:var(--night-soft);}
   </style>
 </head>
@@ -153,17 +162,48 @@
 
   <!-- Modal solicitud -->
   <div class="overlay" id="modal-sol">
-    <div class="modal" style="width:460px;">
+    <div class="modal" style="width:min(500px,92vw);max-height:88vh;overflow-y:auto;">
       <div class="modal-title" id="p-modal-title">Solicitar a Rafael Montoya</div>
-      <div class="modal-sub"  id="p-modal-sub">Este maestro exige un mensaje de motivación. Cuéntale por qué quieres aprender filosofía estoica con él y qué puedes aportarle como discípulo.</div>
-      <div style="height:10px;"></div>
-      <div class="field-wrap"><span class="field-label">Tu mensaje de motivación</span><textarea class="modal-ta" id="mot-text" placeholder="Escribe aquí tu motivación sincera…"></textarea></div>
+      <div class="modal-sub"  id="p-modal-sub">Una solicitud en Aurea no es pedir una clase suelta: es proponer una relación de aprendizaje. Tómate un momento para escribirle bien.</div>
+      <div style="height:14px;"></div>
+
+      <div class="field-wrap">
+        <span class="field-label">¿Por qué quieres aprender con este maestro?</span>
+        <div class="sol-help">Cuéntale qué te atrae de su trayectoria, enfoque o experiencia.</div>
+        <textarea class="modal-ta" id="mot-text" maxlength="1200" placeholder="Escribe tu motivación sincera…"></textarea>
+        <div class="sol-counter" id="mot-counter">Mínimo 120 caracteres</div>
+      </div>
+
+      <div class="field-wrap" style="margin-top:8px;">
+        <span class="field-label">¿Qué te gustaría trabajar durante el periodo de prueba?</span>
+        <div class="sol-help">Describe una meta concreta o una dirección de aprendizaje.</div>
+        <textarea class="modal-ta" id="obj-text" maxlength="800" style="height:90px;" placeholder="Por ejemplo: asentar los fundamentos, preparar algo concreto, corregir un hábito…"></textarea>
+        <div class="sol-counter" id="obj-counter">Mínimo 60 caracteres</div>
+      </div>
+
+      <div class="field-wrap" style="margin-top:8px;">
+        <span class="field-label">¿Qué ritmo imaginas?</span>
+        <select class="sol-select" id="ritmo-sel">
+          <option value="Una conversación inicial">Una conversación inicial</option>
+          <option value="Una sesión semanal">Una sesión semanal</option>
+          <option value="Varias sesiones durante el periodo de prueba">Varias sesiones durante el periodo de prueba</option>
+          <option value="A concretar con el maestro" selected>A concretar con el maestro</option>
+        </select>
+      </div>
+
+      <label class="sol-confirm">
+        <input type="checkbox" id="confirm-chk">
+        <span>Entiendo que estoy solicitando una relación de aprendizaje, no una clase suelta ni una respuesta inmediata.</span>
+      </label>
+
+      <div class="sol-error" id="sol-error"></div>
+
       <div class="success-send" id="sol-success">
         <div style="font-size:24px;margin-bottom:8px;">✦</div>
         <div style="font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--text-primary);margin-bottom:4px;">Solicitud enviada</div>
-        <div style="font-size:11px;color:var(--text-muted);" id="sol-success-sub">Rafael revisará tu perfil y te responderá pronto.</div>
+        <div style="font-size:11px;color:var(--text-muted);" id="sol-success-sub"></div>
       </div>
-      <div class="modal-actions" id="sol-actions">
+      <div class="modal-actions" id="sol-actions" style="margin-top:16px;">
         <button class="btn-mb" onclick="window.closeModals()">Cancelar</button>
         <button class="btn-ms" onclick="window.sendSol()">Enviar solicitud</button>
       </div>
@@ -187,25 +227,53 @@
     let _disciplina  = '';
     let _nombreCompleto = 'este maestro';
 
+    const MOT_MIN = 120, OBJ_MIN = 60;
+
+    function updCounter(id, counterId, min) {
+      const n = document.getElementById(id).value.trim().length;
+      const c = document.getElementById(counterId);
+      if (n >= min) { c.textContent = n + ' caracteres'; c.classList.add('ok'); }
+      else { c.textContent = `Mínimo ${min} caracteres · faltan ${min - n}`; c.classList.remove('ok'); }
+    }
+    document.getElementById('mot-text').addEventListener('input', () => updCounter('mot-text', 'mot-counter', MOT_MIN));
+    document.getElementById('obj-text').addEventListener('input', () => updCounter('obj-text', 'obj-counter', OBJ_MIN));
+
     window.sendSol = async function() {
-      const texto = document.getElementById('mot-text').value.trim();
-      if (!texto) return;
+      const mot   = document.getElementById('mot-text').value.trim();
+      const obj   = document.getElementById('obj-text').value.trim();
+      const ritmo = document.getElementById('ritmo-sel').value;
+      const confirmado = document.getElementById('confirm-chk').checked;
+      const err   = document.getElementById('sol-error');
+
+      const fallos = [];
+      if (mot.length < MOT_MIN) fallos.push(`Tu motivación necesita al menos ${MOT_MIN} caracteres (llevas ${mot.length}).`);
+      if (obj.length < OBJ_MIN) fallos.push(`El objetivo necesita al menos ${OBJ_MIN} caracteres (llevas ${obj.length}).`);
+      if (!confirmado)          fallos.push('Marca la casilla de confirmación para continuar.');
+      if (fallos.length) { err.textContent = fallos[0]; err.classList.add('show'); return; }
+      err.classList.remove('show');
+
+      const texto = formatSolicitud({ motivacion: mot, objetivo: obj, ritmo });
 
       const session = await getSession();
       if (session && _maestroId) {
-        // Insertar solicitud real en Supabase
-        await supabase.from('solicitudes').insert({
+        const { error } = await supabase.from('solicitudes').insert({
           discipulo_id: session.user.id,
           maestro_id:   _maestroId,
           disciplina:   _disciplina,
           motivacion:   texto,
         });
+        if (error) {
+          err.textContent = 'No se pudo enviar la solicitud: ' + error.message;
+          err.classList.add('show');
+          return;
+        }
       }
 
       document.getElementById('sol-actions').style.display = 'none';
+      document.getElementById('sol-error').classList.remove('show');
       document.getElementById('sol-success').classList.add('show');
       document.getElementById('sol-success-sub').textContent =
-        _nombreCompleto + ' revisará tu perfil y te responderá pronto.';
+        `Tu solicitud ha llegado a ${_nombreCompleto}. Si decide iniciar un periodo de prueba contigo, te llegará un aviso.`;
     };
 
     // — Cargar perfil desde Supabase si hay ?id= en la URL —
@@ -347,9 +415,8 @@
 
       // Modal
       document.getElementById('p-modal-title').textContent = `Solicitar a ${fullName}`;
-      document.getElementById('p-modal-sub').textContent   = m.motivacion_obligatoria
-        ? `Este maestro exige un mensaje de motivación. Cuéntale por qué quieres aprender ${m.disciplina} con él/ella.`
-        : `Escribe un mensaje para ${fullName} presentándote como discípulo.`;
+      document.getElementById('p-modal-sub').textContent   =
+        `Solicitar a ${fullName} no es pedir una clase suelta: es proponer una relación de aprendizaje en ${m.disciplina || 'su disciplina'}. Tómate un momento para escribirle bien.`;
     }
   </script>
 </body>

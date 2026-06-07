@@ -52,6 +52,15 @@
     .plaza-label{font-size:10px;font-weight:300;color:var(--text-faint);}
     .plaza-n{font-size:10px;font-weight:400;color:var(--text-primary);}
     .page-footer-bar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:36px;border-top:0.5px solid var(--border);background:var(--night-soft);}
+    .sol-row{cursor:pointer;}
+    .sol-expand-hint{font-size:9px;font-weight:300;color:var(--text-ghost);margin-top:3px;}
+    .sol-detail{display:none;padding:2px 24px 18px 88px;border-bottom:0.5px solid var(--border);background:var(--night-soft);}
+    .sol-detail.open{display:block;}
+    .sol-detail-inner{display:flex;flex-direction:column;gap:12px;padding-top:8px;}
+    .sd-sec{}
+    .sd-label{font-size:9px;font-weight:400;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;}
+    .sd-text{font-size:13px;font-weight:300;color:var(--text-secondary);line-height:1.7;white-space:pre-wrap;}
+    .sd-empty{font-size:12px;color:var(--text-faint);font-style:italic;}
   </style>
 </head>
 <body>
@@ -168,26 +177,52 @@
         const fecha = fechaRelativa(s.created_at);
         const constancia = 0; // sin datos de constancia aún
         return `
-          <div class="sol-row">
-            <div class="ind ${s.estado}"></div>
-            <div class="avatar" style="background:${bg};">${initials}</div>
-            <div>
-              <div class="sol-nombre">${nombre}</div>
-              <div class="sol-disc">${s.disciplina || '—'}</div>
-              <div class="sol-loc">${loc}</div>
+          <div class="sol-block">
+            <div class="sol-row" onclick="toggleDetalle('${s.id}', event)">
+              <div class="ind ${s.estado}"></div>
+              <div class="avatar" style="background:${bg};">${initials}</div>
+              <div>
+                <div class="sol-nombre">${nombre}</div>
+                <div class="sol-disc">${s.disciplina || '—'}</div>
+                <div class="sol-loc">${loc}</div>
+                <div class="sol-expand-hint">Pulsa para ver la solicitud ▾</div>
+              </div>
+              <div class="const-wrap">
+                <div class="const-top"><span class="const-n">${constancia}</span><span style="font-size:9px;color:var(--text-ghost);">/ 100</span></div>
+                <div class="const-bar-bg"><div class="const-bar" style="width:${constancia}%;"></div></div>
+              </div>
+              <div>
+                <div class="sol-fecha">${fecha}</div>
+                <span class="estado-badge ${BADGE[s.estado]}">${ICON[s.estado]} ${LABEL[s.estado]}</span>
+              </div>
+              <div class="sol-actions">${acciones(s)}</div>
             </div>
-            <div class="const-wrap">
-              <div class="const-top"><span class="const-n">${constancia}</span><span style="font-size:9px;color:var(--text-ghost);">/ 100</span></div>
-              <div class="const-bar-bg"><div class="const-bar" style="width:${constancia}%;"></div></div>
-            </div>
-            <div>
-              <div class="sol-fecha">${fecha}</div>
-              <span class="estado-badge ${BADGE[s.estado]}">${ICON[s.estado]} ${LABEL[s.estado]}</span>
-            </div>
-            <div class="sol-actions">${acciones(s)}</div>
+            <div class="sol-detail" id="detalle-${s.id}">${renderDetalle(s)}</div>
           </div>`;
       }).join('');
     }
+
+    function _sdSeccion(titulo, cuerpo) {
+      return `<div class="sd-sec"><div class="sd-label">${titulo}</div><div class="sd-text">${escHtml(cuerpo)}</div></div>`;
+    }
+
+    function renderDetalle(s) {
+      const c = parseSolicitud(s.motivacion);
+      let html = '<div class="sol-detail-inner">';
+      if (c.motivacion) html += _sdSeccion('Motivación', c.motivacion);
+      else              html += '<div class="sd-empty">Esta solicitud no incluye mensaje.</div>';
+      if (c.objetivo)   html += _sdSeccion('Objetivo en el periodo de prueba', c.objetivo);
+      if (c.ritmo)      html += _sdSeccion('Ritmo deseado', c.ritmo);
+      html += '</div>';
+      return html;
+    }
+
+    window.toggleDetalle = function(id, event) {
+      // No desplegar si se ha pulsado un botón de acción
+      if (event && event.target.closest('button')) return;
+      const d = document.getElementById('detalle-' + id);
+      if (d) d.classList.toggle('open');
+    };
 
     function actualizarContadores() {
       const counts = { todas: _allSols.length, nueva: 0, vista: 0, aceptada: 0, rechazada: 0 };
