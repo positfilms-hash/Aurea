@@ -1,17 +1,3 @@
 {
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "shell": "powershell",
-            "command": "$root = git rev-parse --show-toplevel 2>$null; if ($LASTEXITCODE -ne 0) { exit 0 }; Push-Location $root; $st = git status --porcelain 2>$null; if (-not $st) { Pop-Location; exit 0 }; git add -A; $names = (git diff --cached --name-only 2>$null | ForEach-Object { [IO.Path]::GetFileName($_) }) -join ', '; $stat = (git diff --cached --stat 2>$null | Select-Object -Last 1); git commit -m \"Actualizar: $names\" -m \"$stat\" 2>$null; git push origin HEAD 2>$null; Pop-Location",
-            "timeout": 60,
-            "statusMessage": "Subiendo cambios a GitHub..."
-          }
-        ]
-      }
-    ]
-  }
+  "hooks": {}
 }
