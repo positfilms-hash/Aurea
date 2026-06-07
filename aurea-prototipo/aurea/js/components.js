@@ -170,13 +170,18 @@ function formatSolicitud(o) {
 function parseSolicitud(texto) {
   const out = { motivacion: '', objetivo: '', ritmo: '', estructurada: false };
   if (!texto) return out;
+  // Solo se trata como carta estructurada si EMPIEZA por la cabecera "Motivación:".
+  // Así un texto antiguo libre que por casualidad contenga una línea-cabecera no
+  // se malinterpreta ni se descarta el texto anterior al primer encabezado.
+  const lines = texto.split('\n');
+  const firstNonEmpty = (lines.find(function (l) { return l.trim() !== ''; }) || '').trim();
+  if (firstNonEmpty !== 'Motivación:') { out.motivacion = texto.trim(); return out; }
   let current = null;
-  texto.split('\n').forEach(function (line) {
+  lines.forEach(function (line) {
     const key = _SOL_HEAD[line.trim()];
     if (key) { current = key; out.estructurada = true; return; }
     if (current) out[current] += (out[current] ? '\n' : '') + line;
   });
-  if (!out.estructurada) { out.motivacion = texto.trim(); return out; }
   out.motivacion = out.motivacion.trim();
   out.objetivo   = out.objetivo.trim();
   out.ritmo      = out.ritmo.trim();
