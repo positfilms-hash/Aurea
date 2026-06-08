@@ -347,7 +347,7 @@
 
       if (m.hashtags?.length) {
         document.getElementById('p-hashtags').innerHTML =
-          m.hashtags.map(t => `<span class="tag gold">${t}</span>`).join('');
+          m.hashtags.map(t => `<span class="tag gold">${escHtml(t)}</span>`).join('');
       }
       document.getElementById('av-dias').textContent  = m.disponibilidad_dias || '—';
       document.getElementById('av-horas').textContent = m.horas_semanales     || '—';
@@ -372,7 +372,7 @@
       if (reqs.length) {
         document.getElementById('sec-requisitos').innerHTML =
           `<span class="section-label">Requisitos mínimos</span>` +
-          reqs.map(r => `<div class="req-item"><span class="req-icon">✦</span><span class="req-text">${r}</span></div>`).join('');
+          reqs.map(r => `<div class="req-item"><span class="req-icon">✦</span><span class="req-text">${escHtml(r)}</span></div>`).join('');
       }
 
       // Trayectoria
@@ -380,9 +380,9 @@
         document.getElementById('sec-trayectoria').innerHTML =
           `<span class="section-label">Trayectoria</span>` +
           trayRes.data.map(t =>
-            `<div class="tl-item"><span class="tl-year">${t.periodo}</span>
-             <div><div class="tl-title">${t.titulo}</div>
-             ${t.descripcion ? `<div class="tl-sub">${t.descripcion}</div>` : ''}</div></div>`
+            `<div class="tl-item"><span class="tl-year">${escHtml(t.periodo)}</span>
+             <div><div class="tl-title">${escHtml(t.titulo)}</div>
+             ${t.descripcion ? `<div class="tl-sub">${escHtml(t.descripcion)}</div>` : ''}</div></div>`
           ).join('');
       } else {
         document.getElementById('sec-trayectoria').innerHTML =
@@ -397,10 +397,10 @@
             `<div class="review-item">
                <div class="review-header">
                  <span class="review-author">Ex-discípulo</span>
-                 <span class="review-stars">${'★'.repeat(r.estrellas)}</span>
+                 <span class="review-stars">${'★'.repeat(Math.max(0, Math.min(5, r.estrellas | 0)))}</span>
                </div>
-               <div class="review-disc">${r.disciplina}${r.duracion_meses ? ' · ' + r.duracion_meses + ' meses' : ''}</div>
-               <p class="review-text">"${r.texto}"</p>
+               <div class="review-disc">${escHtml(r.disciplina)}${r.duracion_meses ? ' · ' + escHtml(r.duracion_meses) + ' meses' : ''}</div>
+               <p class="review-text">"${escHtml(r.texto)}"</p>
              </div>`
           ).join('');
       } else {

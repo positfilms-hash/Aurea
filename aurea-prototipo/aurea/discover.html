@@ -146,18 +146,18 @@
     function cardHTML(m) {
       const plLabel = m.open ? (m.pl + ' plaza' + (m.pl !== '1' && m.pl !== '—' ? 's' : '')) : 'Lista de espera';
       const href    = m.id ? `perfil-maestro.html?id=${m.id}` : 'perfil-maestro.html';
-      return `<div class="mcard" onclick="window.location.href='${href}'">
+      return `<div class="mcard" onclick="window.location.href='${escHtml(href)}'">
         <div class="mcard-top">
-          <div class="mavatar" style="background:${m.bg};">${m.i}</div>
-          <div><div class="mname">${m.n}</div><div class="mdisc">${m.d}</div></div>
+          <div class="mavatar" style="background:${m.bg};">${escHtml(m.i)}</div>
+          <div><div class="mname">${escHtml(m.n)}</div><div class="mdisc">${escHtml(m.d)}</div></div>
         </div>
         <div class="mcard-body">
-          <div class="mtags">${m.tags.map(t => `<span class="mtag">${t}</span>`).join('')}</div>
+          <div class="mtags">${m.tags.map(t => `<span class="mtag">${escHtml(t)}</span>`).join('')}</div>
           <div class="mstats">
-            <div class="mstat"><div class="mstat-n">${m.rep}</div><div class="mstat-l">Reputación</div></div>
-            <div class="mstat"><div class="mstat-n">${m.pl}</div><div class="mstat-l">Plazas</div></div>
+            <div class="mstat"><div class="mstat-n">${escHtml(m.rep)}</div><div class="mstat-l">Reputación</div></div>
+            <div class="mstat"><div class="mstat-n">${escHtml(m.pl)}</div><div class="mstat-l">Plazas</div></div>
           </div>
-          <div class="mcard-footer"><span class="mdist">${m.dist}</span><span class="mplaza ${m.open ? 'open' : 'wait'}">${plLabel}</span></div>
+          <div class="mcard-footer"><span class="mdist">${escHtml(m.dist)}</span><span class="mplaza ${m.open ? 'open' : 'wait'}">${escHtml(plLabel)}</span></div>
         </div>
       </div>`;
     }

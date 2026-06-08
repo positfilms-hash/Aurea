@@ -282,6 +282,18 @@
       });
     });
 
+    // Escapa un texto de usuario para incrustarlo dentro de una cadena JS
+    // entre comillas simples que vive en un atributo HTML (onclick="...'X'...").
+    // Primero se escapan barra y comilla para el contexto JS, luego se aplica
+    // escHtml para el contexto del atributo.
+    function jsAttr(s) {
+      const js = String(s == null ? '' : s)
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/[\r\n]+/g, ' ');
+      return escHtml(js);
+    }
+
     function diasDesde(fecha) {
       return fecha ? Math.round((Date.now() - new Date(fecha)) / 86400000) : null;
     }
@@ -354,16 +366,16 @@
           ? `<button class="btn-small" onclick="location.href='periodo-prueba.html?id=${r.id}'">Chat</button>`
           : `<button class="btn-small" onclick="location.href='periodo-prueba.html?id=${r.id}'">Chat</button>
              ${resenaBtn}
-             <button class="btn-small warn" onclick="window.openMediador('${nombre}')">Incidencia</button>
-             <button class="btn-small danger" onclick="window.openFinalizar('${r.id}','${nombre}')">Finalizar</button>`);
+             <button class="btn-small warn" onclick="window.openMediador('${jsAttr(nombre)}')">Incidencia</button>
+             <button class="btn-small danger" onclick="window.openFinalizar('${r.id}','${jsAttr(nombre)}')">Finalizar</button>`);
 
         return `
           <div class="rel-row${esFinalizada ? ' faded' : ''}">
             <div class="ind ${r.estado}"></div>
             <div class="avatar" style="background:${esFinalizada ? 'var(--border)' : bg};">${initials}</div>
             <div>
-              <div class="rel-nombre">${nombre}</div>
-              <div class="rel-disc">${disc}</div>
+              <div class="rel-nombre">${escHtml(nombre)}</div>
+              <div class="rel-disc">${escHtml(disc)}</div>
               <div class="rel-rol">${rolLabel} ${r.estado === 'prueba' ? (pruebaVencida ? '· Prueba vencida' : '· En periodo de prueba') : r.estado === 'finalizada' ? '· Finalizado' : '· Aceptado'}</div>
             </div>
             ${badgeHTML}
