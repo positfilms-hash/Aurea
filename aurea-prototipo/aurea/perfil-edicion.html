@@ -387,9 +387,9 @@
       if (!el) return;
       if (url) {
         el.style.background = 'transparent';
-        el.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${initials}">`;
+        el.innerHTML = `<img src="${escHtml(url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${escHtml(initials)}">`;
       } else {
-        el.style.background = color || 'var(--gold)';
+        el.style.background = safeColor(color);
         el.textContent = initials || '?';
       }
     }

@@ -342,7 +342,7 @@
       const nombre = _profile.nombre || '', apellido = _profile.apellido || '';
       const initials = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
       const av = document.querySelector('.big-avatar');
-      av.style.background = _profile.avatar_url ? 'transparent' : (_profile.avatar_color || 'var(--gold)');
+      av.style.background = _profile.avatar_url ? 'transparent' : safeColor(_profile.avatar_color);
       av.innerHTML = _profile.avatar_url
         ? `<img src="${escHtml(_profile.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${escHtml(initials)}"><div class="avatar-overlay" onclick="location.href='perfil-edicion.html'">✎</div>`
         : `${initials}<div class="avatar-overlay" onclick="location.href='perfil-edicion.html'">📷</div>`;
