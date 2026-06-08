@@ -106,12 +106,21 @@
         .in('estado', ['prueba','consolidada'])
         .order('iniciada_at', { ascending: false });
 
-      if (error || !rels?.length) {
+      if (error) {
+        document.getElementById('conv-list-body').innerHTML = `
+          <div class="no-conv">
+            <div class="no-conv-text">No hemos podido cargar tus conversaciones ahora mismo.</div>
+            <div class="no-conv-sub">Vuelve a intentarlo en un momento.</div>
+          </div>`;
+        return;
+      }
+      if (!rels?.length) {
         document.getElementById('conv-list-body').innerHTML = `
           <div class="no-conv">
             <div class="no-conv-icon">✉</div>
-            <div class="no-conv-text">Sin conversaciones activas</div>
-            <div class="no-conv-sub">Los mensajes aparecen cuando tienes una relación en periodo de prueba o activa.</div>
+            <div class="no-conv-text">Todavía no tienes conversaciones</div>
+            <div class="no-conv-sub">El chat se abre cuando empieza una relación de aprendizaje.</div>
+            <a class="empty-state-sec" href="relaciones.html" style="margin-top:12px;">Ver relaciones</a>
           </div>`;
         return;
       }

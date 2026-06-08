@@ -162,9 +162,15 @@
 
       const lista = document.getElementById('lista');
       if (!sols.length) {
-        lista.innerHTML = `<div style="padding:40px;text-align:center;font-size:13px;color:var(--text-faint);">
-          No hay solicitudes${_filtroEstado !== 'todas' ? ' en este estado' : ''}.
-        </div>`;
+        lista.innerHTML = (_filtroEstado !== 'todas')
+          ? `<div style="padding:40px;text-align:center;font-size:13px;color:var(--text-faint);">No hay solicitudes en este estado.</div>`
+          : renderEmptyState({
+              icon: '✦',
+              title: 'Aún no has recibido solicitudes',
+              body: 'A medida que otros usuarios descubran tu perfil, sus solicitudes de aprendizaje aparecerán aquí.',
+              ctaLabel: 'Mejorar perfil de maestro',
+              ctaHref: 'perfil-edicion.html',
+            });
         return;
       }
 
@@ -296,8 +302,10 @@
         .order('created_at', { ascending: false });
 
       if (error) {
-        document.getElementById('lista').innerHTML =
-          `<div style="padding:40px;text-align:center;color:var(--text-faint);">Error al cargar solicitudes.</div>`;
+        document.getElementById('lista').innerHTML = renderEmptyState({
+          title: 'No hemos podido cargar tus solicitudes ahora mismo',
+          body: 'Vuelve a intentarlo en un momento.',
+        });
         return;
       }
 
@@ -323,11 +331,15 @@
         .single();
 
       if (error || !maestro) {
-        document.getElementById('lista').innerHTML = `
-          <div style="padding:60px;text-align:center;">
-            <div style="font-family:var(--font-serif);font-size:20px;color:var(--text-secondary);margin-bottom:12px;">No eres maestro</div>
-            <div style="font-size:12px;color:var(--text-faint);">Esta sección es para maestros que reciben solicitudes de discípulos.</div>
-          </div>`;
+        document.getElementById('lista').innerHTML = renderEmptyState({
+          icon: '🎓',
+          title: 'Esta sección es para maestros',
+          body: 'Aquí aparecen las solicitudes que recibes como maestro. Si quieres aprender, explora maestros y envía una solicitud; si quieres enseñar, añade tu rol de maestro desde tu perfil.',
+          ctaLabel: 'Explorar maestros',
+          ctaHref: 'discover.html',
+          secLabel: 'Editar perfil',
+          secHref: 'perfil-edicion.html',
+        });
         return;
       }
 

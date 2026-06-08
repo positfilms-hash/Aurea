@@ -156,7 +156,7 @@
     // — Relacion ID desde URL —
     const params = new URLSearchParams(location.search);
     const relacionId = params.get('id');
-    if (!relacionId) { location.href = 'relaciones.html'; }
+    // Sin id se gestiona más abajo con un estado vacío (no se redirige en silencio).
 
     // — Nav con iniciales reales —
     const { data: me } = await supabase.from('profiles')
@@ -176,7 +176,20 @@
       .eq('id', relacionId)
       .single();
 
-    if (relErr || !rel) { location.href = 'relaciones.html'; }
+    if (relErr || !rel) {
+      const lay = document.querySelector('.layout');
+      if (lay) {
+        lay.style.display = 'block';
+        lay.innerHTML = renderEmptyState({
+          icon: '⏳',
+          title: 'No hay un periodo de prueba activo seleccionado',
+          body: 'Cuando una solicitud sea aceptada, aquí podrás seguir los 30 días de prueba y las sesiones disponibles.',
+          ctaLabel: 'Ver relaciones',
+          ctaHref: 'relaciones.html',
+        });
+      }
+      await new Promise(() => {}); // detener el resto del script sin romper la UI
+    }
 
     const esMaestro = rel.maestro_id === uid;
     const otroP = esMaestro ? rel.discipulo : rel.maestro;

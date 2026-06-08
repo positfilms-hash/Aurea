@@ -210,6 +210,9 @@
       if (perfil.frase) {
         document.getElementById('pd-bio').textContent = `"${perfil.frase}"`;
         document.getElementById('pd-bio').style.color = 'var(--text-secondary)';
+      } else {
+        document.getElementById('pd-bio').textContent = 'Este discípulo aún está completando su perfil.';
+        document.getElementById('pd-bio').style.color = 'var(--text-faint)';
       }
     }
 

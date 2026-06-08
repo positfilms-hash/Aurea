@@ -194,7 +194,17 @@
 
       // Construir contenido derecho (con try local para no romper toda la init)
       try {
-        document.getElementById('col-right').innerHTML = esMaestro ? buildMaestroHTML() : buildDiscipuloHTML();
+        let html = esMaestro ? buildMaestroHTML() : buildDiscipuloHTML();
+        // Onboarding: si el perfil está incompleto (sin frase), invitar a completarlo.
+        const incompleto = !(_profile && _profile.frase && _profile.frase.trim());
+        if (incompleto) {
+          html = `<div style="background:var(--night-mid);border:0.5px solid var(--border-gold);border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;">
+            <div style="font-family:var(--font-serif);font-size:17px;font-weight:500;color:var(--text-primary);">Tu perfil aún está incompleto</div>
+            <div style="font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.7;">Aurea funciona mejor cuando maestros y discípulos pueden entender quién eres, qué buscas y qué puedes ofrecer.</div>
+            <a class="btn-primary" href="perfil-edicion.html" style="margin-top:6px;">Completar perfil</a>
+          </div>` + html;
+        }
+        document.getElementById('col-right').innerHTML = html;
       } catch(e) {
         console.error('Error renderizando perfil:', e);
         document.getElementById('col-right').innerHTML =
