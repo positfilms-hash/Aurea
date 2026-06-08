@@ -32,6 +32,7 @@
     .hist-tag{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:3px 9px;border-radius:100px;white-space:nowrap;}
     .rol-tag{color:var(--text-muted);background:var(--night-mid);border:0.5px solid var(--border);}
     .tag-enviada{color:var(--gold);background:var(--night-deep);border:0.5px solid var(--border-gold);}
+    .tag-aceptada{color:#3B6D11;background:#1A2A12;border:0.5px solid #3B6D1144;}
     .tag-noaceptada{color:var(--text-faint);background:var(--night-mid);border:0.5px solid var(--border);}
     .tag-prueba{color:var(--purple);background:#1A1830;border:0.5px solid #53489744;}
     .tag-prueba-venc{color:var(--amber,#C8973A);background:var(--night-deep);border:0.5px solid var(--border-gold);}
@@ -95,6 +96,11 @@
 
     const esc = (typeof escHtml === 'function') ? escHtml : (s => s == null ? '' : String(s));
 
+    // Solo permite color hex o var(--...); cualquier otra cosa cae a un valor seguro.
+    function safeColor(c) {
+      return (/^#[0-9A-Fa-f]{3,8}$/.test(c) || /^var\(--[\w-]+\)$/.test(c)) ? c : 'var(--gold)';
+    }
+
     function formatDate(ts) {
       if (!ts) return '—';
       return new Date(ts).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' });
@@ -144,7 +150,7 @@
 
       const html = evs.map(e => `
         <div class="hist-item">
-          <div class="hist-avatar" style="background:${e.otro?.avatar_color||'var(--gold)'};">${ini(e.otro)}</div>
+          <div class="hist-avatar" style="background:${safeColor(e.otro?.avatar_color)};">${esc(ini(e.otro))}</div>
           <div>
             <div class="hist-name">${esc(nombreCompleto(e.otro))}</div>
             <div class="hist-disc">${esc(e.disciplina || '—')}</div>
@@ -209,17 +215,20 @@
 
         const eventos = [];
 
-        // Solicitudes (las aceptadas se representan por su relación → se omiten aquí).
+        // Solicitudes: se muestran todas como eventos propios (no se deduplican
+        // contra relaciones, porque solicitud_id no se rellena y la solicitud se
+        // marca aceptada antes de crear la relación → deduplicar perdería eventos).
         sols.forEach(s => {
-          if (s.estado === 'aceptada') return;
-          const noAceptada = s.estado === 'rechazada';
+          let label, cls;
+          if (s.estado === 'rechazada')     { label = 'Solicitud no aceptada'; cls = 'tag-noaceptada'; }
+          else if (s.estado === 'aceptada') { label = 'Solicitud aceptada';    cls = 'tag-aceptada'; }
+          else                              { label = 'Solicitud enviada';     cls = 'tag-enviada'; }
           eventos.push({
             rol: 'discipulo',
             otro: s.maestro,
             disciplina: s.disciplina,
             fecha: s.created_at,
-            label: noAceptada ? 'Solicitud no aceptada' : 'Solicitud enviada',
-            cls:   noAceptada ? 'tag-noaceptada' : 'tag-enviada',
+            label, cls,
             accion: s.maestro_id ? `perfil-maestro.html?id=${s.maestro_id}` : null,
             accionLabel: 'Ver maestro',
           });

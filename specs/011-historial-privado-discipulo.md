@@ -43,9 +43,10 @@ toca Supabase**.
 
 ## Cómo se construye el historial (`historia.html`)
 
-- **Solicitudes** (`discipulo_id = yo`): se muestran las `nueva`/`vista` como
-  "Solicitud enviada" y las `rechazada` como "Solicitud no aceptada". Las
-  `aceptada` **se omiten** porque su relación las representa (sin duplicar).
+- **Solicitudes** (`discipulo_id = yo`): se muestran **todas** como eventos
+  propios — `nueva`/`vista` → "Solicitud enviada", `aceptada` → "Solicitud
+  aceptada", `rechazada` → "Solicitud no aceptada". No se deduplican contra
+  relaciones (ver nota de Codex abajo).
 - **Relaciones** (yo como discípulo o como maestro):
   - `prueba` → "Periodo de prueba activo" o "Periodo de prueba terminado"
     (vencido = `iniciada_at + dias_prueba_total` < ahora).
@@ -88,8 +89,7 @@ toca Supabase**.
 - [x] Existe `specs/011-historial-privado-discipulo.md`.
 - [x] `historia.html` muestra el historial del usuario autenticado.
 - [x] Ordenado de más reciente a más antiguo.
-- [x] Muestra solicitudes enviadas / pendientes / no aceptadas cuando existan.
-- [x] Las solicitudes aceptadas se representan por su relación (sin duplicar).
+- [x] Muestra solicitudes enviadas / pendientes / aceptadas / no aceptadas cuando existan.
 - [x] Muestra relaciones en prueba (activa/terminada) cuando existan.
 - [x] Muestra relaciones consolidadas y no consolidadas (de `resultados_consolidacion`).
 - [x] No revela quién decidió no consolidar.
@@ -102,6 +102,19 @@ toca Supabase**.
 - [x] No se toca `package.json` ni `.env`.
 
 ---
+
+## Revisión de Codex (pre-merge)
+
+- **Recomendado — escapado/validación:** resuelto. Las iniciales (`ini(...)`) se
+  escapan con `escHtml` y `avatar_color` pasa por `safeColor()` (solo hex o
+  `var(--...)`, si no, fallback) antes de entrar en `style`.
+- **Recomendado — dedupe perdía eventos:** resuelto. Ya no se omiten las
+  solicitudes `aceptada`: se muestran como "Solicitud aceptada". El motivo es que
+  `relaciones.solicitud_id` no se rellena en los inserts actuales y la solicitud
+  se marca aceptada **antes** de crear la relación, así que deduplicar por vínculo
+  no es fiable y podía perder eventos (p. ej. si el insert de la relación falla).
+  Mostrar la solicitud aceptada como su propio evento también cumple el criterio
+  de la spec.
 
 ## Notas / fuera de alcance
 
