@@ -78,7 +78,6 @@
       </div>
       <div class="stats-grid">
         <div class="stat-box"><div class="stat-n" id="pd-activas">—</div><div class="stat-l">Prácticas activas</div></div>
-        <div class="stat-box"><div class="stat-n" id="pd-abandonos">—</div><div class="stat-l">Abandonos</div></div>
       </div>
       <div id="pd-actions" class="action-btns">
         <button class="btn-ac" onclick="window.aceptarDisc()">Aceptar solicitud</button>
@@ -200,11 +199,9 @@
       const nivel = c >= 80 ? 'Alta' : c >= 50 ? 'Media' : 'Baja';
       document.getElementById('pd-const-sub').textContent  = `de 100 puntos · ${nivel}`;
 
-      // Stats de historial
-      const activas   = historial.filter(h => h.estado === 'en_curso').length;
-      const abandonos = historial.filter(h => h.estado === 'cancelada').length;
-      document.getElementById('pd-activas').textContent  = activas;
-      document.getElementById('pd-abandonos').textContent = abandonos;
+      // Stats de historial (sin señaladores de "fracaso" en el perfil público).
+      const activas = historial.filter(h => h.estado === 'en_curso').length;
+      document.getElementById('pd-activas').textContent = activas;
 
       // Bio
       if (perfil.frase) {

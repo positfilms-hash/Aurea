@@ -282,9 +282,25 @@
     const params    = new URLSearchParams(window.location.search);
     const maestroId = params.get('id');
 
+    function maestroNoEncontrado() {
+      const lay = document.querySelector('.layout');
+      if (lay) {
+        lay.style.display = 'block';
+        lay.innerHTML = renderEmptyState({
+          icon: '🔍',
+          title: 'No hemos encontrado este maestro',
+          body: 'Es posible que el enlace no sea válido o que el perfil ya no esté disponible.',
+          ctaLabel: 'Explorar maestros',
+          ctaHref: 'discover.html',
+        });
+      }
+    }
+
     if (maestroId) {
       _maestroId = maestroId;
       cargarPerfil(maestroId);
+    } else {
+      maestroNoEncontrado();
     }
 
     async function cargarPerfil(id) {
@@ -316,7 +332,7 @@
           .in('estado', ['prueba', 'consolidada']),
       ]);
 
-      if (perfilRes.error || !perfilRes.data) return; // mantener demo si falla
+      if (perfilRes.error || !perfilRes.data) { maestroNoEncontrado(); return; }
 
       const m = perfilRes.data;
       const p = m.profiles;

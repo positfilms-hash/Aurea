@@ -93,16 +93,17 @@ function _setupRealtime() {
 }
 
 // ── Acciones globales (usadas desde el dropdown del nav) ──────────────────────
-// Marca la notificación como leída y navega (la navegación no se bloquea si falla).
+// Marca la notificación como leída y navega SIN bloquear: navega cuando el
+// update termina o, como muy tarde, a los 600 ms (lo que ocurra antes).
 window.aureaAbrirNotif = function (ev, id, url) {
   if (ev) ev.preventDefault();
-  (async () => {
-    try {
-      await supabase.from('notificaciones')
-        .update({ leida_at: new Date().toISOString() }).eq('id', id);
-    } catch (e) { /* no bloquear navegación */ }
-    window.location.href = _safeUrl(url);
-  })();
+  const dest = _safeUrl(url);
+  let navegado = false;
+  const ir = () => { if (!navegado) { navegado = true; window.location.href = dest; } };
+  supabase.from('notificaciones')
+    .update({ leida_at: new Date().toISOString() }).eq('id', id)
+    .then(ir, ir);          // navega al terminar (éxito o error)
+  setTimeout(ir, 600);      // o como máximo a los 600 ms si la request se cuelga
   return false;
 };
 
