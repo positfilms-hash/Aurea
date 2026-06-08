@@ -253,7 +253,7 @@
             const p = r.profiles || {};
             const d = días(r.iniciada_at);
             return `<div class="disc-row">
-              <div class="disc-avatar" style="background:${p.avatar_color || 'var(--gold)'};">${escHtml(ini(p))}</div>
+              <div class="disc-avatar" style="background:${safeColor(p.avatar_color)};">${escHtml(ini(p))}</div>
               <div class="disc-info"><div class="disc-name">${escHtml(nombreCompleto(p))}</div><div class="disc-sub">${escHtml(r.disciplina || '')}</div></div>
               <span class="disc-since">Hace ${d} días</span>
             </div>`;
@@ -273,7 +273,7 @@
     function buildDiscipuloHTML() {
       const bio = _profile?.frase || '';
       const bioHTML = bio
-        ? `<p class="bio-text">"${bio}"</p>`
+        ? `<p class="bio-text">"${escHtml(bio)}"</p>`
         : `<p style="font-size:12px;color:var(--text-faint);font-style:normal;">Sin descripción todavía.</p>`;
 
       const discHTML = _relD.length
@@ -282,7 +282,7 @@
             const badge = r.estado === 'prueba' ? '⏳ Periodo de prueba' : '✦ Activa';
             const p = r.profiles || {};
             const maestroIni = escHtml(ini(p) || 'M');
-            const maestroBg  = p.avatar_color || 'var(--gold)';
+            const maestroBg  = safeColor(p.avatar_color);
             const maestroNom = escHtml(nombreCompleto(p));
             const chatBtn = r.id
               ? `<button onclick="location.href='periodo-prueba.html?id=${r.id}'"
@@ -344,7 +344,7 @@
       const av = document.querySelector('.big-avatar');
       av.style.background = _profile.avatar_url ? 'transparent' : (_profile.avatar_color || 'var(--gold)');
       av.innerHTML = _profile.avatar_url
-        ? `<img src="${_profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${initials}"><div class="avatar-overlay" onclick="location.href='perfil-edicion.html'">✎</div>`
+        ? `<img src="${escHtml(_profile.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${escHtml(initials)}"><div class="avatar-overlay" onclick="location.href='perfil-edicion.html'">✎</div>`
         : `${initials}<div class="avatar-overlay" onclick="location.href='perfil-edicion.html'">📷</div>`;
       document.getElementById('profile-name').textContent     = (nombre + ' ' + apellido).trim();
       document.getElementById('profile-location').textContent = _profile.ubicacion || '';

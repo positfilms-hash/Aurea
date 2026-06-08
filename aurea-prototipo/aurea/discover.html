@@ -148,7 +148,7 @@
       const href    = m.id ? `perfil-maestro.html?id=${m.id}` : 'perfil-maestro.html';
       return `<div class="mcard" onclick="window.location.href='${escHtml(href)}'">
         <div class="mcard-top">
-          <div class="mavatar" style="background:${m.bg};">${escHtml(m.i)}</div>
+          <div class="mavatar" style="background:${safeColor(m.bg)};">${escHtml(m.i)}</div>
           <div><div class="mname">${escHtml(m.n)}</div><div class="mdisc">${escHtml(m.d)}</div></div>
         </div>
         <div class="mcard-body">

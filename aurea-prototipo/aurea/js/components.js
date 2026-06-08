@@ -218,6 +218,18 @@ function escHtml(s) {
   });
 }
 
+// Devuelve un color seguro para incrustar en un atributo style generado por
+// innerHTML. Solo acepta hex (#rgb/#rrggbb/#rrggbbaa) o var(--token); cualquier
+// otra cosa (incluido contenido que pueda romper el atributo) cae al fallback.
+function safeColor(c, fallback) {
+  fallback = fallback || 'var(--gold)';
+  if (c == null) return fallback;
+  c = String(c).trim();
+  if (/^#[0-9a-fA-F]{3,8}$/.test(c)) return c;
+  if (/^var\(--[A-Za-z0-9-]+\)$/.test(c)) return c;
+  return fallback;
+}
+
 // Estado vacío / error reutilizable. Máximo un CTA principal + enlace secundario.
 //   renderEmptyState({ icon, title, body, ctaLabel, ctaHref, secLabel, secHref })
 // `icon` se inserta como HTML (pensado para emojis/símbolos de confianza); el

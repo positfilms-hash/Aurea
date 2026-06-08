@@ -290,7 +290,8 @@
       const js = String(s == null ? '' : s)
         .replace(/\\/g, '\\\\')
         .replace(/'/g, "\\'")
-        .replace(/[\r\n]+/g, ' ');
+        // \s cubre tabs, CR/LF y separadores de linea Unicode (U+2028/U+2029)
+        .replace(/\s+/g, ' ');
       return escHtml(js);
     }
 
@@ -372,7 +373,7 @@
         return `
           <div class="rel-row${esFinalizada ? ' faded' : ''}">
             <div class="ind ${r.estado}"></div>
-            <div class="avatar" style="background:${esFinalizada ? 'var(--border)' : bg};">${initials}</div>
+            <div class="avatar" style="background:${esFinalizada ? 'var(--border)' : safeColor(bg)};">${escHtml(initials)}</div>
             <div>
               <div class="rel-nombre">${escHtml(nombre)}</div>
               <div class="rel-disc">${escHtml(disc)}</div>

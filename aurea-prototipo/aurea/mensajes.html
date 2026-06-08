@@ -166,7 +166,7 @@
         const estadoLabel = r.estado === 'prueba' ? 'Prueba' : 'Activa';
 
         return `<a class="conv-item${unread>0?' unread':''}" href="periodo-prueba.html?id=${r.id}">
-          <div class="conv-avatar" style="background:${otro?.avatar_color||'var(--gold)'};">${escHtml(ini(otro))}</div>
+          <div class="conv-avatar" style="background:${safeColor(otro?.avatar_color)};">${escHtml(ini(otro))}</div>
           <div class="conv-info">
             <div class="conv-name">${escHtml(nombreCompleto(otro))}</div>
             <div class="conv-disc">${escHtml(r.disciplina || '—')}</div>

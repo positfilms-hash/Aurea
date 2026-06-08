@@ -590,10 +590,15 @@
           <button class="btn-del" onclick="this.closest('.tl-block').remove()">Eliminar</button>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;">
-          <div class="edit-field"><span class="edit-label">Año o periodo</span><input class="edit-input tl-periodo" type="text" value="${t.periodo || ''}" placeholder="2022"></div>
-          <div class="edit-field"><span class="edit-label">Título</span><input class="edit-input tl-titulo" type="text" value="${t.titulo || ''}" placeholder="Título o nombre del hito"></div>
-          <div class="edit-field"><span class="edit-label">Descripción</span><input class="edit-input tl-descripcion" type="text" value="${t.descripcion || ''}" placeholder="Descripción breve (opcional)"></div>
+          <div class="edit-field"><span class="edit-label">Año o periodo</span><input class="edit-input tl-periodo" type="text" placeholder="2022"></div>
+          <div class="edit-field"><span class="edit-label">Título</span><input class="edit-input tl-titulo" type="text" placeholder="Título o nombre del hito"></div>
+          <div class="edit-field"><span class="edit-label">Descripción</span><input class="edit-input tl-descripcion" type="text" placeholder="Descripción breve (opcional)"></div>
         </div>`;
+      // Los valores se asignan por .value (nunca por innerHTML) para evitar
+      // inyección por atributo si el dato guardado contiene comillas o HTML.
+      d.querySelector('.tl-periodo').value     = t.periodo     || '';
+      d.querySelector('.tl-titulo').value      = t.titulo      || '';
+      d.querySelector('.tl-descripcion').value = t.descripcion || '';
       return d;
     }
 
