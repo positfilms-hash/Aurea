@@ -225,14 +225,14 @@
     function buildMaestroHTML() {
       const bio = _profile?.frase || '';
       const bioHTML = bio
-        ? `<p class="bio-text">"${bio}"</p>`
+        ? `<p class="bio-text">"${escHtml(bio)}"</p>`
         : `<p style="font-size:12px;color:var(--text-faint);font-style:normal;">Sin descripción todavía.</p>`;
 
       const trayHTML = _tray.length
         ? _tray.map(t => `
             <div class="tl-item">
-              <span class="tl-year">${t.periodo || '—'}</span>
-              <div><div class="tl-title">${t.titulo}</div>${t.descripcion ? `<div class="tl-sub">${t.descripcion}</div>` : ''}</div>
+              <span class="tl-year">${escHtml(t.periodo || '—')}</span>
+              <div><div class="tl-title">${escHtml(t.titulo)}</div>${t.descripcion ? `<div class="tl-sub">${escHtml(t.descripcion)}</div>` : ''}</div>
             </div>`).join('')
         : `<p style="font-size:12px;color:var(--text-faint);padding:8px 0;">Sin trayectoria añadida.</p>`;
 
@@ -243,8 +243,8 @@
                 <span class="review-author">Ex-discípulo</span>
                 <span class="review-stars">${'★'.repeat(Math.min(r.estrellas || 5, 5))}</span>
               </div>
-              <div class="review-disc">${r.disciplina || ''}${r.duracion_meses ? ' · ' + r.duracion_meses + ' meses' : ''}</div>
-              <p class="review-text">"${r.texto}"</p>
+              <div class="review-disc">${escHtml(r.disciplina || '')}${r.duracion_meses ? ' · ' + escHtml(r.duracion_meses) + ' meses' : ''}</div>
+              <p class="review-text">"${escHtml(r.texto)}"</p>
             </div>`).join('')
         : `<p style="font-size:12px;color:var(--text-faint);padding:8px 0;">Sin reseñas todavía.</p>`;
 
@@ -253,8 +253,8 @@
             const p = r.profiles || {};
             const d = días(r.iniciada_at);
             return `<div class="disc-row">
-              <div class="disc-avatar" style="background:${p.avatar_color || 'var(--gold)'};">${ini(p)}</div>
-              <div class="disc-info"><div class="disc-name">${nombreCompleto(p)}</div><div class="disc-sub">${r.disciplina || ''}</div></div>
+              <div class="disc-avatar" style="background:${safeColor(p.avatar_color)};">${escHtml(ini(p))}</div>
+              <div class="disc-info"><div class="disc-name">${escHtml(nombreCompleto(p))}</div><div class="disc-sub">${escHtml(r.disciplina || '')}</div></div>
               <span class="disc-since">Hace ${d} días</span>
             </div>`;
           }).join('')
@@ -273,7 +273,7 @@
     function buildDiscipuloHTML() {
       const bio = _profile?.frase || '';
       const bioHTML = bio
-        ? `<p class="bio-text">"${bio}"</p>`
+        ? `<p class="bio-text">"${escHtml(bio)}"</p>`
         : `<p style="font-size:12px;color:var(--text-faint);font-style:normal;">Sin descripción todavía.</p>`;
 
       const discHTML = _relD.length
@@ -281,9 +281,9 @@
             const d = días(r.iniciada_at);
             const badge = r.estado === 'prueba' ? '⏳ Periodo de prueba' : '✦ Activa';
             const p = r.profiles || {};
-            const maestroIni = ini(p) || 'M';
-            const maestroBg  = p.avatar_color || 'var(--gold)';
-            const maestroNom = nombreCompleto(p);
+            const maestroIni = escHtml(ini(p) || 'M');
+            const maestroBg  = safeColor(p.avatar_color);
+            const maestroNom = escHtml(nombreCompleto(p));
             const chatBtn = r.id
               ? `<button onclick="location.href='periodo-prueba.html?id=${r.id}'"
                    style="font-family:var(--font-serif);font-size:12px;font-style:italic;color:var(--gold);background:none;border:0.5px solid var(--border-gold);padding:6px 14px;border-radius:100px;cursor:pointer;white-space:nowrap;margin-left:8px;transition:background 0.18s;"
@@ -292,7 +292,7 @@
             return `<div class="disc-row">
               <div class="disc-avatar" style="background:${maestroBg};">${maestroIni}</div>
               <div class="disc-info">
-                <div class="disc-name">${r.disciplina || 'Disciplina'}</div>
+                <div class="disc-name">${escHtml(r.disciplina || 'Disciplina')}</div>
                 <div class="disc-sub">${badge}${maestroNom ? ' · ' + maestroNom : ''}</div>
               </div>
               <span class="disc-since">Hace ${d} días</span>
@@ -305,8 +305,8 @@
         ? `<div class="divider"></div>
            <div>
              <span class="section-label">Busco maestro en</span>
-             <div style="font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--gold);margin-top:6px;">${_discipulo.disciplina_buscada}</div>
-             ${_discipulo.categoria ? `<div style="font-size:10px;color:var(--text-faint);margin-top:4px;text-transform:uppercase;letter-spacing:0.1em;">${_discipulo.categoria} · ${_discipulo.nivel || 'principiante'}</div>` : ''}
+             <div style="font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--gold);margin-top:6px;">${escHtml(_discipulo.disciplina_buscada)}</div>
+             ${_discipulo.categoria ? `<div style="font-size:10px;color:var(--text-faint);margin-top:4px;text-transform:uppercase;letter-spacing:0.1em;">${escHtml(_discipulo.categoria)} · ${escHtml(_discipulo.nivel || 'principiante')}</div>` : ''}
            </div>`
         : '';
 
@@ -344,7 +344,7 @@
       const av = document.querySelector('.big-avatar');
       av.style.background = _profile.avatar_url ? 'transparent' : (_profile.avatar_color || 'var(--gold)');
       av.innerHTML = _profile.avatar_url
-        ? `<img src="${_profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${initials}"><div class="avatar-overlay" onclick="location.href='perfil-edicion.html'">✎</div>`
+        ? `<img src="${escHtml(_profile.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${escHtml(initials)}"><div class="avatar-overlay" onclick="location.href='perfil-edicion.html'">✎</div>`
         : `${initials}<div class="avatar-overlay" onclick="location.href='perfil-edicion.html'">📷</div>`;
       document.getElementById('profile-name').textContent     = (nombre + ' ' + apellido).trim();
       document.getElementById('profile-location').textContent = _profile.ubicacion || '';
@@ -394,7 +394,7 @@
       if (_discipulo) {
         document.querySelector('#tags-discipulo .tags-wrap').innerHTML =
           (_discipulo.hashtags?.length
-            ? _discipulo.hashtags.map(t => `<span class="tag gold">${t}</span>`).join('')
+            ? _discipulo.hashtags.map(t => `<span class="tag gold">${escHtml(t)}</span>`).join('')
             : '<span style="font-size:11px;color:var(--text-ghost)">Sin hashtags</span>');
         const avD = document.querySelectorAll('#avail-discipulo .avail-val');
         if (avD[0]) avD[0].textContent = _discipulo.disponibilidad_dias || '—';
@@ -413,7 +413,7 @@
           <div class="stat-box"><div class="stat-n">${plazas}</div><div class="stat-l">Plaza${plazas !== 1 ? 's' : ''} libre${plazas !== 1 ? 's' : ''}</div></div>`;
         document.querySelector('#tags-maestro .tags-wrap').innerHTML =
           (_maestro.hashtags?.length
-            ? _maestro.hashtags.map(t => `<span class="tag gold">${t}</span>`).join('')
+            ? _maestro.hashtags.map(t => `<span class="tag gold">${escHtml(t)}</span>`).join('')
             : '<span style="font-size:11px;color:var(--text-ghost)">Sin hashtags</span>');
         // Disponibilidad maestro
         const avM = document.querySelectorAll('#avail-maestro .avail-val');

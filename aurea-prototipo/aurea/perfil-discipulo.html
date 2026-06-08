@@ -263,7 +263,7 @@
     const activaHTML = relActiva ? `
       <div class="activa-item">
         <div style="flex:1;">
-          <div class="hist-disc">${relActiva.disciplina || '—'}</div>
+          <div class="hist-disc">${escHtml(relActiva.disciplina || '—')}</div>
           <div class="hist-sub">${relActiva.estado === 'prueba' ? 'Periodo de prueba en curso' : 'Relación consolidada'}</div>
         </div>
         <span class="hist-badge hb-partial" style="margin-right:8px;">${relActiva.estado === 'prueba' ? '⏳ En prueba' : '✦ Activa'}</span>
@@ -286,8 +286,8 @@
           return `
             <div class="hist-item">
               <div>
-                <div class="hist-disc">${h.disciplina}</div>
-                <div class="hist-sub">${h.maestro_nombre ? 'Maestro: ' + h.maestro_nombre : ''}${h.duracion_meses ? ' · ' + h.duracion_meses + ' meses' : ''}</div>
+                <div class="hist-disc">${escHtml(h.disciplina)}</div>
+                <div class="hist-sub">${h.maestro_nombre ? 'Maestro: ' + escHtml(h.maestro_nombre) : ''}${h.duracion_meses ? ' · ' + escHtml(h.duracion_meses) + ' meses' : ''}</div>
               </div>
               <span class="hist-badge ${badgeClass}" style="${badgeStyle}">${badgeText}</span>
             </div>`;

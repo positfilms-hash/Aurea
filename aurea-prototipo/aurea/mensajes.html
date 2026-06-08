@@ -166,11 +166,11 @@
         const estadoLabel = r.estado === 'prueba' ? 'Prueba' : 'Activa';
 
         return `<a class="conv-item${unread>0?' unread':''}" href="periodo-prueba.html?id=${r.id}">
-          <div class="conv-avatar" style="background:${otro?.avatar_color||'var(--gold)'};">${ini(otro)}</div>
+          <div class="conv-avatar" style="background:${safeColor(otro?.avatar_color)};">${escHtml(ini(otro))}</div>
           <div class="conv-info">
-            <div class="conv-name">${nombreCompleto(otro)}</div>
-            <div class="conv-disc">${r.disciplina || '—'}</div>
-            <div class="conv-preview">${last ? (last.autor_id === uid ? 'Tú: ' : '') + last.texto.substring(0,60) : 'Sin mensajes aún'}</div>
+            <div class="conv-name">${escHtml(nombreCompleto(otro))}</div>
+            <div class="conv-disc">${escHtml(r.disciplina || '—')}</div>
+            <div class="conv-preview">${last ? (last.autor_id === uid ? 'Tú: ' : '') + escHtml(last.texto.substring(0,60)) : 'Sin mensajes aún'}</div>
           </div>
           <div class="conv-meta">
             <span class="conv-time">${timeAgo(last?.created_at)}</span>
