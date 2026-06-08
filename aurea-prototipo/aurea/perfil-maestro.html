@@ -390,6 +390,9 @@
              <div><div class="tl-title">${t.titulo}</div>
              ${t.descripcion ? `<div class="tl-sub">${t.descripcion}</div>` : ''}</div></div>`
           ).join('');
+      } else {
+        document.getElementById('sec-trayectoria').innerHTML =
+          `<span class="section-label">Trayectoria</span><p class="tl-sub" style="padding:8px 0;">Este maestro aún está completando su perfil.</p>`;
       }
 
       // Reseñas
@@ -406,6 +409,9 @@
                <p class="review-text">"${r.texto}"</p>
              </div>`
           ).join('');
+      } else {
+        document.getElementById('sec-resenas').innerHTML =
+          `<span class="section-label">Reseñas de ex-discípulos</span><p class="review-text" style="font-style:normal;color:var(--text-faint);padding:8px 0;">Este maestro aún no tiene reseñas.</p>`;
       }
 
       // Discípulos actuales — por ahora solo el conteo

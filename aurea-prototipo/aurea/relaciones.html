@@ -246,6 +246,7 @@
     let _uid = null;
     let _relById = {};
     let _reviewed = new Set();
+    let _relError = false;
 
     const _rSections = document.querySelectorAll('.filter-chips');
     // Sección 0: Estado
@@ -300,8 +301,25 @@
       if (_filtroRol !== 'todos')    rels = rels.filter(r => r._rol === _filtroRol);
 
       const lista = document.querySelector('.list');
+      if (_relError) {
+        lista.innerHTML = renderEmptyState({
+          title: 'No hemos podido cargar tus relaciones ahora mismo',
+          body: 'Vuelve a intentarlo en un momento.',
+        });
+        return;
+      }
       if (!rels.length) {
-        lista.innerHTML = `<div style="padding:40px;text-align:center;font-size:13px;color:var(--text-faint);">No hay relaciones${_filtroEstado !== 'todas' ? ' en este estado' : ''} todavía.</div>`;
+        lista.innerHTML = (_filtroEstado !== 'todas' || _filtroRol !== 'todos')
+          ? `<div style="padding:40px;text-align:center;font-size:13px;color:var(--text-faint);">No hay relaciones en esta vista.</div>`
+          : renderEmptyState({
+              icon: '✦',
+              title: 'Todavía no tienes relaciones de aprendizaje',
+              body: 'Las relaciones aparecen cuando una solicitud es aceptada y empieza el periodo de prueba.',
+              ctaLabel: 'Explorar maestros',
+              ctaHref: 'discover.html',
+              secLabel: 'Ver solicitudes',
+              secHref: 'solicitudes.html',
+            });
         return;
       }
 
@@ -409,6 +427,7 @@
       );
 
       const [rMRes, rDRes] = await Promise.all(fetches);
+      _relError = !!(rMRes.error || rDRes.error);
 
       const relsMaestro = (rMRes.data || []).map(r => ({
         ...r,

@@ -218,6 +218,20 @@ function escHtml(s) {
   });
 }
 
+// Estado vacío / error reutilizable. Máximo un CTA principal + enlace secundario.
+//   renderEmptyState({ icon, title, body, ctaLabel, ctaHref, secLabel, secHref })
+function renderEmptyState(o) {
+  o = o || {};
+  var cta = o.ctaHref ? '<a class="btn-primary" href="' + o.ctaHref + '">' + escHtml(o.ctaLabel || 'Continuar') + '</a>' : '';
+  var sec = o.secHref ? '<a class="empty-state-sec" href="' + o.secHref + '">' + escHtml(o.secLabel || '') + '</a>' : '';
+  return '<div class="empty-state">' +
+      (o.icon ? '<div class="empty-state-icon">' + o.icon + '</div>' : '') +
+      '<div class="empty-state-title">' + escHtml(o.title || '') + '</div>' +
+      (o.body ? '<div class="empty-state-body">' + escHtml(o.body) + '</div>' : '') +
+      ((cta || sec) ? '<div class="empty-state-actions">' + cta + sec + '</div>' : '') +
+    '</div>';
+}
+
 const RESP={'prueba':'El periodo de prueba dura hasta 30 días y permite hasta 3 sesiones de videollamada. El chat es libre. Cualquiera puede aceptar o cancelar en cualquier momento.','discípulo':'Como maestro puedes tener entre 1 y 5 discípulos activos. Al llenarte tu perfil pasa a lista de espera.','plaza':'Las plazas se bloquean al aceptar un discípulo. Se liberan tras cancelar en prueba o tras 1 mes mínimo en relación consolidada.','constancia':'La constancia sube completando relaciones y baja si abandonas antes del mes mínimo.','solicitud':'Puedes enviar hasta 5 solicitudes activas (10 con Pro). Cada una puede requerir mensaje de motivación.','default':'Déjame buscarte la respuesta. Si necesitas más ayuda escríbenos a info.aureacatena@gmail.com o usa el formulario de contacto.'};
 
 function getResp(msg){const m=msg.toLowerCase();for(const[k,v]of Object.entries(RESP)){if(m.includes(k))return v;}return RESP.default;}
