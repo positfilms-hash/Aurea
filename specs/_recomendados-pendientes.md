@@ -20,6 +20,10 @@ Regla: guardar salvo que sea fundamental; resolver cada 2-3 specs o al tocar un 
 
 ## Pendiente
 
-| # | Origen | Pendiente | Nota |
-|---|--------|-----------|------|
-| O3b | legacy | Columnas `relaciones.decision_maestro` / `decision_discipulo` sin uso. | Diferido: es un cambio de esquema (DROP COLUMN) → requiere su propia migración + spec, no entra en un lote de frontend. |
+_Sin pendientes._
+
+## Resuelto fuera de lote
+
+| # | Origen | Recomendado | Estado |
+|---|--------|-------------|--------|
+| O3b | legacy | Columnas `relaciones.decision_maestro` / `decision_discipulo` sin uso. | ✅ hecho (spec 018 + migración 014: `DROP COLUMN IF EXISTS`). |
