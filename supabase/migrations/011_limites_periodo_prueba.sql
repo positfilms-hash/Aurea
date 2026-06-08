@@ -46,9 +46,13 @@ begin
   -- Fin del periodo = inicio + duración (sin columna redundante).
   v_fin := v_iniciada_at + (v_dias || ' days')::interval;
 
-  -- Una sesión no puede programarse más allá del fin del periodo (insert o update).
+  -- Ni la programación ni la realización de una sesión pueden caer después del
+  -- fin del periodo de prueba (insert o update).
   if new.programada_at is not null and new.programada_at > v_fin then
     raise exception 'No se puede programar una sesión después del fin del periodo de prueba.';
+  end if;
+  if new.completada_at is not null and new.completada_at > v_fin then
+    raise exception 'No se puede registrar una sesión como completada después del fin del periodo de prueba.';
   end if;
 
   -- Solo al CREAR: la relación debe estar en prueba y el periodo no vencido.

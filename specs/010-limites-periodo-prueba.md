@@ -122,7 +122,11 @@ insertar por API saltándose el frontend.
 - **Recomendado — cubrir UPDATE:** el trigger pasa a `before insert or update`.
   En UPDATE: se valida `programada_at` y el conteo de 3 **excluyendo la propia
   fila** (cubre mover una sesión a otra relación); no se bloquea por `now()`/estado
-  para no impedir, p. ej., marcar una sesión como completada tras el periodo.
+  para no impedir un update legítimo de otros campos.
+- **Recomendado (2ª ronda) — `completada_at > fin`:** resuelto. Igual que
+  `programada_at`, se rechaza marcar una sesión como completada con fecha
+  posterior al fin del periodo. Así ninguna sesión (programada ni realizada)
+  cae fuera de los 30 días.
 
 ## Notas / fuera de alcance
 
