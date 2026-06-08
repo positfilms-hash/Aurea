@@ -5,19 +5,33 @@
    de coordenadas post-zoom, para que los layouts de columna
    puedan hacer scroll correctamente. */
 (function () {
-  var sw = screen.width;
-  var z = 1;
-  if      (sw >= 3840) z = 2;
-  else if (sw >= 3200) z = 1.75;
-  else if (sw >= 2560) z = 1.5;
-  if (z > 1) document.documentElement.style.zoom = String(z);
-  // --real-vh: alto del viewport en coordenadas post-zoom
-  var realVh = window.innerHeight / z;
-  document.documentElement.style.setProperty('--real-vh', realVh + 'px');
-  // Actualizar en resize por si cambia la ventana
-  window.addEventListener('resize', function () {
+  // Ancho de contenido mínimo (px CSS) que queremos preservar tras el zoom.
+  // Por debajo de esto el zoom causaría scroll horizontal y solapes, así que
+  // se reduce el factor: en tablet/móvil o ventanas estrechas, z = 1.
+  var MIN_CONTENT = 1280;
+
+  function computeZoom() {
+    var sw = screen.width;
+    var vw = window.innerWidth || sw;
+    var z = 1;
+    if      (sw >= 3840) z = 2;
+    else if (sw >= 3200) z = 1.75;
+    else if (sw >= 2560) z = 1.5;
+    // No ampliar si el viewport real no es lo bastante ancho.
+    while (z > 1 && vw / z < MIN_CONTENT) z -= 0.25;
+    return z < 1 ? 1 : z;
+  }
+
+  function apply() {
+    var z = computeZoom();
+    document.documentElement.style.zoom = z > 1 ? String(z) : '';
+    // --real-vh: alto del viewport en coordenadas post-zoom
     document.documentElement.style.setProperty('--real-vh', (window.innerHeight / z) + 'px');
-  });
+  }
+
+  apply();
+  // Recalcular en resize (cambio de ventana / orientación)
+  window.addEventListener('resize', apply);
 
   // — Tema arena persistente —
   // Reglas de prioridad:
