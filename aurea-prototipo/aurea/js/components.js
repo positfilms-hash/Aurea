@@ -60,6 +60,13 @@ function renderNavAuth(active='', user='') {
       <a class="nav-link${active==='mensajes'?' active':''}" href="mensajes.html" id="nav-msg-link">Mensajes <span id="nav-msg-badge" class="notif-badge" style="display:none;margin-left:3px;">0</span></a>
       ${pages.filter(p=>p.id!=='discover').map(p=>`<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('')}
     </div>
+    <div class="nav-notif-wrap" id="nav-notif-wrap">
+      <button class="nav-notif-btn" id="nav-notif-btn" onclick="toggleNotifDd()" title="Notificaciones" aria-label="Notificaciones">🔔<span id="nav-notif-badge" class="notif-badge" style="display:none;">0</span></button>
+      <div class="nav-dd nav-notif-dd" id="nav-notif-dd">
+        <div class="nav-notif-head"><span>Notificaciones</span><button class="nav-notif-readall" onclick="marcarTodasLeidas()">Marcar todas</button></div>
+        <div class="nav-notif-list" id="nav-notif-list"><div class="nav-notif-empty">Cargando…</div></div>
+      </div>
+    </div>
     <div class="nav-perfil-wrap" id="nav-perfil-wrap">
       <button class="nav-perfil-btn${active==='perfil'?' active':''}" id="nav-perfil-btn" onclick="toggleNavDd()">
         Mi perfil <span class="nav-rol-badge" id="nav-rol-badge">· ${badge}</span> <span class="nav-dd-arrow">▾</span>
@@ -87,6 +94,18 @@ function toggleNavDd() {
     dd.classList.toggle('open');
     var dd2 = document.getElementById('nav-rel-dd');
     if (dd2) dd2.classList.remove('open');
+    var dd3 = document.getElementById('nav-notif-dd');
+    if (dd3) dd3.classList.remove('open');
+  }
+}
+
+// — Nav dropdown Notificaciones —
+function toggleNotifDd() {
+  var dd = document.getElementById('nav-notif-dd');
+  if (dd) {
+    dd.classList.toggle('open');
+    var p = document.getElementById('nav-perfil-dd'); if (p) p.classList.remove('open');
+    var r = document.getElementById('nav-rel-dd');    if (r) r.classList.remove('open');
   }
 }
 
@@ -136,11 +155,15 @@ function cambiarRolNav(rol) {
 
 // Cerrar dropdowns al clicar fuera
 document.addEventListener('click', function(e) {
-  ['nav-perfil-wrap','nav-rel-wrap'].forEach(function(wrapId) {
+  var map = {
+    'nav-perfil-wrap': 'nav-perfil-dd',
+    'nav-rel-wrap':    'nav-rel-dd',
+    'nav-notif-wrap':  'nav-notif-dd',
+  };
+  Object.keys(map).forEach(function(wrapId) {
     var wrap = document.getElementById(wrapId);
     if (wrap && !wrap.contains(e.target)) {
-      var ddId = wrapId === 'nav-perfil-wrap' ? 'nav-perfil-dd' : 'nav-rel-dd';
-      var dd = document.getElementById(ddId);
+      var dd = document.getElementById(map[wrapId]);
       if (dd) dd.classList.remove('open');
     }
   });

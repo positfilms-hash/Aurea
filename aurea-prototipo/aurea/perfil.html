@@ -127,8 +127,10 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     import { requireAuth } from './js/auth.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     document.getElementById('nav-container').innerHTML = renderNavAuth('perfil', '');
+    checkNotificaciones();
 
     // — Estado global —
     let _profile = null, _maestro = null, _discipulo = null;

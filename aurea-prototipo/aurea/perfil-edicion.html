@@ -291,6 +291,7 @@
     import { supabase } from './js/supabase.js';
     import { requireAuth } from './js/auth.js';
     import { CATS, poblarSub, initHashtags } from './js/categorias.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     // Poblar selects de categoría con las 11 categorías
     function poblarCats(selId) {
@@ -315,6 +316,7 @@
     let _htDiscipulo = { getTags: () => [] };
 
     document.getElementById('nav-container').innerHTML = renderNavAuth('perfil');
+    checkNotificaciones();
 
     let _uid = null, _esMaestro = false, _esDiscipulo = false, _rol = null;
 

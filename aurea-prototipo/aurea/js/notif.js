@@ -1,133 +1,130 @@
 /**
- * notif.js — Badges de notificación en tiempo real
+ * notif.js — Notificaciones in-app (tabla `notificaciones`)
  *
  * Exporta:
- *   checkNotificaciones()  — llamar al cargar la página
- *   refreshMsgBadge()      — llamar tras marcar mensajes como leídos
+ *   checkNotificaciones()  — llamar al cargar cada página autenticada
+ *   refreshNotifBadge()    — recuenta no leídas y actualiza el badge
+ *   refreshMsgBadge()      — alias retrocompatible de refreshNotifBadge()
+ *
+ * El badge global (campana del nav) cuenta solo notificaciones no leídas.
+ * Persiste (lee de la tabla) y se actualiza por Realtime si está disponible.
  */
 
 import { supabase } from './supabase.js';
 
-// Estado compartido del módulo
-let _uid      = null;
-let _relIds   = [];
-let _msgCount = 0;
-let _channel  = null;  // canal realtime activo
+let _uid = null;
+let _channel = null;
+
+const _ALLOW_URLS = ['solicitudes.html', 'relaciones.html', 'mensajes.html', 'perfil.html'];
 
 // ── Entrada principal ────────────────────────────────────────────────────────
 export async function checkNotificaciones() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return;
   _uid = session.user.id;
-
-  // Relaciones activas del usuario (para filtrar mensajes)
-  const { data: rels } = await supabase
-    .from('relaciones').select('id')
-    .or(`maestro_id.eq.${_uid},discipulo_id.eq.${_uid}`)
-    .in('estado', ['prueba','consolidada']);
-  _relIds = (rels || []).map(r => r.id);
-
-  // Conteos iniciales en paralelo
-  const [solRes, relRes, msgRes] = await Promise.all([
-    supabase.from('solicitudes')
-      .select('*', { count: 'exact', head: true })
-      .eq('maestro_id', _uid).eq('estado', 'nueva'),
-
-    supabase.from('relaciones')
-      .select('*', { count: 'exact', head: true })
-      .or(`maestro_id.eq.${_uid},discipulo_id.eq.${_uid}`)
-      .eq('estado', 'prueba'),
-
-    _relIds.length
-      ? supabase.from('mensajes').select('id')
-          .in('relacion_id', _relIds)
-          .neq('autor_id', _uid)
-          .is('leido_at', null)
-      : Promise.resolve({ data: [] }),
-  ]);
-
-  if (solRes.count > 0) _addBadge('solicitudes.html', solRes.count);
-  if (relRes.count > 0) _addBadge('relaciones.html',  relRes.count);
-
-  _msgCount = (msgRes.data || []).length;
-  _updateMsgBadge();
-
-  // Suscripción realtime: mensajes nuevos
+  await _refrescarTodo();
   _setupRealtime();
 }
 
-// ── Refrescar badge de mensajes (llamar tras marcar como leídos) ─────────────
-export async function refreshMsgBadge() {
+// Recuenta no leídas y actualiza el badge.
+export async function refreshNotifBadge() {
   if (!_uid) return;
-  if (!_relIds.length) { _msgCount = 0; _updateMsgBadge(); return; }
-
-  const { data } = await supabase.from('mensajes').select('id')
-    .in('relacion_id', _relIds)
-    .neq('autor_id', _uid)
-    .is('leido_at', null);
-
-  _msgCount = (data || []).length;
-  _updateMsgBadge();
+  const { count } = await supabase
+    .from('notificaciones')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', _uid)
+    .is('leida_at', null);
+  _updateBadge(count || 0);
 }
 
-// ── Realtime ─────────────────────────────────────────────────────────────────
+// Compatibilidad: antes refrescaba el badge de mensajes; ahora el de notificaciones.
+export const refreshMsgBadge = refreshNotifBadge;
+
+// ── Internos ─────────────────────────────────────────────────────────────────
+async function _refrescarTodo() {
+  await refreshNotifBadge();
+  await _cargarLista();
+}
+
+async function _cargarLista() {
+  const listEl = document.getElementById('nav-notif-list');
+  if (!listEl) return;
+  const { data, error } = await supabase
+    .from('notificaciones')
+    .select('id, titulo, cuerpo, url, leida_at, created_at')
+    .eq('user_id', _uid)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (error) {
+    listEl.innerHTML = '<div class="nav-notif-empty">No se pudieron cargar las notificaciones.</div>';
+    return;
+  }
+  if (!data || !data.length) {
+    listEl.innerHTML = '<div class="nav-notif-empty">No tienes notificaciones.</div>';
+    return;
+  }
+  listEl.innerHTML = data.map(n => {
+    const url = _safeUrl(n.url);
+    return `<a class="nav-notif-item${n.leida_at ? '' : ' unread'}" href="${url}"
+       onclick="return aureaAbrirNotif(event,'${n.id}','${url}')">
+      <div class="nav-notif-item-title">${_esc(n.titulo)}</div>
+      ${n.cuerpo ? `<div class="nav-notif-item-body">${_esc(n.cuerpo)}</div>` : ''}
+      <div class="nav-notif-item-date">${_fechaRel(n.created_at)}</div>
+    </a>`;
+  }).join('');
+}
+
+function _updateBadge(n) {
+  const b = document.getElementById('nav-notif-badge');
+  if (!b) return;
+  if (n > 0) { b.textContent = n > 9 ? '9+' : String(n); b.style.display = 'inline-flex'; }
+  else b.style.display = 'none';
+}
+
 function _setupRealtime() {
-  // Eliminar canal anterior si existe
   if (_channel) { supabase.removeChannel(_channel); _channel = null; }
-  if (!_relIds.length) return;
-
-  _channel = supabase.channel('aurea-notif-msgs')
+  _channel = supabase.channel('aurea-notificaciones')
     .on('postgres_changes', {
-      event:  'INSERT',
-      schema: 'public',
-      table:  'mensajes',
-    }, (payload) => {
-      const msg = payload.new;
-      // Solo mensajes del OTRO participante
-      if (msg.autor_id === _uid) return;
-      // Solo de relaciones del usuario
-      if (!_relIds.includes(msg.relacion_id)) return;
-      // Si el chat está abierto en esta relación, no contar (se marca leído al momento)
-      if (_isChatOpen(msg.relacion_id)) return;
-
-      _msgCount++;
-      _updateMsgBadge();
-    })
+      event: '*', schema: 'public', table: 'notificaciones',
+      filter: `user_id=eq.${_uid}`,
+    }, () => { _refrescarTodo(); })
     .subscribe();
 }
 
-// Detecta si el usuario tiene abierto el chat de esa relación
-function _isChatOpen(relId) {
-  return window.location.pathname.includes('periodo-prueba') &&
-         new URLSearchParams(window.location.search).get('id') === relId;
-}
+// ── Acciones globales (usadas desde el dropdown del nav) ──────────────────────
+// Marca la notificación como leída y navega (la navegación no se bloquea si falla).
+window.aureaAbrirNotif = function (ev, id, url) {
+  if (ev) ev.preventDefault();
+  (async () => {
+    try {
+      await supabase.from('notificaciones')
+        .update({ leida_at: new Date().toISOString() }).eq('id', id);
+    } catch (e) { /* no bloquear navegación */ }
+    window.location.href = _safeUrl(url);
+  })();
+  return false;
+};
 
-// ── Helpers DOM ──────────────────────────────────────────────────────────────
-function _updateMsgBadge() {
-  const badge = document.getElementById('nav-msg-badge');
-  if (!badge) return;
-  if (_msgCount > 0) {
-    badge.textContent    = _msgCount > 9 ? '9+' : String(_msgCount);
-    badge.style.display  = 'inline-flex';
-  } else {
-    badge.style.display  = 'none';
-  }
-}
+window.marcarTodasLeidas = async function () {
+  if (!_uid) return;
+  await supabase.from('notificaciones')
+    .update({ leida_at: new Date().toISOString() })
+    .eq('user_id', _uid).is('leida_at', null);
+  await _refrescarTodo();
+};
 
-function _addBadge(href, count) {
-  const link = document.querySelector(`.nav-link[href="${href}"]`)
-            || document.querySelector(`.nav-dd-item[href="${href}"]`)
-            || document.querySelector(`.nav-link[href$="${href}"]`);
-  if (!link || link.querySelector('.notif-badge')) return;
-  const badge = document.createElement('span');
-  badge.className   = 'notif-badge';
-  badge.textContent = count > 9 ? '9+' : count;
-  badge.style.cssText = [
-    'display:inline-flex','align-items:center','justify-content:center',
-    'min-width:16px','height:16px','padding:0 4px',
-    'background:var(--gold)','color:var(--night)',
-    'font-size:8px','font-weight:700','font-family:var(--font-sans,sans-serif)',
-    'border-radius:100px','margin-left:5px','vertical-align:middle','line-height:1',
-  ].join(';');
-  link.appendChild(badge);
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function _esc(s) {
+  return (typeof escHtml === 'function') ? escHtml(s) : (s == null ? '' : String(s));
+}
+function _safeUrl(u) {
+  return _ALLOW_URLS.includes(u) ? u : 'mensajes.html';
+}
+function _fechaRel(iso) {
+  const d = Math.round((Date.now() - new Date(iso)) / 86400000);
+  if (d <= 0) return 'Hoy';
+  if (d === 1) return 'Ayer';
+  if (d < 7) return `Hace ${d} días`;
+  return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
 }

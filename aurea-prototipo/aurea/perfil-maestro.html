@@ -215,8 +215,10 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     import { getSession } from './js/auth.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     document.getElementById('nav-container').innerHTML = renderNavAuth('discover');
+    checkNotificaciones();
 
     // — Modales (expuestos globalmente para onclick) —
     window.openSolicitud = () => document.getElementById('modal-sol').classList.add('open');
