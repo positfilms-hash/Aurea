@@ -112,6 +112,24 @@
     </div>
   </div>
 
+  <!-- Modal reseña (solo discípulo de relación consolidada) -->
+  <div class="overlay" id="overlay-resena">
+    <div class="modal" style="width:460px;">
+      <div class="modal-title">Dejar reseña</div>
+      <div class="modal-sub">Comparte una reseña sobre esta relación de aprendizaje. Habla de la experiencia, el acompañamiento y lo aprendido. Evita información privada o sensible.</div>
+      <div id="res-stars" style="display:flex;gap:6px;margin:16px 0 4px;font-size:26px;color:var(--border);cursor:pointer;user-select:none;">
+        <span data-n="1">★</span><span data-n="2">★</span><span data-n="3">★</span><span data-n="4">★</span><span data-n="5">★</span>
+      </div>
+      <textarea class="modal-textarea" id="res-texto" maxlength="1200" placeholder="Tu reseña…" style="height:110px;"></textarea>
+      <div id="res-counter" style="font-size:10px;color:var(--text-ghost);text-align:right;margin-top:4px;">Mínimo 80 caracteres</div>
+      <div id="res-error" style="display:none;color:var(--red);font-size:11px;margin-top:8px;line-height:1.5;"></div>
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn-modal-back" onclick="closeModals()">Cancelar</button>
+        <button class="btn-modal-warn" id="res-submit" onclick="enviarResena()">Enviar reseña</button>
+      </div>
+    </div>
+  </div>
+
   <div id="chat-container"></div>
   <script src="js/components.js"></script>
   <script type="module">
@@ -155,10 +173,79 @@
       }
     });
 
+    // — Reseña (solo discípulo de relación consolidada) —
+    let _resRelId = null, _resRating = 0;
+
+    function pintarStars(n) {
+      document.querySelectorAll('#res-stars span').forEach(s => {
+        s.style.color = (+s.dataset.n <= n) ? 'var(--gold)' : 'var(--border)';
+      });
+    }
+    document.getElementById('res-stars').addEventListener('click', e => {
+      const s = e.target.closest('span[data-n]');
+      if (!s) return;
+      _resRating = +s.dataset.n;
+      pintarStars(_resRating);
+    });
+    document.getElementById('res-texto').addEventListener('input', function () {
+      const n = this.value.trim().length;
+      document.getElementById('res-counter').textContent =
+        n >= 80 ? `${n} caracteres` : `Mínimo 80 caracteres · faltan ${80 - n}`;
+    });
+
+    window.openResena = function (relId) {
+      _resRelId = relId; _resRating = 0;
+      document.getElementById('res-texto').value = '';
+      document.getElementById('res-error').style.display = 'none';
+      document.getElementById('res-counter').textContent = 'Mínimo 80 caracteres';
+      const btn = document.getElementById('res-submit');
+      btn.disabled = false; btn.textContent = 'Enviar reseña';
+      pintarStars(0);
+      document.getElementById('overlay-resena').classList.add('open');
+    };
+
+    window.enviarResena = async function () {
+      const texto = document.getElementById('res-texto').value.trim();
+      const err = document.getElementById('res-error');
+      if (_resRating < 1 || _resRating > 5) {
+        err.textContent = 'Elige una puntuación de 1 a 5 estrellas.'; err.style.display = 'block'; return;
+      }
+      if (texto.length < 80) {
+        err.textContent = `Tu reseña necesita al menos 80 caracteres (llevas ${texto.length}).`;
+        err.style.display = 'block'; return;
+      }
+      const rel = _relById[_resRelId];
+      if (!rel) return;
+      const btn = document.getElementById('res-submit');
+      btn.disabled = true; btn.textContent = 'Enviando…';
+      const { error } = await supabase.from('resenas').insert({
+        relacion_id:  rel.id,
+        maestro_id:   rel.maestro_id,
+        discipulo_id: _uid,
+        disciplina:   rel.disciplina || rel._disciplina || '—',
+        estrellas:    _resRating,
+        texto,
+      });
+      if (error) {
+        err.textContent = error.code === '23505'
+          ? 'Ya has dejado una reseña para esta relación.'
+          : 'No hemos podido guardar tu reseña ahora mismo.';
+        err.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Enviar reseña';
+        return;
+      }
+      _reviewed.add(rel.id);
+      closeModals();
+      renderRelaciones();
+    };
+
     // — Filtro chips —
     let _filtroEstado = 'todas';
     let _filtroRol    = 'todos';
     let _allRels = [];
+    let _uid = null;
+    let _relById = {};
+    let _reviewed = new Set();
 
     const _rSections = document.querySelectorAll('.filter-chips');
     // Sección 0: Estado
@@ -240,9 +327,18 @@
           ? '<span class="estado-badge badge-prueba">⏳ Prueba vencida · decidir</span>'
           : (BADGE_MAP[r.estado] || '');
 
+        // CTA de reseña: solo el discípulo de una relación consolidada.
+        let resenaBtn = '';
+        if (r.estado === 'consolidada' && r._rol === 'discipulo') {
+          resenaBtn = _reviewed.has(r.id)
+            ? `<span class="btn-small disabled" title="Ya has dejado una reseña para esta relación">✓ Reseñada</span>`
+            : `<button class="btn-small" onclick="window.openResena('${r.id}')">Dejar reseña</button>`;
+        }
+
         const actionsHTML = esFinalizada ? '' : (r.estado === 'prueba'
           ? `<button class="btn-small" onclick="location.href='periodo-prueba.html?id=${r.id}'">Chat</button>`
           : `<button class="btn-small" onclick="location.href='periodo-prueba.html?id=${r.id}'">Chat</button>
+             ${resenaBtn}
              <button class="btn-small warn" onclick="window.openMediador('${nombre}')">Incidencia</button>
              <button class="btn-small danger" onclick="window.openFinalizar('${r.id}','${nombre}')">Finalizar</button>`);
 
@@ -330,6 +426,14 @@
 
       _allRels = [...relsMaestro, ...relsDisc].sort((a, b) =>
         new Date(b.iniciada_at || 0) - new Date(a.iniciada_at || 0));
+
+      // Índice por id + reseñas ya dejadas por este usuario (como discípulo).
+      _uid = uid;
+      _relById = {};
+      _allRels.forEach(r => { _relById[r.id] = r; });
+      const { data: misResenas } = await supabase
+        .from('resenas').select('relacion_id').eq('discipulo_id', uid);
+      _reviewed = new Set((misResenas || []).map(x => x.relacion_id).filter(Boolean));
 
       renderRelaciones();
       actualizarContadoresRel();
