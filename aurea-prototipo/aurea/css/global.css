@@ -53,6 +53,7 @@
   --radius:    10px;
   --radius-lg: 14px;
   --tap:       44px; /* altura mínima táctil en móvil */
+  --mobile-tabbar-height: 64px; /* barra de navegación inferior móvil (spec 020) */
 }
 
 /* ── TEMA ARENA (vista discípulo) ─────────────────────────────── */
@@ -404,4 +405,47 @@ pre, code { overflow-wrap: anywhere; white-space: pre-wrap; }
   .form-actions, .empty-state-actions, .modal-actions { flex-direction: column; align-items: stretch; }
   .modal-actions .btn, .modal-actions .btn-primary, .modal-actions .btn-secondary,
   .form-actions > * { width: 100%; }
+}
+
+/* ============================================================
+   NAVEGACIÓN INFERIOR MÓVIL (spec 020)
+   Barra de tabs fija solo en móvil/tablet para páginas autenticadas
+   (la genera renderNavAuth). En desktop manda la nav superior.
+   ============================================================ */
+.mobile-tabbar { display: none; }
+.tabbar-badge {
+  display: none; align-items: center; justify-content: center;
+  min-width: 16px; height: 16px; padding: 0 4px; border-radius: 100px;
+  background: var(--gold); color: var(--night); font-size: 9px; font-weight: 600; line-height: 1;
+}
+@media (max-width: 899px) {
+  .mobile-tabbar {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 150;
+    background: var(--night); border-top: 0.5px solid var(--border);
+    height: calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tabbar-item {
+    flex: 1; min-width: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3px;
+    min-height: var(--tap); padding: 8px 2px; text-decoration: none;
+    color: var(--text-faint); transition: color 0.18s;
+  }
+  .tabbar-item.active { color: var(--gold); }
+  .tabbar-icon { font-size: 18px; line-height: 1; position: relative; }
+  .tabbar-badge { position: absolute; top: -5px; left: 100%; transform: translateX(-7px); }
+  .tabbar-label { font-size: 10px; letter-spacing: 0.02em; line-height: 1; white-space: nowrap; }
+
+  /* La barra inferior asume la navegación principal: se ocultan los enlaces
+     superiores SOLO cuando hay tabbar (páginas autenticadas). En páginas
+     públicas (sin tabbar) se mantiene la nav superior. */
+  body:has(.mobile-tabbar) .nav-links { display: none !important; }
+  /* Padding inferior para que la tabbar no tape el final del contenido. */
+  body:has(.mobile-tabbar) { padding-bottom: calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom)); }
+  /* La fina barra de copyright sobra bajo la tabbar en móvil. */
+  body:has(.mobile-tabbar) .page-footer-bar { display: none; }
+  /* El FAB del chat (esquina inferior derecha) chocaría con el tab Perfil:
+     se oculta en móvil autenticado (sigue disponible en desktop). */
+  body:has(.mobile-tabbar) .chat-fab,
+  body:has(.mobile-tabbar) .chat-widget { display: none !important; }
 }

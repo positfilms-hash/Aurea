@@ -214,6 +214,7 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     import { CATS } from './js/categorias.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     // — Nav inteligente —
     const { data: { session } } = await supabase.auth.getSession();
@@ -222,6 +223,7 @@
         .select('nombre, apellido').eq('id', session.user.id).single();
       const ini = p ? ((p.nombre||'')[0]+(p.apellido||'')[0]).toUpperCase()||'?' : '?';
       document.getElementById('nav-container').innerHTML = renderNavAuth('', ini);
+      checkNotificaciones();
       const btnEmpezar = document.querySelector('[onclick*="modal-empezar"]');
       if (btnEmpezar) btnEmpezar.setAttribute('onclick', "location.href='discover.html'");
     }
