@@ -62,25 +62,21 @@
   <div id="nav-container"></div>
   <div class="layout">
     <aside class="sidebar">
-      <div><span class="section-label">Mostrar</span><div class="filter-chips"><div class="chip-side on">Todas <span class="chip-count">5</span></div><div class="chip-side">Consolidadas <span class="chip-count">3</span></div><div class="chip-side">En prueba <span class="chip-count">1</span></div><div class="chip-side">Finalizadas <span class="chip-count">1</span></div></div></div>
+      <div><span class="section-label">Mostrar</span><div class="filter-chips"><div class="chip-side on">Todas <span class="chip-count"></span></div><div class="chip-side">Consolidadas <span class="chip-count"></span></div><div class="chip-side">En prueba <span class="chip-count"></span></div><div class="chip-side">Finalizadas <span class="chip-count"></span></div></div></div>
       <div class="filter-divider"></div>
       <div><span class="section-label">Rol</span><div class="filter-chips"><div class="chip-side on">Todos</div><div class="chip-side">Como maestro</div><div class="chip-side">Como discípulo</div></div></div>
       <div class="filter-divider"></div>
       <div><span class="section-label">Ordenar</span><div class="filter-chips"><div class="chip-side on">Más recientes</div><div class="chip-side">Más antiguas</div><div class="chip-side">Duración</div></div></div>
     </aside>
     <div class="content">
-      <div class="content-header"><div class="content-title">Mis relaciones</div><div class="content-sub">5 relaciones · 3 consolidadas · 1 en prueba · 1 finalizada</div></div>
+      <div class="content-header"><div class="content-title">Mis relaciones</div><div class="content-sub">Cargando…</div></div>
       <div class="col-header"><div></div><div></div><div class="col-h">Persona</div><div class="col-h">Estado</div><div class="col-h">Desde</div><div class="col-h"></div></div>
       <div class="list">
-        <div class="rel-row"><div class="ind consolidada"></div><div class="avatar" style="background:#7A4F2A;">JM</div><div><div class="rel-nombre">Javier Molina</div><div class="rel-disc">Filosofía estoica</div><div class="rel-rol">Discípulo aceptado</div></div><span class="estado-badge badge-nueva">✦ Consolidada</span><div><div class="rel-desde">10 abril 2026</div><div class="rel-duracion">Hace 45 días</div></div><div class="rel-actions"><button class="btn-small" onclick="location.href='periodo-prueba.html'">Chat</button><button class="btn-small warn" onclick="openMediador('Javier Molina')">Incidencia</button><button class="btn-small danger" onclick="openFinalizar('Javier Molina')">Finalizar</button></div></div>
-        <div class="rel-row"><div class="ind consolidada"></div><div class="avatar" style="background:#3B6D11;">LP</div><div><div class="rel-nombre">Laura Pérez</div><div class="rel-disc">Filosofía estoica</div><div class="rel-rol">Discípulo aceptado</div></div><span class="estado-badge badge-nueva">✦ Consolidada</span><div><div class="rel-desde">5 mayo 2026</div><div class="rel-duracion">Hace 20 días</div></div><div class="rel-actions"><button class="btn-small">Chat</button><button class="btn-small warn" onclick="openMediador('Laura Pérez')">Incidencia</button><button class="btn-small danger disabled" title="Disponible tras 1 mes">Finalizar</button></div></div>
-        <div class="rel-row"><div class="ind consolidada"></div><div class="avatar" style="background:#534AB7;">AO</div><div><div class="rel-nombre">Andrés Ortega</div><div class="rel-disc">Astronomía</div><div class="rel-rol">Maestro aceptado</div></div><span class="estado-badge badge-nueva">✦ Consolidada</span><div><div class="rel-desde">1 marzo 2026</div><div class="rel-duracion">Hace 85 días</div></div><div class="rel-actions"><button class="btn-small">Chat</button><button class="btn-small warn" onclick="openMediador('Andrés Ortega')">Incidencia</button><button class="btn-small danger" onclick="openFinalizar('Andrés Ortega')">Finalizar</button></div></div>
-        <div class="rel-row"><div class="ind prueba"></div><div class="avatar" style="background:#993556;">SL</div><div><div class="rel-nombre">Sofía Llorente</div><div class="rel-disc">Filosofía estoica</div><div class="rel-rol">En periodo de prueba</div></div><span class="estado-badge badge-prueba">⏳ En prueba</span><div><div class="rel-desde">15 mayo 2026</div><div class="rel-duracion">Hace 10 días</div></div><div class="rel-actions"><button class="btn-small" onclick="location.href='periodo-prueba.html'">Chat</button></div></div>
-        <div class="rel-row faded"><div class="ind finalizada"></div><div class="avatar" style="background:var(--border);">CR</div><div><div class="rel-nombre">Carlos Rivas</div><div class="rel-disc">Filosofía estoica</div><div class="rel-rol">Discípulo · Finalizado</div></div><span class="estado-badge badge-vista">— Finalizada</span><div><div class="rel-desde">Ene – Mar 2026</div><div class="rel-duracion">3 meses</div></div><div class="rel-actions"></div></div>
+        <div style="padding:40px;text-align:center;font-size:13px;color:var(--text-faint);">Cargando…</div>
       </div>
       <div class="plazas-bar">
-        <div class="plaza-item"><div class="plaza-dot" style="background:var(--gold);"></div><span class="plaza-label">Plazas ocupadas (maestro)</span><span class="plaza-n">3 / 4</span></div>
-        <div class="plaza-item"><div class="plaza-dot" style="background:var(--purple);"></div><span class="plaza-label">Prácticas activas (discípulo)</span><span class="plaza-n">2 / 3</span></div>
+        <div class="plaza-item"><div class="plaza-dot" style="background:var(--gold);"></div><span class="plaza-label">Como maestro</span><span class="plaza-n">—</span></div>
+        <div class="plaza-item"><div class="plaza-dot" style="background:var(--purple);"></div><span class="plaza-label">Como discípulo</span><span class="plaza-n">—</span></div>
       </div>
     </div>
   </div>
@@ -246,6 +242,7 @@
     let _uid = null;
     let _relById = {};
     let _reviewed = new Set();
+    let _consolidadas = new Set();
     let _relError = false;
 
     const _rSections = document.querySelectorAll('.filter-chips');
@@ -345,9 +342,9 @@
           ? '<span class="estado-badge badge-prueba">⏳ Prueba vencida · decidir</span>'
           : (BADGE_MAP[r.estado] || '');
 
-        // CTA de reseña: solo el discípulo de una relación consolidada.
+        // CTA de reseña: solo el discípulo de una relación con resultado consolidado.
         let resenaBtn = '';
-        if (r.estado === 'consolidada' && r._rol === 'discipulo') {
+        if (_consolidadas.has(r.id) && r._rol === 'discipulo') {
           resenaBtn = _reviewed.has(r.id)
             ? `<span class="btn-small disabled" title="Ya has dejado una reseña para esta relación">✓ Reseñada</span>`
             : `<button class="btn-small" onclick="window.openResena('${r.id}')">Dejar reseña</button>`;
@@ -395,6 +392,12 @@
     }
 
     async function cargarRelaciones() {
+      // Limpiar el contenido de ejemplo del HTML mientras carga (estado "cargando").
+      const _listEl = document.querySelector('.list');
+      if (_listEl) _listEl.innerHTML = `<div style="padding:40px;text-align:center;font-size:13px;color:var(--text-faint);">Cargando…</div>`;
+      const _subEl = document.querySelector('.content-sub');
+      if (_subEl) _subEl.textContent = 'Cargando…';
+
       const session = await requireAuth();
       if (!session) return;
       const uid = session.user.id;
@@ -453,6 +456,18 @@
       const { data: misResenas } = await supabase
         .from('resenas').select('relacion_id').eq('discipulo_id', uid);
       _reviewed = new Set((misResenas || []).map(x => x.relacion_id).filter(Boolean));
+
+      // Relaciones realmente consolidadas (resultado del sobre cerrado), para
+      // mostrar el CTA de reseña solo donde la BD lo permite (no por estado legacy).
+      const _ids = _allRels.map(r => r.id);
+      if (_ids.length) {
+        const { data: resCons } = await supabase
+          .from('resultados_consolidacion')
+          .select('relacion_id').in('relacion_id', _ids).eq('resultado', 'consolidada');
+        _consolidadas = new Set((resCons || []).map(x => x.relacion_id));
+      } else {
+        _consolidadas = new Set();
+      }
 
       renderRelaciones();
       actualizarContadoresRel();

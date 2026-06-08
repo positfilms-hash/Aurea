@@ -220,10 +220,12 @@ function escHtml(s) {
 
 // Estado vacío / error reutilizable. Máximo un CTA principal + enlace secundario.
 //   renderEmptyState({ icon, title, body, ctaLabel, ctaHref, secLabel, secHref })
+// `icon` se inserta como HTML (pensado para emojis/símbolos de confianza); el
+// resto de campos, incluidos los href, se escapan. No pasar valores no confiables.
 function renderEmptyState(o) {
   o = o || {};
-  var cta = o.ctaHref ? '<a class="btn-primary" href="' + o.ctaHref + '">' + escHtml(o.ctaLabel || 'Continuar') + '</a>' : '';
-  var sec = o.secHref ? '<a class="empty-state-sec" href="' + o.secHref + '">' + escHtml(o.secLabel || '') + '</a>' : '';
+  var cta = o.ctaHref ? '<a class="btn-primary" href="' + escHtml(o.ctaHref) + '">' + escHtml(o.ctaLabel || 'Continuar') + '</a>' : '';
+  var sec = o.secHref ? '<a class="empty-state-sec" href="' + escHtml(o.secHref) + '">' + escHtml(o.secLabel || '') + '</a>' : '';
   return '<div class="empty-state">' +
       (o.icon ? '<div class="empty-state-icon">' + o.icon + '</div>' : '') +
       '<div class="empty-state-title">' + escHtml(o.title || '') + '</div>' +

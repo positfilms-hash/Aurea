@@ -1,204 +1,255 @@
-# CLAUDE.md
+# CLAUDE.md — Aurea
 
-Trabajo en Aurea (aureacatena.com), plataforma española que conecta maestros y discípulos para relaciones de aprendizaje continuas. No es una plataforma de cursos.
-
----
-
-## Stack
-
-- HTML/CSS/JS vanilla
-- Vite 6
-- Supabase: PostgreSQL, Auth, Realtime
-- Vercel
-- Sin frameworks frontend
+Guía maestra para Claude (y cualquier IA que programe en este repo).
+**Léela entera antes de tocar nada.** Resume qué es el proyecto, el flujo de
+trabajo con varias IAs, las reglas críticas y las lecciones aprendidas para no
+repetir errores.
 
 ---
 
-## Tablas principales en Supabase
+## 1. Qué es Aurea
 
-- `profiles`
-- `maestro_perfiles`
-- `discipulo_perfiles`
-- `solicitudes`
-- `relaciones`
-- `mensajes`
+Plataforma española que conecta **maestros** y **discípulos** para relaciones de
+aprendizaje **continuas** (no es una plataforma de cursos ni de lecciones grabadas).
 
----
+- Producción: **https://www.aureacatena.com**
+- Deploy automático en **Vercel** al hacer push/merge a `main`.
+- No hay usuarios reales todavía (solo cuentas de prueba) → las migraciones
+  pueden ser pragmáticas, pero **nunca destructivas de datos**.
 
-## Roles de IA
-
-- **ChatGPT**: piensa, estructura producto, detecta riesgos y escribe specs.
-- **Claude**: programa siguiendo specs aprobadas.
-- **Codex**: revisa PRs cuando esté disponible.
-- **GitHub**: historial y fuente de verdad del proyecto.
-- **Vercel**: deploy automático al hacer push a `main`.
-- **Humano**: aprueba merges.
+Flujo de producto: registro → completar perfil → explorar maestros (discover) →
+enviar solicitud → el maestro acepta → **periodo de prueba** (30 días, hasta 3
+sesiones, chat) → **consolidación en sobre cerrado** (ambos deciden en privado) →
+historial / reseñas.
 
 ---
 
-## Reglas críticas
+## 2. Stack
 
-- No trabajar directamente en `main`.
-- Crear una rama nueva para cada cambio.
-- Hacer PRs pequeños y acotados.
-- No mezclar cambios no relacionados.
-- No tocar Supabase sin una spec aprobada.
-- Toda migración de Supabase debe ir numerada en `supabase/migrations/`.
-- No tocar `package.json` salvo permiso explícito.
-- No tocar `.env`, secretos, claves API ni configuración sensible.
-- No usar `git add .`.
-- No hacer merge sin aprobación humana.
-- No borrar datos reales.
+- Frontend: **HTML/CSS/JS vanilla** (sin frameworks).
+- Build: **Vite 6** (multipágina). `vite.config.js`, `package.json`, `vercel.json`
+  están en la **raíz del repo** (no en la subcarpeta).
+- Datos: **Supabase** (PostgreSQL + Auth + Realtime + Storage).
+- Email del formulario de contacto: **EmailJS** (sin backend; claves públicas hardcodeadas).
+- Moderación de imágenes: **NSFWJS** (en cliente).
 
 ---
 
-## Specs
+## 3. Roles del equipo (humano + IAs)
 
-Antes de cualquier feature no trivial debe existir una spec.
-Las specs viven en `specs/` y siguen este formato:
-
-- nombre
-- estado
-- qué hace
-- páginas que toca
-- tablas de Supabase que toca
-- flujo de usuario
-- SQL de migración, si aplica
-- criterios de aceptación
-
-Si una feature toca Supabase, la spec debe explicar exactamente:
-
-- qué tablas modifica
-- qué columnas añade o cambia
-- qué policies/RLS afecta
-- qué migración SQL se necesita
-- qué riesgos existen
-
----
-
-## Trabajo de Claude
-
-Claude debe:
-
-1. Leer este archivo antes de actuar.
-2. Leer la spec correspondiente antes de programar.
-3. Implementar solo lo definido en la spec.
-4. Avisar si detecta contradicciones, riesgos técnicos o riesgos de UX.
-5. No escribir features nuevas fuera de alcance.
-6. Explicar siempre qué archivos cambió y por qué.
-7. Ejecutar los checks disponibles antes de terminar.
-
----
-
-## Checks antes de terminar
-
-Ejecutar, cuando existan:
-
-```powershell
-npm.cmd test
-npm.cmd run build
-git diff --check
+```
+ChatGPT  → piensa producto, detecta riesgos y ESCRIBE las specs.
+Claude   → PROGRAMA siguiendo specs aprobadas (eso eres tú).
+Codex    → REVISA los PRs (bloqueante / recomendado / menor).
+GitHub   → historial y fuente de verdad.
+Vercel   → deploy automático al mergear a main.
+Supabase → las migraciones SQL las ejecuta EL HUMANO a mano (Claude no tiene acceso).
+Humano   → aprueba y hace los merges; ejecuta las migraciones en Supabase.
 ```
 
-Si un comando no existe o falla, Claude debe decirlo claramente. No debe inventar que los tests han pasado.
+---
+
+## 4. El ciclo de trabajo (IMPORTANTE — síguelo siempre)
+
+1. **ChatGPT entrega una spec** (el humano te la pega). Si toca Supabase, debe
+   describir tablas/columnas/RLS/migración/riesgos.
+2. **Claude implementa**:
+   - Crea **una rama nueva** desde `main` actualizado (nunca trabajes en `main`).
+   - Verifica el esquema/código real **antes** de escribir (ver §7, lección clave).
+   - Implementa solo lo de la spec. Guarda la spec en `specs/NNN-nombre.md`.
+   - Ejecuta los checks (§6).
+   - Entrega el **resumen final obligatorio** (§9) + un **"Mensaje para Codex"**
+     listo para pegar.
+3. **El humano** ejecuta el commit/push que le sugieres y abre el PR.
+4. **Codex revisa el PR**. El humano te pega los hallazgos.
+5. **Claude corrige en la MISMA rama, ANTES del merge** (lección dura, §7).
+   - **Bloqueantes**: se arreglan siempre.
+   - **Recomendados/menores**: ver regla de lotes (§5).
+6. Cuando Codex queda limpio (o solo "menor" diferido) → **el humano mergea** y,
+   si hay migración, **la ejecuta en Supabase Studio**.
+
+> El humano hace los commits/push/merge. Tú preparas la rama y das el comando
+> exacto, **sin ejecutarlo** (salvo operaciones de git de lectura/diagnóstico).
 
 ---
 
-## Resumen final obligatorio
+## 5. Regla de lotes para recomendados de Codex
 
-Al terminar cualquier tarea, Claude debe responder con:
+Cuando Codex **no da ningún bloqueante**, **guarda** los recomendados en
+`specs/_recomendados-pendientes.md` y hazlos **en lote** (cada 2-3 specs o al
+corregir un bloqueante), **salvo que veas uno fundamental** (p. ej. fuga de datos
+ficticios, privacidad, seguridad) → ese se hace en el momento.
 
-1. Archivos creados o modificados.
+Mantén ese archivo de backlog actualizado (qué, de dónde viene, estado).
+
+---
+
+## 6. Checks antes de terminar (ejecútalos de verdad)
+
+```powershell
+npm.cmd run build        # desde la raíz del repo; valida también los <script type="module"> inline
+git diff --check         # espacios/conflictos
+npm.cmd test             # NO EXISTE (no hay tests) → dilo, no lo inventes
+```
+
+- El warning `LF will be replaced by CRLF` es normal en Windows, inofensivo.
+- Las migraciones SQL viven en `supabase/migrations/` (raíz), **fuera** del root
+  de Vite → no entran al build; para ellas el check real es leerlas con cuidado.
+
+---
+
+## 7. Lecciones aprendidas (NO repetir errores)
+
+1. **Numeración**: specs y migraciones se numeran **independientemente** y van
+   desfasadas. ChatGPT suele dar números obsoletos. **Antes de numerar, mira
+   `origin/main`**:
+   ```powershell
+   git ls-tree origin/main specs/ --name-only | Select-Object -Last 1
+   git ls-tree origin/main supabase/migrations/ --name-only | Select-Object -Last 1
+   ```
+   Usa el siguiente número libre de cada uno.
+2. **El esquema YA suele tener lo que la spec propone añadir.** Verifica las
+   columnas reales antes de crear migraciones. Casos vistos: `relaciones` ya
+   tenía `iniciada_at`/`dias_prueba_total`/`decision_*`; `resenas` ya tenía
+   `relacion_id` + unique; `mensajes` usa `autor_id` (no `emisor_id`). **Adapta a
+   los nombres reales; no dupliques columnas.** Si hay un choque de diseño,
+   **avisa al humano antes de implementar** (se hizo con AskUserQuestion).
+3. **Corrige los hallazgos de Codex en la misma rama ANTES de mergear.** Una vez
+   se mergeó la versión vieja y los fixes quedaron sin commitear → divergencia
+   git/Supabase dolorosa. La rama que se mergea debe ser la que revisó Codex.
+4. **Migraciones ya aplicadas son inmutables.** Si una migración ya está en
+   `main`/Supabase, **no la edites**: crea una migración nueva (idempotente:
+   `create or replace`, `drop policy if exists` + `create`, `create table if not
+   exists`, `add column if not exists`).
+5. **Triggers que cuentan filas y deben serializar** (sobre cerrado, límite de
+   sesiones): usa `perform 1 from <tabla padre> where id = ... for no key update`
+   antes de contar. **`FOR NO KEY UPDATE`**, no `FOR UPDATE` (este último choca
+   con el `FOR KEY SHARE` que toma el INSERT por el FK → deadlock).
+6. **RLS**: las policies se suman en **OR**. Si endureces una regla, **elimina la
+   policy permisiva antigua** (si no, sigue abriendo el hueco). Para reglas
+   "solo el sistema": función `SECURITY DEFINER` + `REVOKE EXECUTE` a
+   public/anon/authenticated; sin policy de INSERT para clientes.
+7. **No tocar `relaciones.estado` a ciegas.** Estados válidos:
+   `prueba, consolidada, pausada, finalizada, cancelada`. Transiciones desde
+   `prueba` solo por trigger; los participantes no deberían poder ponerlas a mano
+   (policy con `using estado <> 'prueba'` + `with check estado <> 'consolidada' and estado <> 'prueba'`).
+8. **XSS**: escapa SIEMPRE el texto de usuario que metas por `innerHTML` con
+   `escHtml()` (global en `components.js`). Saneа `avatar_color` (solo hex o
+   `var(--...)`).
+9. **No dejes datos demo en el HTML estático.** Las páginas con datos remotos
+   deben arrancar en "Cargando…"/vacío, no con contenido ficticio (si el JS se
+   cuelga, no se ven datos falsos). Distingue **cargando / vacío / error**.
+10. **El hook de auto-commit fue eliminado.** Hubo un hook `Stop` en
+    `.claude/settings.json` que hacía `git add -A` + commit + push solo. Se
+    desactivó. **No lo reintroduzcas.** Los commits los controla el humano.
+11. **`await new Promise(()=>{})` para "parar" un módulo es frágil.** Si necesitas
+    early-return en un módulo con top-level await, envuelve la lógica en una
+    `(async () => { ... })()` (las imports quedan fuera) y usa `return`.
+
+---
+
+## 8. Reglas críticas
+
+- No trabajar en `main`. Rama nueva por cada cambio; PRs pequeños y acotados; no
+  mezclar cambios no relacionados.
+- **No tocar Supabase sin spec aprobada.** Toda migración numerada en
+  `supabase/migrations/`. Las ejecuta el humano en Supabase Studio.
+- **Nunca** commitear `.env` ni secretos (está en `.gitignore`). No tocar
+  `package.json` salvo permiso explícito.
+- No usar `git add .` (preferir rutas explícitas; excepción justificada al incluir
+  borrados, avisando).
+- No hacer merge sin aprobación humana. No borrar datos reales.
+- Avisar de contradicciones/riesgos técnicos o de UX antes de implementar.
+
+---
+
+## 9. Resumen final obligatorio (al terminar cada tarea)
+
+1. Archivos creados/modificados.
 2. Motivo de cada cambio.
-3. Checks ejecutados.
-4. Riesgos pendientes.
+3. Checks ejecutados (resultado real).
+4. Riesgos pendientes (incluida la **acción manual de migración en Supabase** si aplica).
 5. Qué debe revisar visualmente el humano.
-6. Comando recomendado de commit, sin ejecutarlo.
+6. **Comando recomendado de commit/push, sin ejecutarlo.**
+7. **Mensaje para Codex** listo para pegar (apuntándolo al repo/PR; que Codex
+   lea los archivos, no pegarle diffs enormes).
 
 ---
 
-## Contexto técnico adicional
-
-### Estructura del proyecto
+## 10. Estructura del proyecto
 
 ```
 / (raíz del repo)
-├── CLAUDE.md
-├── specs/                        <- specs de features
-├── supabase/migrations/          <- migraciones SQL numeradas
-└── aurea-prototipo/aurea/        <- raíz del proyecto web (root de Vite)
-    ├── index.html                <- landing page pública
-    ├── como-funciona.html
-    ├── registro.html
-    ├── login.html
-    ├── perfil.html               <- perfil propio
-    ├── perfil-edicion.html       <- editar perfil, upload foto
-    ├── perfil-maestro.html       <- perfil público maestro
-    ├── perfil-discipulo.html     <- perfil público discípulo
-    ├── discover.html             <- explorar maestros
-    ├── solicitudes.html
-    ├── relaciones.html
-    ├── periodo-prueba.html       <- chat de relación en prueba
-    ├── mensajes.html
-    ├── historia.html             <- relaciones pasadas
-    ├── contacto.html
-    ├── privacidad.html
-    ├── dona.html                 <- pendiente, no enlazar aún
+├── CLAUDE.md                         <- este archivo
+├── specs/                            <- specs (NNN-nombre.md) + _template.md + _recomendados-pendientes.md
+├── supabase/migrations/             <- migraciones SQL numeradas (001..)
+├── vite.config.js · package.json · vercel.json   <- EN LA RAÍZ
+└── aurea-prototipo/aurea/           <- root de Vite (las páginas)
+    ├── index.html, como-funciona.html, registro.html, login.html, logout.html
+    ├── perfil.html, perfil-edicion.html, perfil-maestro.html, perfil-discipulo.html
+    ├── discover.html, solicitudes.html, relaciones.html, periodo-prueba.html
+    ├── mensajes.html, historia.html, contacto.html, privacidad.html
+    ├── dona.html                     <- oculta (sin enlaces en nav/footer); "no disponible aún"
     ├── js/
-    │   ├── supabase.js           <- cliente Supabase (lee .env)
-    │   ├── auth.js               <- requireAuth(), rol, redirección
-    │   ├── components.js         <- renderNavPublic/Auth(), renderFooter()
-    │   ├── scale.js              <- zoom 4K, tema arena/dark
-    │   ├── categorias.js         <- CATS, poblarSub(), initHashtags()
-    │   └── notif.js              <- badges de notificaciones en tiempo real
-    └── css/
-        └── global.css            <- estilos globales, variables CSS, tema arena
+    │   ├── supabase.js               <- cliente (lee .env vía import.meta.env)
+    │   ├── auth.js                   <- getSession/requireAuth/signOut + sync rol/tema
+    │   ├── components.js             <- navs, footer, renderEmptyState, escHtml, chat asistente; campana de notificaciones
+    │   ├── scale.js                  <- zoom pantallas grandes + tema arena/dark
+    │   ├── categorias.js             <- CATS (11 categorías) + hashtags + formatSolicitud/parseSolicitud
+    │   └── notif.js                  <- badge + dropdown de notificaciones (tabla notificaciones) + Realtime
+    └── css/global.css                <- estilos globales, variables, tema arena, .empty-state, campana
 ```
 
-### Secretos
+> Nota: `css/components.css`, `css/home.css` y la carpeta `aurea-prototipo/aurea/pages/`
+> fueron **eliminados** (legacy duplicado sin uso). No recrearlos.
 
-El `.env` está en `.gitignore` y NUNCA va al repo. Las variables también están configuradas en Vercel > Environment Variables.
+---
 
+## 11. Base de datos (Supabase)
+
+Tablas: `profiles`, `maestro_perfiles`, `discipulo_perfiles`, `trayectoria`,
+`solicitudes`, `relaciones`, `sesiones_prueba`, `mensajes`, `resenas`,
+`historial_discipulo`, `decisiones_consolidacion`, `resultados_consolidacion`,
+`notificaciones`. Bucket de Storage: `avatars` (versionado en migración 007).
+
+Claves de RLS/triggers ya implementadas:
+- `handle_new_user()` crea el perfil al registrarse (categorías alineadas, mig. 006).
+- **Sobre cerrado** (specs 007-009 / migs 008-010): `decisiones_consolidacion` +
+  `resultados_consolidacion`, RLS de privacidad, trigger con `FOR NO KEY UPDATE`,
+  sincroniza `relaciones.estado`; `relaciones` UPDATE bloqueado para participantes
+  desde `prueba` y para poner `consolidada` a mano.
+- **Límites del periodo** (spec 010 / mig 011): trigger en `sesiones_prueba`
+  (máx. 3, no tras vencer; fin = `iniciada_at + dias_prueba_total`).
+- **Reseñas** (spec 012 / mig 012): solo el discípulo de una relación con
+  `resultado='consolidada'`; trigger + RLS; `actualizar_reputacion()` intacto.
+- **Notificaciones** (spec 013 / mig 013): tabla + triggers en solicitudes,
+  mensajes (`autor_id`), `resultados_consolidacion` y `resenas`; `crear_notificacion`
+  SECURITY DEFINER con REVOKE.
+
+`localStorage`: `aurea-rol` (maestro|discipulo|ambos), `aurea-tema` (dark|arena).
+discípulo→arena, maestro→dark, ambos→preferencia. Pantalla 4K: `scale.js` aplica
+`zoom`; para alturas usar `--real-vh` (`window.innerHeight / zoom`).
+
+---
+
+## 12. Estado actual (al crear esta guía)
+
+- Última **spec** en repo: **014** (estados vacíos / onboarding).
+- Última **migración**: **013** (notificaciones).
+- Specs 001-014 implementadas. PR en curso al escribir esto:
+  `feat/estados-vacios` (spec 014 + lote de recomendados R1/R2/O1/O2/O3a + C1-C4).
+- Backlog (`specs/_recomendados-pendientes.md`): solo queda **O3b** = quitar las
+  columnas `relaciones.decision_*` sin uso → necesita su propia migración + spec.
+- EmailJS (claves públicas, en `contacto.html`): KEY `3hq5zg5R_U9rgRnER`,
+  SERVICE `service_pre7dnv`, TEMPLATE `template_otepyoq`.
+
+---
+
+## 13. Credenciales / secretos
+
+`.env` (NUNCA al repo; también en Vercel > Environment Variables):
 ```
-# .env (nunca al repo)
 VITE_SUPABASE_URL=...
 VITE_SUPABASE_ANON_KEY=...
 ```
-
-EmailJS (seguras, hardcodeadas en contacto.html):
-```
-EJS_KEY      = '3hq5zg5R_U9rgRnER'
-EJS_SERVICE  = 'service_pre7dnv'
-EJS_TEMPLATE = 'template_otepyoq'
-```
-
-### Sistema de roles y temas
-
-- `localStorage.aurea-rol` → `'maestro'` | `'discipulo'` | `'ambos'`
-- `localStorage.aurea-tema` → `'dark'` | `'arena'`
-- rol `discipulo` → siempre tema arena
-- rol `maestro` → siempre tema dark
-- rol `ambos` → el usuario elige; se persiste en `aurea-tema`
-
-`scale.js` aplica el tema antes del render para evitar flash.
-`auth.js` sincroniza el rol de Supabase con localStorage al cargar cada página autenticada.
-
-### Pantalla del usuario
-
-El usuario tiene pantalla 4K (3840×2160). `scale.js` aplica `zoom: 1.5` al `<html>`.
-Para alturas correctas usar:
-```js
-const zoom = parseFloat(document.documentElement.style.zoom) || 1;
-const realVh = window.innerHeight / zoom;
-```
-
-### Bugs resueltos (no repetir)
-
-| Problema | Solución |
-|---|---|
-| Logo hasheado por Vite | Plugin `copyLegacyScripts` en vite.config.js copia logo.png a dist/ |
-| Top-level await en Supabase SDK | `build.target: 'esnext'` en vite.config.js |
-| `const` duplicado en components.js | Una sola declaración por variable al inicio de la función |
-| Recursión infinita setRole → cambiarRolNav | `setRole()` llama `aureaSetTema()` directamente, no `cambiarRolNav()` |
-| FAB drag con salto de posición | Dividir por zoom: `rect.left / zoom`, `(clientX - startX) / zoom` |
-| Auth.js recargando la página en bucle | Eliminar `window.location.reload()` de auth.js |
+Repo GitHub: `positfilms-hash/Aurea`.

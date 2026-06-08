@@ -150,6 +150,7 @@
     import { requireAuth } from './js/auth.js';
     import { checkNotificaciones, refreshMsgBadge } from './js/notif.js';
 
+    (async () => {
     const session = await requireAuth();
     const uid = session.user.id;
 
@@ -188,7 +189,7 @@
           ctaHref: 'relaciones.html',
         });
       }
-      await new Promise(() => {}); // detener el resto del script sin romper la UI
+      return; // detener init tras pintar el estado vacío (estamos en una IIFE async)
     }
 
     const esMaestro = rel.maestro_id === uid;
@@ -495,6 +496,7 @@
     document.querySelectorAll('.overlay').forEach(o =>
       o.addEventListener('click', function(e) { if (e.target === this) closeModals(); })
     );
+    })();
   </script>
 </body>
 </html>
