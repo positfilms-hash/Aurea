@@ -6,6 +6,28 @@ function renderNavPublic(active=''){
   return `<nav class="nav"><a class="nav-logo" href="index.html"><img src="${LOGO_URL}" alt="Aurea"><span class="nav-wordmark">Aurea</span></a><div class="nav-links">${pages.map(p=>`<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('')}</div><div style="display:flex;align-items:center;gap:8px;"><a class="nav-cta-outline" href="login.html">Entrar</a><a class="nav-cta${active==='registro'?' active':''}" href="registro.html">Registro</a></div></nav>`;
 }
 
+// — Barra de navegación inferior móvil (spec 020) —
+// Se añade al final de renderNavAuth, así toda página autenticada la incluye.
+// Solo es visible en móvil/tablet (CSS); en desktop manda la nav superior.
+// `active` reutiliza el mismo valor que la nav superior (discover/solicitudes/
+// relaciones/mensajes/perfil). periodo-prueba pasa 'relaciones' → resalta
+// Relaciones sin ser un tab propio. historia no es tab (se llega desde Perfil).
+function renderMobileTabbar(active='') {
+  const tabs = [
+    { id:'discover',    href:'discover.html',    label:'Inicio',      icon:'🏠' },
+    { id:'solicitudes', href:'solicitudes.html', label:'Solicitudes', icon:'✉' },
+    { id:'relaciones',  href:'relaciones.html',  label:'Relaciones',  icon:'✦' },
+    { id:'mensajes',    href:'mensajes.html',    label:'Mensajes',    icon:'💬', badge:true },
+    { id:'perfil',      href:'perfil.html',      label:'Perfil',      icon:'👤' },
+  ];
+  return `<nav class="mobile-tabbar" aria-label="Navegación principal">
+    ${tabs.map(t => `<a class="tabbar-item${active===t.id?' active':''}" href="${t.href}"${active===t.id?' aria-current="page"':''}>
+      <span class="tabbar-icon">${t.icon}${t.badge?'<span id="tab-notif-badge" class="tabbar-badge" style="display:none;">0</span>':''}</span>
+      <span class="tabbar-label">${t.label}</span>
+    </a>`).join('')}
+  </nav>`;
+}
+
 function renderNavAuth(active='', user='') {
   // Estado leído de localStorage — una sola vez para todo el nav
   const rol   = localStorage.getItem('aurea-rol')  || 'maestro';
@@ -15,15 +37,13 @@ function renderNavAuth(active='', user='') {
 
   // Dropdown "Mis relaciones" — el primer item cambia según la vista activa
   const relLabel  = arena ? 'Mis maestros' : 'Mis discípulos';
-  const relActive = ['relaciones','solicitudes','historia'].includes(active);
+  const relActive = ['relaciones','solicitudes'].includes(active);
 
   const relDd = `<div class="nav-rel-wrap" id="nav-rel-wrap">
     <button class="nav-link nav-dd-btn${relActive?' active':''}" onclick="toggleRelDd()">Mis relaciones <span class="nav-dd-arrow">▾</span></button>
     <div class="nav-dd nav-dd-left" id="nav-rel-dd">
       <a class="nav-dd-item${active==='relaciones'?' active':''}" href="relaciones.html">${relLabel}</a>
       <a class="nav-dd-item${active==='solicitudes'?' active':''}" href="solicitudes.html">Mis solicitudes</a>
-      <div class="nav-dd-sep"></div>
-      <a class="nav-dd-item${active==='historia'?' active':''}" href="historia.html">Mi historia</a>
     </div>
   </div>`;
 
@@ -45,6 +65,7 @@ function renderNavAuth(active='', user='') {
   }
   ddItems += `<a class="nav-dd-item" href="perfil.html">Ver mi perfil</a>`;
   ddItems += `<a class="nav-dd-item" href="perfil-edicion.html">Editar perfil</a>`;
+  ddItems += `<a class="nav-dd-item" href="historia.html">Mi historia</a>`;
   if (rol !== 'ambos') {
     const otro = rol === 'maestro' ? 'discipulo' : 'maestro';
     const otroLabel = rol === 'maestro' ? 'Discípulo' : 'Maestro';
@@ -74,7 +95,7 @@ function renderNavAuth(active='', user='') {
       <div class="nav-dd" id="nav-perfil-dd">${ddItems}</div>
     </div>
     <a href="logout.html" class="nav-link" style="font-size:10px;letter-spacing:0.1em;color:var(--text-secondary);" title="Cerrar sesión">Salir</a>
-  </nav>`;
+  </nav>` + renderMobileTabbar(active);
 }
 
 // — Nav dropdown Mis relaciones —

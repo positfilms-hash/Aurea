@@ -76,10 +76,16 @@ async function _cargarLista() {
 }
 
 function _updateBadge(n) {
-  const b = document.getElementById('nav-notif-badge');
-  if (!b) return;
-  if (n > 0) { b.textContent = n > 9 ? '9+' : String(n); b.style.display = 'inline-flex'; }
-  else b.style.display = 'none';
+  // Campana de la nav superior + badge de la barra inferior móvil (spec 020).
+  // Mismo recuento de notificaciones en ambos sitios (consistente, no duplicado
+  // contradictorio).
+  const txt = n > 9 ? '9+' : String(n);
+  ['nav-notif-badge', 'tab-notif-badge'].forEach(id => {
+    const b = document.getElementById(id);
+    if (!b) return;
+    if (n > 0) { b.textContent = txt; b.style.display = 'inline-flex'; }
+    else b.style.display = 'none';
+  });
 }
 
 function _setupRealtime() {
