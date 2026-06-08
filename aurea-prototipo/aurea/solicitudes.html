@@ -24,6 +24,9 @@
     .col-h{font-size:8px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-ghost);}
     .list{}
     .sol-row{display:grid;grid-template-columns:4px 44px 1fr 100px 80px 200px;gap:16px;padding:13px 24px;border-bottom:0.5px solid var(--border);align-items:center;transition:background 0.15s;}
+    /* Auditoría responsive (spec 016): en móvil la cabecera de columnas no aplica
+       y se reducen gap/padding; la lista mantiene scroll-x interno (spec 017). */
+    @media (max-width: 599px) { .col-header{display:none;} .sol-row{gap:8px;padding:13px 14px;} }
     .sol-row:hover{background:var(--night-mid);}
     .ind{width:4px;border-radius:100px;flex-shrink:0;align-self:stretch;}
     .ind.nueva{background:var(--gold);}
