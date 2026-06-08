@@ -110,6 +110,24 @@ insertar por API saltándose el frontend.
 
 ---
 
+## Revisión de Codex (pre-merge)
+
+- **Bloqueante — carrera en el límite de 3 sesiones:** resuelto. El trigger hace
+  `perform 1 from relaciones ... for no key update` antes de contar, serializando
+  por relación (mismo patrón que el sobre cerrado). `FOR NO KEY UPDATE` es
+  compatible con el `FOR KEY SHARE` del FK.
+- **Bloqueante — `programada_at` posterior al fin:** resuelto. Si
+  `new.programada_at > iniciada_at + dias_prueba_total`, se rechaza (en insert y
+  update), de modo que no se puede programar una sesión fuera del periodo.
+- **Recomendado — cubrir UPDATE:** el trigger pasa a `before insert or update`.
+  En UPDATE: se valida `programada_at` y el conteo de 3 **excluyendo la propia
+  fila** (cubre mover una sesión a otra relación); no se bloquea por `now()`/estado
+  para no impedir un update legítimo de otros campos.
+- **Recomendado (2ª ronda) — `completada_at > fin`:** resuelto. Igual que
+  `programada_at`, se rechaza marcar una sesión como completada con fecha
+  posterior al fin del periodo. Así ninguna sesión (programada ni realizada)
+  cae fuera de los 30 días.
+
 ## Notas / fuera de alcance
 
 - No se implementa calendario ni videollamadas reales: solo el cupo registrado.
