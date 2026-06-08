@@ -26,26 +26,35 @@
     .list-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;flex-shrink:0;border-bottom:0.5px solid var(--border);}
     .list-title{font-size:10px;font-weight:300;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-faint);}
     .sort-select{font-size:10px;color:var(--text-muted);background:var(--night-mid);border:0.5px solid var(--border);border-radius:4px;padding:4px 8px;outline:none;cursor:pointer;}
-    .cards-wrap{padding:14px 20px;}
-    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
-    .mcard{background:var(--night-mid);border:0.5px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color 0.18s;}
-    .mcard:hover{border-color:var(--gold);}
-    .mcard-top{padding:14px 14px 10px;display:flex;align-items:center;gap:10px;border-bottom:0.5px solid var(--border);}
-    .mavatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:14px;font-weight:600;color:var(--text-primary);flex-shrink:0;}
-    .mname{font-family:var(--font-serif);font-size:14px;font-weight:500;color:var(--text-primary);line-height:1.2;}
-    .mdisc{font-size:9px;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-top:2px;}
-    .mcard-body{padding:10px 14px;}
-    .mtags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px;}
-    .mtag{font-size:8px;color:var(--text-faint);border:0.5px solid var(--border);padding:2px 6px;border-radius:100px;}
-    .mstats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
-    .mstat{text-align:center;}
-    .mstat-n{font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--gold);}
-    .mstat-l{font-size:7px;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-faint);margin-top:1px;}
-    .mcard-footer{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:0.5px solid var(--border);}
-    .mdist{font-size:9px;color:var(--text-faint);}
-    .mplaza{font-size:9px;font-weight:400;}
-    .mplaza.open{color:var(--gold);}
-    .mplaza.wait{color:var(--text-faint);}
+    /* — Cards de descubrimiento (spec 019) — */
+    .cards-wrap{padding:var(--space-5) var(--space-5) var(--space-8);}
+    .cards{display:grid;grid-template-columns:1fr;gap:var(--space-5);}
+    @media(min-width:600px){ .cards{grid-template-columns:repeat(2,1fr);} }
+    @media(min-width:1280px){ .cards{grid-template-columns:repeat(3,1fr);} }
+    .cards-state{grid-column:1/-1;padding:48px 16px;text-align:center;font-size:13px;color:var(--text-faint);}
+    .mcard{display:flex;flex-direction:column;background:var(--night-mid);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:border-color .18s,transform .18s;}
+    .mcard:hover{border-color:var(--gold);transform:translateY(-2px);}
+    .mcard-head{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-5) var(--space-5) var(--space-4);}
+    .mcard-avatar{width:60px;height:60px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--night);overflow:hidden;background:var(--gold);}
+    .mcard-avatar img{width:100%;height:100%;object-fit:cover;}
+    .mcard-id{min-width:0;}
+    .mcard-name{font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--text-primary);line-height:1.2;overflow-wrap:break-word;}
+    .mcard-cat{font-size:10px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-top:4px;line-height:1.3;}
+    .mcard-body{display:flex;flex-direction:column;gap:var(--space-3);padding:0 var(--space-5);flex:1;}
+    .mcard-disc{font-family:var(--font-serif);font-style:italic;font-size:15px;color:var(--text-secondary);}
+    .mcard-frase{font-size:13px;font-weight:300;color:var(--text-muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+    .mcard-tags{display:flex;flex-wrap:wrap;gap:5px;}
+    .mcard-tag{font-size:10px;color:var(--text-faint);border:0.5px solid var(--border);padding:3px 9px;border-radius:100px;}
+    .mcard-meta{display:flex;align-items:center;gap:var(--space-4);padding:var(--space-4) var(--space-5) 0;font-size:12px;color:var(--text-muted);}
+    .mcard-rep{color:var(--gold);font-weight:500;}
+    .mcard-actions{display:flex;gap:var(--space-2);padding:var(--space-4) var(--space-5) var(--space-5);margin-top:auto;}
+    .btn-card{flex:1;min-height:var(--tap);display:inline-flex;align-items:center;justify-content:center;text-align:center;border-radius:100px;font-size:12px;font-weight:500;letter-spacing:.05em;transition:all .18s;cursor:pointer;}
+    .btn-ver{background:var(--gold);color:var(--night);border:1px solid var(--gold);}
+    .btn-ver:hover{opacity:.88;}
+    .btn-solicitar{background:none;color:var(--gold);border:0.5px solid var(--border-gold);}
+    .btn-solicitar:hover{background:rgba(200,151,58,.08);}
+    /* En móvil las cards son protagonistas: se oculta el panel de filtros (no funcional) */
+    @media(max-width:899px){ .sidebar{display:none;} }
     .pagination{display:flex;align-items:center;justify-content:center;gap:5px;padding:12px;border-top:0.5px solid var(--border);flex-shrink:0;}
     .pg-btn{font-size:10px;font-weight:300;color:var(--text-muted);border:0.5px solid var(--border);background:none;padding:6px 11px;border-radius:4px;cursor:pointer;transition:all 0.18s;}
     .pg-btn:hover{color:var(--gold);border-color:var(--gold);}
@@ -75,7 +84,7 @@
       <div class="filter-section"><span class="section-label">Reputación mínima</span><div class="range-row"><span style="font-size:9px;color:var(--text-faint);">0</span><span class="range-val" id="rep-val">4.0</span><span style="font-size:9px;color:var(--text-faint);">5.0</span></div><input type="range" min="0" max="50" value="40" oninput="document.getElementById('rep-val').textContent=(this.value/10).toFixed(1)"></div>
     </aside>
     <div class="main-content">
-      <div class="list-header"><span class="list-title" id="list-title">Mostrando 1–12 de 28 maestros</span><select class="sort-select"><option>Ordenar: distancia</option><option>Ordenar: reputación</option><option>Ordenar: plazas</option></select></div>
+      <div class="list-header"><span class="list-title" id="list-title">Cargando maestros…</span></div>
       <div class="cards-wrap"><div class="cards" id="cards-grid"></div></div>
       <div class="pagination" id="pagination"></div>
     </div>
@@ -94,83 +103,115 @@
     import { supabase } from './js/supabase.js';
     import { checkNotificaciones } from './js/notif.js';
 
-    // Nav inteligente: público si no hay sesión, auth si la hay
+    // Nav inteligente: público si no hay sesión, auth si la hay.
+    // _puedeSolicitar: solo discípulos (o ambos) autenticados ven el CTA secundario.
+    let _puedeSolicitar = false;
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       const { data: p } = await supabase.from('profiles')
-        .select('nombre, apellido').eq('id', session.user.id).single();
+        .select('nombre, apellido, rol').eq('id', session.user.id).single();
       const ini = p ? ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?' : '?';
+      _puedeSolicitar = p?.rol === 'discipulo' || p?.rol === 'ambos';
       document.getElementById('nav-container').innerHTML = renderNavAuth('discover', ini);
       checkNotificaciones();
     } else {
       document.getElementById('nav-container').innerHTML = renderNavPublic('');
     }
 
-    // — Datos de demostración (fallback si la BD está vacía) —
-    const DEMO = [
-      {i:'RM',n:'Rafael M.',d:'Filosofía estoica',tags:['#presencial','#riguroso','#avanzado'],rep:'4.9',pl:'1',dist:'2.4 km',open:true,bg:'#C8973A'},
-      {i:'CL',n:'Carmen L.',d:'Cerámica',tags:['#presencial','#paciente','#principiantes'],rep:'4.7',pl:'2',dist:'5.1 km',open:true,bg:'#7A4F2A'},
-      {i:'AO',n:'Andrés O.',d:'Astronomía',tags:['#online','#teórico','#riguroso'],rep:'5.0',pl:'1',dist:'8.7 km',open:true,bg:'#4A3A2A'},
-      {i:'LV',n:'Lucía V.',d:'Caligrafía',tags:['#presencial','#práctico','#paciente'],rep:'4.8',pl:'3',dist:'12 km',open:true,bg:'#854F0B'},
-      {i:'ES',n:'Elena S.',d:'Medicina herbal',tags:['#presencial','#práctico','#principiantes'],rep:'4.6',pl:'2',dist:'18 km',open:true,bg:'#3B6D11'},
-      {i:'MT',n:'Miguel T.',d:'Ajedrez',tags:['#online','#intensivo','#avanzado'],rep:'4.9',pl:'—',dist:'Online',open:false,bg:'#534AB7'},
-      {i:'PR',n:'Patricia R.',d:'Pintura al óleo',tags:['#presencial','#paciente','#práctico'],rep:'4.5',pl:'1',dist:'22 km',open:true,bg:'#993556'},
-      {i:'JB',n:'Javier B.',d:'Luthería',tags:['#presencial','#riguroso','#avanzado'],rep:'5.0',pl:'—',dist:'31 km',open:false,bg:'#185FA5'},
-      {i:'MG',n:'Marta G.',d:'Tejido',tags:['#presencial','#paciente','#principiantes'],rep:'4.4',pl:'2',dist:'35 km',open:true,bg:'#0F6E56'},
-      {i:'DR',n:'David R.',d:'Fotografía analógica',tags:['#presencial','#práctico','#avanzado'],rep:'4.7',pl:'1',dist:'38 km',open:true,bg:'#712B13'},
-      {i:'AI',n:'Ana I.',d:'Encuadernación',tags:['#presencial','#teórico','#principiantes'],rep:'4.3',pl:'3',dist:'44 km',open:true,bg:'#3C3489'},
-      {i:'PF',n:'Pedro F.',d:'Meditación zen',tags:['#online','#paciente','#principiantes'],rep:'4.8',pl:'2',dist:'Online',open:true,bg:'#633806'},
-      {i:'SV',n:'Sara V.',d:'Estoicismo aplicado',tags:['#online','#teórico','#avanzado'],rep:'4.6',pl:'1',dist:'Online',open:true,bg:'#3B6D11'},
-      {i:'MH',n:'Marcos H.',d:'Carpintería',tags:['#presencial','#práctico','#principiantes'],rep:'4.5',pl:'2',dist:'52 km',open:true,bg:'#854F0B'},
-      {i:'IT',n:'Isabel T.',d:'Lengua griega',tags:['#online','#riguroso','#avanzado'],rep:'4.9',pl:'1',dist:'Online',open:true,bg:'#534AB7'},
-      {i:'RN',n:'Roberto N.',d:'Artes marciales',tags:['#presencial','#intensivo','#avanzado'],rep:'4.7',pl:'—',dist:'61 km',open:false,bg:'#993C1D'},
-      {i:'BM',n:'Beatriz M.',d:'Cocina tradicional',tags:['#presencial','#práctico','#principiantes'],rep:'4.4',pl:'3',dist:'67 km',open:true,bg:'#7A4F2A'},
-      {i:'FG',n:'Fernando G.',d:'Astronomía',tags:['#online','#teórico','#principiantes'],rep:'4.2',pl:'2',dist:'Online',open:true,bg:'#185FA5'},
-      {i:'NC',n:'Nuria C.',d:'Pintura acuarela',tags:['#presencial','#paciente','#principiantes'],rep:'4.6',pl:'1',dist:'74 km',open:true,bg:'#D4537E'},
-      {i:'AL',n:'Alberto L.',d:'Filosofía budista',tags:['#online','#teórico','#avanzado'],rep:'4.8',pl:'2',dist:'Online',open:true,bg:'#0F6E56'},
-      {i:'CP',n:'Clara P.',d:'Vitral',tags:['#presencial','#práctico','#principiantes'],rep:'4.3',pl:'2',dist:'82 km',open:true,bg:'#378ADD'},
-      {i:'JM',n:'Juan M.',d:'Escultura',tags:['#presencial','#práctico','#avanzado'],rep:'4.7',pl:'1',dist:'88 km',open:true,bg:'#7A4F2A'},
-      {i:'PL',n:'Paula L.',d:'Lengua árabe',tags:['#online','#riguroso','#principiantes'],rep:'4.5',pl:'3',dist:'Online',open:true,bg:'#854F0B'},
-      {i:'MR',n:'Miguel R.',d:'Orfebrería',tags:['#presencial','#riguroso','#avanzado'],rep:'4.9',pl:'—',dist:'95 km',open:false,bg:'#C8973A'},
-      {i:'TV',n:'Teresa V.',d:'Danza flamenca',tags:['#presencial','#intensivo','#principiantes'],rep:'4.6',pl:'2',dist:'101 km',open:true,bg:'#993556'},
-      {i:'OM',n:'Óscar M.',d:'Jardinería zen',tags:['#presencial','#paciente','#principiantes'],rep:'4.4',pl:'1',dist:'112 km',open:true,bg:'#3B6D11'},
-      {i:'VR',n:'Valentina R.',d:'Astronomía árabe',tags:['#online','#teórico','#avanzado'],rep:'4.7',pl:'2',dist:'Online',open:true,bg:'#534AB7'},
-      {i:'HG',n:'Hugo G.',d:'Relojería',tags:['#presencial','#riguroso','#avanzado'],rep:'5.0',pl:'1',dist:'138 km',open:true,bg:'#185FA5'},
-    ];
 
     let ALL = [];
     const PER = 12;
     let page = 1;
 
-    // — Card HTML —
+    const grid    = document.getElementById('cards-grid');
+    const pag     = document.getElementById('pagination');
+    const titleEl = document.getElementById('list-title');
+
+    function setEstado(html, titulo) {
+      grid.innerHTML = `<div class="cards-state">${html}</div>`;
+      pag.innerHTML = '';
+      if (titulo != null) titleEl.textContent = titulo;
+    }
+
+    // — Mapear una fila de maestro a los datos de la card —
+    function mapMaestro(m) {
+      const p = m.profiles || {};
+      const nombre = (p.nombre || '').trim();
+      if (!nombre) return null;            // sin nombre visible → no se muestra card
+      const apellido = (p.apellido || '').trim();
+      const cat = (m.categoria && m.categoria !== 'Otra') ? m.categoria : '';
+      return {
+        id:           m.id,
+        nombre:       nombre + (apellido ? ' ' + apellido[0] + '.' : ''),
+        ini:          ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?',
+        categoria:    cat,
+        subcategoria: (cat && m.subcategoria) ? m.subcategoria : '',
+        disciplina:   (m.disciplina || '').trim(),
+        frase:        (p.frase || '').trim(),
+        tags:         (m.hashtags || []).slice(0, 3),
+        rep:          m.reputacion,
+        avatarUrl:    p.avatar_url || '',
+        avatarBg:     p.avatar_color,
+        abierto:      !!m.acepta_solicitudes,
+      };
+    }
+
+    // — Card HTML (todo el contenido de usuario va escapado) —
     function cardHTML(m) {
-      const plLabel = m.open ? (m.pl + ' plaza' + (m.pl !== '1' && m.pl !== '—' ? 's' : '')) : 'Lista de espera';
-      const href    = m.id ? `perfil-maestro.html?id=${m.id}` : 'perfil-maestro.html';
-      return `<div class="mcard" onclick="window.location.href='${escHtml(href)}'">
-        <div class="mcard-top">
-          <div class="mavatar" style="background:${safeColor(m.bg)};">${escHtml(m.i)}</div>
-          <div><div class="mname">${escHtml(m.n)}</div><div class="mdisc">${escHtml(m.d)}</div></div>
-        </div>
-        <div class="mcard-body">
-          <div class="mtags">${m.tags.map(t => `<span class="mtag">${escHtml(t)}</span>`).join('')}</div>
-          <div class="mstats">
-            <div class="mstat"><div class="mstat-n">${escHtml(m.rep)}</div><div class="mstat-l">Reputación</div></div>
-            <div class="mstat"><div class="mstat-n">${escHtml(m.pl)}</div><div class="mstat-l">Plazas</div></div>
+      const href = `perfil-maestro.html?id=${encodeURIComponent(m.id)}`;
+      const cat = m.categoria
+        ? (m.subcategoria ? `${escHtml(m.categoria)} › ${escHtml(m.subcategoria)}` : escHtml(m.categoria))
+        : '';
+      const avatar = m.avatarUrl
+        ? `<span class="mcard-avatar"><img src="${escHtml(m.avatarUrl)}" alt="${escHtml(m.nombre)}"></span>`
+        : `<span class="mcard-avatar" style="background:${safeColor(m.avatarBg)};">${escHtml(m.ini)}</span>`;
+      const disc  = m.disciplina ? `<div class="mcard-disc">${escHtml(m.disciplina)}</div>` : '';
+      const frase = m.frase ? `<p class="mcard-frase">${escHtml(m.frase)}</p>` : '';
+      const tags  = m.tags.length ? `<div class="mcard-tags">${m.tags.map(t => `<span class="mcard-tag">${escHtml(t)}</span>`).join('')}</div>` : '';
+      const rep   = (m.rep != null) ? `<span class="mcard-rep">★ ${Number(m.rep).toFixed(1)}</span>` : '';
+      const meta  = `<div class="mcard-meta">${rep}<span>${m.abierto ? 'Acepta solicitudes' : 'Lista de espera'}</span></div>`;
+      const solicitar = _puedeSolicitar
+        ? `<button type="button" class="btn-card btn-solicitar" onclick="event.stopPropagation();window.location.href='${href}'">Solicitar aprendizaje</button>`
+        : '';
+      return `<div class="mcard" onclick="window.location.href='${href}'">
+        <div class="mcard-head">
+          ${avatar}
+          <div class="mcard-id">
+            <div class="mcard-name">${escHtml(m.nombre)}</div>
+            ${cat ? `<div class="mcard-cat">${cat}</div>` : ''}
           </div>
-          <div class="mcard-footer"><span class="mdist">${escHtml(m.dist)}</span><span class="mplaza ${m.open ? 'open' : 'wait'}">${escHtml(plLabel)}</span></div>
+        </div>
+        <div class="mcard-body">${disc}${frase}${tags}</div>
+        ${meta}
+        <div class="mcard-actions">
+          <button type="button" class="btn-card btn-ver" onclick="event.stopPropagation();window.location.href='${href}'">Ver perfil</button>
+          ${solicitar}
         </div>
       </div>`;
     }
 
-    // — Paginación —
+    // — Estado vacío (distinto del error), según autenticación —
+    function vacio() {
+      grid.innerHTML = '<div style="grid-column:1/-1">' + renderEmptyState({
+        icon: '🔍',
+        title: 'Todavía no hay maestros disponibles',
+        body: session ? 'Puedes completar tu perfil o volver más adelante.' : 'Crea tu cuenta para empezar a explorar.',
+        ctaLabel: session ? 'Completar perfil' : 'Crear cuenta',
+        ctaHref:  session ? 'perfil-edicion.html' : 'registro.html',
+      }) + '</div>';
+      pag.innerHTML = '';
+      titleEl.textContent = 'Maestros';
+    }
+
+    // — Render + paginación —
     function renderPage(p) {
+      if (!ALL.length) { vacio(); return; }
       page = p;
       const total = ALL.length, tPgs = Math.ceil(total / PER);
       const s = (p - 1) * PER, e = Math.min(s + PER, total);
-      document.getElementById('cards-grid').innerHTML  = ALL.slice(s, e).map(cardHTML).join('');
-      document.getElementById('list-title').textContent = `Mostrando ${s + 1}–${e} de ${total} maestros`;
-      // Paginación
-      const pg = document.getElementById('pagination');
+      grid.innerHTML = ALL.slice(s, e).map(cardHTML).join('');
+      titleEl.textContent = `Mostrando ${s + 1}–${e} de ${total} maestro${total !== 1 ? 's' : ''}`;
+      if (tPgs <= 1) { pag.innerHTML = ''; return; }
       let h = `<button class="pg-btn" onclick="window._goPage(${p - 1})" ${p === 1 ? 'disabled' : ''}>←</button>`;
       for (let i = 1; i <= tPgs; i++) {
         if (i === 1 || i === tPgs || Math.abs(i - p) <= 1)
@@ -179,44 +220,26 @@
           h += `<span class="pg-info">…</span>`;
       }
       h += `<button class="pg-btn" onclick="window._goPage(${p + 1})" ${p === tPgs ? 'disabled' : ''}>→</button>`;
-      pg.innerHTML = h;
+      pag.innerHTML = h;
     }
-    window._goPage = p => renderPage(p);
+    window._goPage = p => { renderPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
-    // — Carga desde Supabase (fallback a DEMO si vacío) —
+    // — Carga desde Supabase (estados: cargando / vacío / error) —
     async function cargarMaestros() {
+      setEstado('Cargando maestros…', 'Cargando maestros…');
       try {
         const { data, error } = await supabase
           .from('maestro_perfiles')
-          .select(`id, disciplina, hashtags, acepta_solicitudes, reputacion, max_discipulos, formato,
-                   profiles (nombre, apellido, avatar_color, ubicacion)`)
+          .select(`id, disciplina, categoria, subcategoria, hashtags, acepta_solicitudes, reputacion,
+                   profiles (nombre, apellido, avatar_color, avatar_url, frase)`)
           .order('reputacion', { ascending: false, nullsFirst: false });
-
-        if (!error && data && data.length > 0) {
-          ALL = data.map(m => {
-            const p     = m.profiles;
-            const nombre  = p?.nombre  || '';
-            const apellido= p?.apellido || '';
-            return {
-              id:   m.id,
-              i:    ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '??',
-              n:    nombre + (apellido ? ' ' + apellido[0] + '.' : ''),
-              d:    m.disciplina,
-              tags: (m.hashtags || []).slice(0, 3),
-              rep:  m.reputacion != null ? Number(m.reputacion).toFixed(1) : '—',
-              pl:   m.acepta_solicitudes ? String(m.max_discipulos || 1) : '—',
-              dist: p?.ubicacion || (m.formato === 'online' ? 'Online' : '—'),
-              open: m.acepta_solicitudes,
-              bg:   p?.avatar_color || '#C8973A',
-            };
-          });
-        } else {
-          ALL = DEMO; // BD vacía → mostrar demo
-        }
-      } catch {
-        ALL = DEMO;
+        if (error) throw error;
+        ALL = (data || []).map(mapMaestro).filter(Boolean);
+        renderPage(1);
+      } catch (e) {
+        console.warn('Error cargando maestros:', e?.message || e);
+        setEstado('No hemos podido cargar los maestros ahora mismo.', 'Maestros');
       }
-      renderPage(1);
     }
 
     // — Filtros —
