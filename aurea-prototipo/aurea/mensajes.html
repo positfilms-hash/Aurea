@@ -67,8 +67,10 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     import { requireAuth } from './js/auth.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     document.getElementById('nav-container').innerHTML = renderNavAuth('mensajes');
+    checkNotificaciones();
 
     function timeAgo(ts) {
       if (!ts) return '';
