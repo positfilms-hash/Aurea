@@ -81,7 +81,7 @@
       </div>
       <div id="pd-actions" class="action-btns">
         <button class="btn-ac" onclick="window.aceptarDisc()">Aceptar solicitud</button>
-        <button class="btn-re" onclick="window.rechazarDisc()">Rechazar solicitud</button>
+        <button class="btn-re" onclick="window.rechazarDisc()">No aceptar</button>
       </div>
     </div>
     <div class="col-right">
@@ -307,7 +307,7 @@
         disciplina:   _solData?.disciplina || '',
         estado:       'prueba',
       }).select('id').single();
-      if (error) { btn.textContent = 'Error: ' + error.message; btn.disabled = false; return; }
+      if (error) { console.error('Error aceptando solicitud:', error); btn.textContent = 'No se pudo aceptar. Reintenta'; btn.disabled = false; return; }
       location.href = `periodo-prueba.html?id=${rel.id}`;
     };
 

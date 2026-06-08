@@ -121,12 +121,13 @@
       const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
+        console.error('Login error:', error);
         const msgs = {
           'Invalid login credentials': 'Correo o contraseña incorrectos.',
           'Email not confirmed':        'Confirma tu correo antes de entrar.',
           'Too many requests':          'Demasiados intentos. Espera un momento.',
         };
-        mostrarError(msgs[error.message] || ('Error: ' + error.message));
+        mostrarError(msgs[error.message] || 'No hemos podido iniciar sesión. Inténtalo de nuevo.');
         btn.disabled    = false;
         btn.textContent = 'Entrar en Aurea';
       } else {

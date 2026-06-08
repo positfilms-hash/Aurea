@@ -443,7 +443,9 @@
           msg.textContent = '✓ Foto actualizada';
           setTimeout(() => { msg.textContent = ''; }, 3000);
         } catch (err) {
-          msg.textContent = 'Error: ' + (err.message || err);
+          console.error('Error subiendo avatar:', err);
+          msg.style.color = '#E87070';
+          msg.textContent = 'No hemos podido subir la foto. Inténtalo de nuevo.';
         }
       });
     });
@@ -483,7 +485,8 @@
           window.location.href = 'index.html';
         }
       } catch (err) {
-        alert('Error al procesar la baja: ' + (err.message || err));
+        console.error('Error al procesar la baja:', err);
+        alert('No hemos podido procesar la baja ahora mismo. Inténtalo de nuevo.');
       }
     };
 
@@ -517,7 +520,7 @@
         window.location.reload();
       } catch (err) {
         console.error('Error añadiendo rol:', err);
-        btn.textContent = '✕ Error: ' + (err.message || err);
+        btn.textContent = '✕ No se pudo activar. Reintenta';
         btn.disabled = false;
       }
     };
@@ -856,7 +859,7 @@
           avEl.textContent = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
         }
 
-        btn.textContent = '✓ Guardado';
+        btn.textContent = '✓ Perfil actualizado';
         btn.style.background = 'var(--green)';
         btn.style.opacity = '1';
         btn.disabled = false;
@@ -876,7 +879,7 @@
 
       } catch (err) {
         console.error('Error al guardar:', err);
-        const msg = err?.message || err?.details || String(err);
+        const msg = 'No hemos podido guardar los cambios. Inténtalo de nuevo.';
         btn.textContent = '✕ Error';
         btn.title = msg;
         btn.style.background = 'var(--red)';
