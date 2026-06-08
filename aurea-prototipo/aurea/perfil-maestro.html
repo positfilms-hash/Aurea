@@ -243,7 +243,8 @@
           motivacion:   texto,
         });
         if (error) {
-          err.textContent = 'No se pudo enviar la solicitud: ' + error.message;
+          console.error('Error enviando solicitud:', error);
+          err.textContent = 'No hemos podido enviar tu solicitud ahora mismo. Inténtalo de nuevo.';
           err.classList.add('show');
           return;
         }

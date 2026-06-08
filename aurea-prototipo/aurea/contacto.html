@@ -147,7 +147,8 @@
         btn.style.display = 'none';
         document.getElementById('success').classList.add('show');
       } catch (err) {
-        mostrarError('Error al enviar. Inténtalo de nuevo o escríbenos directamente.');
+        console.error('EmailJS error:', err);
+        mostrarError('No hemos podido enviar el mensaje ahora mismo. Inténtalo de nuevo o escríbenos a info.aureacatena@gmail.com.');
         btn.disabled    = false;
         btn.textContent = 'Enviar mensaje';
       }

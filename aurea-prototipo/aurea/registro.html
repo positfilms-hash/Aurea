@@ -218,15 +218,16 @@
         }
 
       } catch (err) {
+        console.error('Registro error:', err);
         const msgs = {
           'User already registered':                          'Este usuario ya tiene cuenta. Prueba a <a href="login.html" style="color:var(--gold);">iniciar sesión</a>.',
           'Password should be at least 6 characters':         'La contraseña debe tener al menos 8 caracteres.',
           'Unable to validate email address: invalid format': 'El correo electrónico no es válido.',
           'Invalid email':                                    'El correo electrónico no es válido.',
         };
-        mostrarError(msgs[err.message] || ('Error: ' + err.message), !!msgs[err.message]);
+        mostrarError(msgs[err.message] || 'No hemos podido crear tu cuenta. Inténtalo de nuevo.', !!msgs[err.message]);
         btn.disabled    = false;
-        btn.textContent = 'Entrar en Aurea';
+        btn.textContent = 'Crear cuenta';
       }
     }
 

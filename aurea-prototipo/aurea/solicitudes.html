@@ -155,7 +155,7 @@
       if (sol.estado === 'rechazada') return `<span style="font-size:10px;font-style:italic;font-family:var(--font-serif);color:var(--red);">Solicitud rechazada</span>`;
       return `<button class="btn-small" onclick="verPerfil('${sol.discipulo_id}','${sol.id}')">Ver perfil</button>
               <button class="btn-ac" onclick="aceptar('${sol.id}')">Aceptar</button>
-              <button class="btn-re" onclick="rechazar('${sol.id}')">✕</button>`;
+              <button class="btn-re" onclick="rechazar('${sol.id}')">No aceptar</button>`;
     }
 
     function renderLista() {
