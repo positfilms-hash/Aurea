@@ -51,14 +51,14 @@ begin
   -- 3) Perfil principal. CASCADE borra todo lo personal restante (ver cabecera).
   delete from public.profiles where id = v_user_id;
 
-  -- 4) Usuario de Auth. Si el entorno no permitiera borrar auth.users desde esta
-  --    función, los datos personales (paso 3) YA están borrados y no se revierte;
-  --    se deja un warning para activar el fallback (Edge Function service_role).
-  begin
-    delete from auth.users where id = v_user_id;
-  exception when others then
-    raise warning 'eliminar_mi_cuenta: no se pudo borrar auth.users (%). Datos personales ya borrados.', sqlerrm;
-  end;
+  -- 4) Usuario de Auth. NO se captura el error a propósito: si el entorno no
+  --    permitiera borrar auth.users desde esta función, la excepción se propaga
+  --    y TODA la transacción (pasos 1–3 incluidos) se revierte. Así la operación
+  --    es atómica: o se borra todo (datos + auth) o no se borra nada, y el
+  --    cliente recibe un error real (sin falsos "cuenta eliminada"). Si esto
+  --    fallara en producción, se implementa el fallback con Edge Function
+  --    (service_role) — ver spec 023.
+  delete from auth.users where id = v_user_id;
 end;
 $$;
 

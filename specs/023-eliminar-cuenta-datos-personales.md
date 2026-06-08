@@ -47,16 +47,21 @@ solo puede borrarse a sí mismo. `revoke` a public/anon; `grant execute` solo a
 1. Borra `relaciones` del usuario (desbloquea el RESTRICT y cascada lo asociado).
 2. Borra sus objetos de avatar en `storage.objects` (`avatars/{uid}/...`).
 3. Borra `profiles` → **CASCADE** elimina todo lo personal restante.
-4. Borra `auth.users` dentro de un bloque `exception` por si el entorno no lo
-   permite: en ese caso los datos personales (paso 3) ya están borrados y no se
-   revierte; queda un `warning` para activar el fallback.
+4. Borra `auth.users`. **El error NO se captura a propósito** (atómico): si el
+   entorno no permite borrar `auth.users` desde la función, la excepción se
+   propaga y **toda la transacción se revierte** (pasos 1–3 incluidos). Así o se
+   borra todo (datos + auth) o no se borra nada, y el cliente recibe un error
+   real — nunca un falso "cuenta eliminada" con un usuario de Auth huérfano y un
+   login roto. (Corrige el bloqueante de Codex: antes se tragaba el error y se
+   reportaba éxito parcial como total.)
 
 **Fallback de `auth.users`:** borrar `auth.users` desde una función
 `SECURITY DEFINER` (propiedad del rol de la migración) suele funcionar en
-Supabase. **El humano debe probarlo en Studio.** Si fallara, la alternativa
-segura es una **Edge Function `delete-account` con `service_role`** (nunca
-exponer `service_role` en el cliente). Aun así, los datos personales se borran
-igualmente porque el paso 3 va antes.
+Supabase. **El humano DEBE probarlo en Studio con una cuenta de prueba antes de
+mergear.** Si el borrado de `auth.users` falla, la RPC devolverá error (nada se
+borra) y se implementará el fallback: **Edge Function `delete-account` con
+`service_role`** que use la Admin API (`auth.admin.deleteUser`) — nunca exponer
+`service_role` en el cliente. (Mini-spec aparte si hace falta.)
 
 ## Frontend (`perfil-edicion.html`, pestaña Cuenta)
 
