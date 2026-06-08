@@ -12,6 +12,7 @@ Regla: guardar salvo que sea fundamental; resolver cada 2-3 specs o al tocar un 
 | C1 | spec 014 (Codex) | `periodo-prueba.html` usaba `await new Promise(()=>{})` para parar el módulo. | ✅ hecho (IIFE async + `return`) |
 | C2 | spec 014 (Codex) | `perfil-maestro.html` conservaba la demo de Rafael si no hay `?id=` o falla la carga. | ✅ hecho (estado "maestro no encontrado") |
 | C3 | spec 014 (Codex) | `relaciones.html` mostraba filas demo mientras cargaba. | ✅ hecho (estado "Cargando…" al inicio) |
+| C2b/C3b | spec 014 (Codex 2ª ronda) | El **HTML estático** de `perfil-maestro.html` y `relaciones.html` seguía trayendo los datos demo (flash / fail-open si el JS se cuelga). | ✅ hecho (HTML inicial neutro en "Cargando…", sin datos ficticios) |
 | C4 | spec 014 (Codex) | `renderEmptyState` no escapaba `ctaHref`/`secHref`/`icon`. | ✅ hecho (hrefs escapados; `icon` documentado como HTML de confianza) |
 | O1 | spec 011 | `perfil-discipulo.html` mostraba stat pública "Abandonos". | ✅ hecho (retirada) |
 | O2 | spec 005 | `privacidad.html` mencionaba pagos de donaciones (Stripe/PayPal/Bizum). | ✅ hecho (texto neutro: gratuito, sin pagos) |
