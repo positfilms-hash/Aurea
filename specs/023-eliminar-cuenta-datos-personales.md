@@ -45,9 +45,16 @@ solo puede borrarse a sí mismo. `revoke` a public/anon; `grant execute` solo a
 `authenticated`. Pasos:
 
 1. Borra `relaciones` del usuario (desbloquea el RESTRICT y cascada lo asociado).
-2. Borra sus objetos de avatar en `storage.objects` (`avatars/{uid}/...`).
-3. Borra `profiles` → **CASCADE** elimina todo lo personal restante.
-4. Borra `auth.users`. **El error NO se captura a propósito** (atómico): si el
+2. Borra `profiles` → **CASCADE** elimina todo lo personal restante.
+3. Borra `auth.users`.
+
+**Avatar:** NO se borra en SQL. Supabase **bloquea el `DELETE` directo sobre
+`storage.objects`** (trigger `storage.protect_delete`: "Use the Storage API
+instead"). Por eso el **frontend** borra el avatar vía Storage API
+(`supabase.storage.from('avatars').remove([...])`) **antes** del RPC; como el
+perfil se elimina, nada vuelve a referenciar ese avatar. (Si el borrado del
+fichero fallara, queda huérfano en el bucket pero sin referencia; limpieza
+opcional futura.) **El error NO se captura a propósito** (atómico): si el
    entorno no permite borrar `auth.users` desde la función, la excepción se
    propaga y **toda la transacción se revierte** (pasos 1–3 incluidos). Así o se
    borra todo (datos + auth) o no se borra nada, y el cliente recibe un error
