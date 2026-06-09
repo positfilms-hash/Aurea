@@ -53,8 +53,15 @@
     .btn-ver:hover{opacity:.88;}
     .btn-solicitar{background:none;color:var(--gold);border:0.5px solid var(--border-gold);}
     .btn-solicitar:hover{background:rgba(200,151,58,.08);}
-    /* En móvil las cards son protagonistas: se oculta el panel de filtros (no funcional) */
-    @media(max-width:899px){ .sidebar{display:none;} }
+    /* — Filtros (spec 024) — */
+    .filter-row{display:flex;flex-direction:column;}
+    /* En móvil el panel de filtros pasa a una barra compacta arriba (no se oculta). */
+    @media(max-width:899px){
+      .sidebar{padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-3);}
+      .filter-section{margin-bottom:0;}
+      .filter-row{flex-direction:row;gap:var(--space-3);}
+      .filter-row .filter-section{flex:1;min-width:0;}
+    }
     .pagination{display:flex;align-items:center;justify-content:center;gap:5px;padding:12px;border-top:0.5px solid var(--border);flex-shrink:0;}
     .pg-btn{font-size:10px;font-weight:300;color:var(--text-muted);border:0.5px solid var(--border);background:none;padding:6px 11px;border-radius:4px;cursor:pointer;transition:all 0.18s;}
     .pg-btn:hover{color:var(--gold);border-color:var(--gold);}
@@ -67,21 +74,24 @@
   <div id="nav-container"></div>
   <div class="layout">
     <aside class="sidebar">
-      <div class="filter-section"><span class="section-label">Buscar</span><input class="field-input" type="text" placeholder="Nombre, disciplina…" style="font-size:11px;padding:7px 10px;"></div>
-      <div class="filter-divider"></div>
-      <div class="filter-section"><span class="section-label">Categoría</span><div class="filter-chips"><span class="chip on">Todas</span><span class="chip">Filosofía</span><span class="chip">Artes</span><span class="chip">Oficios</span><span class="chip">Deportes</span><span class="chip">Espiritualidad</span><span class="chip">Ciencia</span><span class="chip">Lenguas</span></div></div>
-      <div class="filter-divider"></div>
-      <div class="filter-section"><span class="section-label">Subcategoría</span><div class="filter-chips"><span class="chip on">Todas</span><span class="chip">Estoicismo</span><span class="chip">Budismo</span><span class="chip">Pintura</span><span class="chip">Cerámica</span><span class="chip">Carpintería</span><span class="chip">Luthería</span><span class="chip">Caligrafía</span></div></div>
-      <div class="filter-divider"></div>
-      <div class="filter-section"><span class="section-label">Hashtags</span><div class="hash-input-wrap"><span class="hash-prefix">#</span><input class="hash-input" type="text" placeholder="paciente, online…" id="hash-in"></div><div class="filter-chips" id="hash-chips"><span class="chip on">#presencial</span><span class="chip">#online</span><span class="chip">#principiantes</span><span class="chip">#avanzado</span><span class="chip">#paciente</span><span class="chip">#riguroso</span></div></div>
-      <div class="filter-divider"></div>
-      <div class="filter-section"><span class="section-label">Distancia máxima</span><div class="range-row"><span style="font-size:9px;color:var(--text-faint);">0 km</span><span class="range-val" id="dist-val">50 km</span><span style="font-size:9px;color:var(--text-faint);">200 km</span></div><input type="range" min="0" max="200" value="50" oninput="document.getElementById('dist-val').textContent=this.value+' km'"></div>
-      <div class="filter-divider"></div>
-      <div class="filter-section"><span class="section-label">Formato</span><div class="toggle-row"><span class="toggle-label">Presencial</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div><div class="toggle-row"><span class="toggle-label">Online</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div></div>
-      <div class="filter-divider"></div>
-      <div class="filter-section"><span class="section-label">Disponibilidad</span><div class="filter-chips"><span class="chip on">Con plazas</span><span class="chip">Lista espera</span><span class="chip">Todos</span></div></div>
-      <div class="filter-divider"></div>
-      <div class="filter-section"><span class="section-label">Reputación mínima</span><div class="range-row"><span style="font-size:9px;color:var(--text-faint);">0</span><span class="range-val" id="rep-val">4.0</span><span style="font-size:9px;color:var(--text-faint);">5.0</span></div><input type="range" min="0" max="50" value="40" oninput="document.getElementById('rep-val').textContent=(this.value/10).toFixed(1)"></div>
+      <div class="filter-section">
+        <span class="section-label">Buscar</span>
+        <input id="f-search" class="field-input" type="text" autocomplete="off"
+               placeholder="Buscar por maestro, oficio, tema o inquietud" style="font-size:12px;">
+      </div>
+      <div class="filter-row">
+        <div class="filter-section">
+          <span class="section-label">Categoría</span>
+          <select id="f-categoria" class="field-input" style="cursor:pointer;"></select>
+        </div>
+        <div class="filter-section">
+          <span class="section-label">Subcategoría</span>
+          <select id="f-subcategoria" class="field-input" style="cursor:pointer;" disabled>
+            <option value="">Todas</option>
+          </select>
+        </div>
+      </div>
+      <button id="btn-limpiar" type="button" class="btn-secondary" style="width:100%;">Limpiar filtros</button>
     </aside>
     <div class="main-content">
       <div class="list-header"><span class="list-title" id="list-title">Cargando maestros…</span></div>
@@ -102,6 +112,7 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     import { checkNotificaciones } from './js/notif.js';
+    import { CATS } from './js/categorias.js';
 
     // Nav inteligente: público si no hay sesión, auth si la hay.
     // _puedeSolicitar: solo discípulos (o ambos) autenticados ven el CTA secundario.
@@ -119,13 +130,16 @@
     }
 
 
-    let ALL = [];
+    let ALL = [], FILTERED = [];
     const PER = 12;
     let page = 1;
 
-    const grid    = document.getElementById('cards-grid');
-    const pag     = document.getElementById('pagination');
-    const titleEl = document.getElementById('list-title');
+    const grid     = document.getElementById('cards-grid');
+    const pag      = document.getElementById('pagination');
+    const titleEl  = document.getElementById('list-title');
+    const searchEl = document.getElementById('f-search');
+    const catEl    = document.getElementById('f-categoria');
+    const subEl    = document.getElementById('f-subcategoria');
 
     function setEstado(html, titulo) {
       grid.innerHTML = `<div class="cards-state">${html}</div>`;
@@ -139,13 +153,12 @@
       const nombre = (p.nombre || '').trim();
       if (!nombre) return null;            // sin nombre visible → no se muestra card
       const apellido = (p.apellido || '').trim();
-      const cat = (m.categoria && m.categoria !== 'Otra') ? m.categoria : '';
       return {
         id:           m.id,
         nombre:       nombre + (apellido ? ' ' + apellido[0] + '.' : ''),
         ini:          ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?',
-        categoria:    cat,
-        subcategoria: (cat && m.subcategoria) ? m.subcategoria : '',
+        categoria:    (m.categoria || '').trim(),     // crudo (incl. 'Otra') para filtrar
+        subcategoria: (m.subcategoria || '').trim(),
         disciplina:   (m.disciplina || '').trim(),
         frase:        (p.frase || '').trim(),
         tags:         (m.hashtags || []).slice(0, 3),
@@ -159,7 +172,9 @@
     // — Card HTML (todo el contenido de usuario va escapado) —
     function cardHTML(m) {
       const href = `perfil-maestro.html?id=${encodeURIComponent(m.id)}`;
-      const cat = m.categoria
+      // 'Otra' es el valor por defecto de perfiles sin categoría real → no se muestra.
+      const showCat = m.categoria && m.categoria !== 'Otra';
+      const cat = showCat
         ? (m.subcategoria ? `${escHtml(m.categoria)} › ${escHtml(m.subcategoria)}` : escHtml(m.categoria))
         : '';
       const avatar = m.avatarUrl
@@ -203,13 +218,30 @@
       titleEl.textContent = 'Maestros';
     }
 
-    // — Render + paginación —
+    // — Estado "sin resultados por filtros" (distinto de "no hay maestros") —
+    function sinResultados() {
+      grid.innerHTML = '<div style="grid-column:1/-1">' + renderEmptyState({
+        icon: '🔍',
+        title: 'No hemos encontrado maestros con esos filtros',
+        body: 'Prueba con otra categoría o términos de búsqueda distintos.',
+        ctaLabel: 'Limpiar filtros',
+        ctaHref: '#',
+      }) + '</div>';
+      // El CTA del estado vacío es un enlace; lo reconvertimos a "limpiar filtros".
+      const cta = grid.querySelector('.empty-state .btn-primary');
+      if (cta) cta.onclick = (ev) => { ev.preventDefault(); limpiarFiltros(); };
+      pag.innerHTML = '';
+      titleEl.textContent = 'Sin resultados';
+    }
+
+    // — Render + paginación (sobre la lista FILTRADA) —
     function renderPage(p) {
-      if (!ALL.length) { vacio(); return; }
+      if (!ALL.length) { vacio(); return; }            // no hay maestros en absoluto
+      if (!FILTERED.length) { sinResultados(); return; } // filtros sin resultados
       page = p;
-      const total = ALL.length, tPgs = Math.ceil(total / PER);
+      const total = FILTERED.length, tPgs = Math.ceil(total / PER);
       const s = (p - 1) * PER, e = Math.min(s + PER, total);
-      grid.innerHTML = ALL.slice(s, e).map(cardHTML).join('');
+      grid.innerHTML = FILTERED.slice(s, e).map(cardHTML).join('');
       titleEl.textContent = `Mostrando ${s + 1}–${e} de ${total} maestro${total !== 1 ? 's' : ''}`;
       if (tPgs <= 1) { pag.innerHTML = ''; return; }
       let h = `<button class="pg-btn" onclick="window._goPage(${p - 1})" ${p === 1 ? 'disabled' : ''}>←</button>`;
@@ -235,32 +267,61 @@
           .order('reputacion', { ascending: false, nullsFirst: false });
         if (error) throw error;
         ALL = (data || []).map(mapMaestro).filter(Boolean);
-        renderPage(1);
+        aplicarFiltros();
       } catch (e) {
         console.warn('Error cargando maestros:', e?.message || e);
         setEstado('No hemos podido cargar los maestros ahora mismo.', 'Maestros');
       }
     }
 
-    // — Filtros —
-    document.querySelectorAll('.filter-chips .chip').forEach(c => {
-      c.addEventListener('click', function() {
-        const isHash = this.parentElement.id === 'hash-chips';
-        if (isHash) this.classList.toggle('on');
-        else { this.parentElement.querySelectorAll('.chip').forEach(s => s.classList.remove('on')); this.classList.add('on'); }
-      });
-    });
-    document.getElementById('hash-in').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && this.value.trim()) {
-        const v = this.value.trim().replace(/^#/, '');
-        const c = document.createElement('span');
-        c.className = 'chip on'; c.textContent = '#' + v;
-        c.addEventListener('click', function() { this.classList.toggle('on'); });
-        document.getElementById('hash-chips').appendChild(c);
-        this.value = '';
-      }
-    });
+    // ── Filtros (spec 024) ──────────────────────────────────────────────────
+    // Categorías: lista canónica de categorias.js + 'Otra'.
+    catEl.innerHTML =
+      '<option value="">Todas las categorías</option>' +
+      [...Object.keys(CATS), 'Otra'].map(c => `<option value="${c}">${c}</option>`).join('');
 
+    // Subcategoría: depende de la categoría; deshabilitada si no aplica.
+    function poblarSubcategorias(cat) {
+      const subs = CATS[cat] || [];
+      subEl.innerHTML = '<option value="">Todas</option>' +
+        subs.map(s => `<option value="${s}">${s}</option>`).join('');
+      subEl.disabled = subs.length === 0;   // 'Otra'/sin categoría → sin subcategorías
+      subEl.value = '';
+    }
+
+    // Filtra ALL en cliente (volumen pequeño) y repinta.
+    function aplicarFiltros() {
+      const cat = catEl.value;
+      const sub = subEl.value;
+      const q   = (searchEl.value || '').trim().toLowerCase();
+      FILTERED = ALL.filter(m => {
+        if (cat && m.categoria !== cat) return false;
+        if (sub && m.subcategoria !== sub) return false;
+        if (q) {
+          const heno = [m.nombre, m.disciplina, m.frase, m.categoria, m.subcategoria, (m.tags || []).join(' ')]
+            .join(' ').toLowerCase();
+          if (!heno.includes(q)) return false;
+        }
+        return true;
+      });
+      renderPage(1);
+    }
+
+    window.limpiarFiltros = function() {
+      searchEl.value = '';
+      catEl.value = '';
+      poblarSubcategorias('');
+      aplicarFiltros();
+    };
+
+    // Eventos
+    let _t = null;
+    searchEl.addEventListener('input', () => { clearTimeout(_t); _t = setTimeout(aplicarFiltros, 180); });
+    catEl.addEventListener('change', () => { poblarSubcategorias(catEl.value); aplicarFiltros(); });
+    subEl.addEventListener('change', aplicarFiltros);
+    document.getElementById('btn-limpiar').addEventListener('click', limpiarFiltros);
+
+    poblarSubcategorias('');
     cargarMaestros();
   </script>
 </body>
