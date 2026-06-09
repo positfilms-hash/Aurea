@@ -20,7 +20,10 @@ Regla: guardar salvo que sea fundamental; resolver cada 2-3 specs o al tocar un 
 
 ## Pendiente
 
-_Sin pendientes._
+| # | Origen | Recomendado | Estado |
+|---|--------|-------------|--------|
+| R3 | spec 026 (Codex) | `discover.html`: los estados vacíos específicos ("Todavía no hay maestros en esta categoría" / "No hemos encontrado maestros en esta subcategoría") no contemplan la búsqueda libre activa: si hay categoría/subcategoría con maestros pero la búsqueda deja `FILTERED` a 0, el copy es engañoso. Priorizar el estado "sin resultados con esos filtros" cuando `searchEl.value.trim()` no esté vacío, o ajustar el copy para mencionar la búsqueda. | ⏳ pendiente |
+| R4 | spec 026 (Codex) | `discover.html` (~línea 201): blindar `Number(m.rep).toFixed(1)` con `Number.isFinite(Number(m.rep))` por si `reputacion` no fuera numérico (menor; Supabase lo guarda numérico). | ⏳ pendiente |
 
 ## Resuelto fuera de lote
 
