@@ -1,255 +1,364 @@
-# CLAUDE.md — Aurea
+# CLAUDE.md
 
-Guía maestra para Claude (y cualquier IA que programe en este repo).
-**Léela entera antes de tocar nada.** Resume qué es el proyecto, el flujo de
-trabajo con varias IAs, las reglas críticas y las lecciones aprendidas para no
-repetir errores.
+**Léelo entero antes de tocar nada.**
+
+Este archivo es la guía operativa de Claude Code para trabajar en Aurea. Su
+objetivo es que una sesión nueva pueda continuar el proyecto sin depender del
+contexto de chats anteriores.
 
 ---
 
 ## 1. Qué es Aurea
 
-Plataforma española que conecta **maestros** y **discípulos** para relaciones de
-aprendizaje **continuas** (no es una plataforma de cursos ni de lecciones grabadas).
+Aurea es una plataforma española, publicada en `aureacatena.com`, que conecta
+**maestros** y **discípulos** para relaciones de aprendizaje **continuas**.
 
-- Producción: **https://www.aureacatena.com**
-- Deploy automático en **Vercel** al hacer push/merge a `main`.
-- No hay usuarios reales todavía (solo cuentas de prueba) → las migraciones
-  pueden ser pragmáticas, pero **nunca destructivas de datos**.
+No es una plataforma de cursos, lecciones grabadas ni compra de clases sueltas.
+El centro del producto es la **relación humana** de aprendizaje.
 
-Flujo de producto: registro → completar perfil → explorar maestros (discover) →
-enviar solicitud → el maestro acepta → **periodo de prueba** (30 días, hasta 3
-sesiones, chat) → **consolidación en sobre cerrado** (ambos deciden en privado) →
-historial / reseñas.
+El deploy se hace automáticamente en **Vercel** al mergear a `main`.
+
+**No hay usuarios reales todavía**, solo cuentas de prueba. Esto permite
+migraciones pragmáticas, pero **nunca destructivas sin intención explícita**.
 
 ---
 
-## 2. Stack
+## 2. Stack técnico
 
-- Frontend: **HTML/CSS/JS vanilla** (sin frameworks).
-- Build: **Vite 6** (multipágina). `vite.config.js`, `package.json`, `vercel.json`
-  están en la **raíz del repo** (no en la subcarpeta).
-- Datos: **Supabase** (PostgreSQL + Auth + Realtime + Storage).
-- Email del formulario de contacto: **EmailJS** (sin backend; claves públicas hardcodeadas).
-- Moderación de imágenes: **NSFWJS** (en cliente).
+- Frontend: **HTML, CSS y JavaScript vanilla** (sin frameworks).
+- Build: **Vite 6** multipágina.
+- Backend/datos: **Supabase** (PostgreSQL, Auth, Realtime, Storage).
+- Deploy: **Vercel**.
+- Contacto: **EmailJS** (sin backend; claves públicas hardcodeadas).
+- Moderación de imágenes: **NSFWJS** en cliente.
+
+No añadir frameworks ni dependencias sin permiso explícito.
 
 ---
 
-## 3. Roles del equipo (humano + IAs)
+## 3. Estructura del repo
+
+Repo GitHub: **`positfilms-hash/Aurea`**
 
 ```
-ChatGPT  → piensa producto, detecta riesgos y ESCRIBE las specs.
-Claude   → PROGRAMA siguiendo specs aprobadas (eso eres tú).
-Codex    → REVISA los PRs (bloqueante / recomendado / menor).
-GitHub   → historial y fuente de verdad.
-Vercel   → deploy automático al mergear a main.
-Supabase → las migraciones SQL las ejecuta EL HUMANO a mano (Claude no tiene acceso).
-Humano   → aprueba y hace los merges; ejecuta las migraciones en Supabase.
+/
+├── CLAUDE.md
+├── specs/                       # specs NNN-nombre.md + _recomendados-pendientes.md + _template.md
+├── supabase/migrations/         # migraciones SQL numeradas (001..)
+├── vite.config.js · package.json · vercel.json   # EN LA RAÍZ
+└── aurea-prototipo/aurea/       # la web (root de Vite)
+    ├── *.html
+    ├── js/  (supabase.js, auth.js, components.js, scale.js, categorias.js, notif.js)
+    └── css/global.css
 ```
 
----
-
-## 4. El ciclo de trabajo (IMPORTANTE — síguelo siempre)
-
-1. **ChatGPT entrega una spec** (el humano te la pega). Si toca Supabase, debe
-   describir tablas/columnas/RLS/migración/riesgos.
-2. **Claude implementa**:
-   - Crea **una rama nueva** desde `main` actualizado (nunca trabajes en `main`).
-   - Verifica el esquema/código real **antes** de escribir (ver §7, lección clave).
-   - Implementa solo lo de la spec. Guarda la spec en `specs/NNN-nombre.md`.
-   - Ejecuta los checks (§6).
-   - Entrega el **resumen final obligatorio** (§9) + un **"Mensaje para Codex"**
-     listo para pegar.
-3. **El humano** ejecuta el commit/push que le sugieres y abre el PR.
-4. **Codex revisa el PR**. El humano te pega los hallazgos.
-5. **Claude corrige en la MISMA rama, ANTES del merge** (lección dura, §7).
-   - **Bloqueantes**: se arreglan siempre.
-   - **Recomendados/menores**: ver regla de lotes (§5).
-6. Cuando Codex queda limpio (o solo "menor" diferido) → **el humano mergea** y,
-   si hay migración, **la ejecuta en Supabase Studio**.
-
-> El humano hace los commits/push/merge. Tú preparas la rama y das el comando
-> exacto, **sin ejecutarlo** (salvo operaciones de git de lectura/diagnóstico).
+No recrear legacy eliminado: `css/components.css`, `css/home.css`, carpeta
+`aurea-prototipo/aurea/pages/`.
 
 ---
 
-## 5. Regla de lotes para recomendados de Codex
+## 4. Roles del equipo
 
-Cuando Codex **no da ningún bloqueante**, **guarda** los recomendados en
-`specs/_recomendados-pendientes.md` y hazlos **en lote** (cada 2-3 specs o al
-corregir un bloqueante), **salvo que veas uno fundamental** (p. ej. fuga de datos
-ficticios, privacidad, seguridad) → ese se hace en el momento.
+- **ChatGPT** → piensa producto, detecta riesgos y **escribe las specs**. No
+  programa. Si una spec toca Supabase, describe tablas/columnas/RLS/migración/riesgos.
+- **Claude (tú)** → **PROGRAMA** siguiendo specs aprobadas. No decide prioridades
+  de producto por su cuenta.
+- **Codex** → **REVISA los PRs**. Clasifica: bloqueante / recomendado / menor.
+- **GitHub** → historial y fuente de verdad. La rama que se mergea debe ser la que
+  revisó Codex.
+- **Vercel** → despliega solo al mergear a `main`.
+- **Supabase** → Claude **no tiene acceso remoto**. Las migraciones SQL las
+  ejecuta **el humano a mano** en Supabase Studio.
+- **Humano** → aprueba specs, decide prioridades, hace commit/push/PR/merge, pega
+  los hallazgos de Codex y ejecuta las migraciones.
 
-Mantén ese archivo de backlog actualizado (qué, de dónde viene, estado).
+**Claude no ejecuta commits, push, merge ni migraciones remotas.**
 
 ---
 
-## 6. Checks antes de terminar (ejecútalos de verdad)
+## 5. Ciclo exacto de trabajo
+
+1. ChatGPT entrega una spec; el humano la pega a Claude.
+2. Claude crea **rama nueva** desde `main` actualizado.
+3. Claude **verifica el esquema/código real** antes de escribir.
+4. Claude implementa **solo** la spec. La guarda en `specs/NNN-nombre.md`.
+5. Claude ejecuta los **checks reales** (§9).
+6. Claude entrega: **resumen final** (§10) + **comando de commit/push** + **Mensaje
+   para Codex**.
+7. El humano hace commit/push y abre el PR.
+8. Codex revisa; el humano pega los hallazgos.
+9. Claude corrige **en la misma rama, antes del merge**.
+10. Cuando Codex queda limpio → el humano mergea; si hay migración, la ejecuta en
+    Supabase Studio.
+
+> **Regla dura:** la rama que se mergea debe ser la misma que revisó Codex. No
+> corregir hallazgos en otra rama.
+
+---
+
+## 6. Regla para hallazgos de Codex
+
+- **Bloqueantes**: se arreglan siempre antes del merge.
+- Sin bloqueantes: guardar recomendados/menores en
+  `specs/_recomendados-pendientes.md` y resolverlos **en lote** (cada 2–3 specs o
+  al tocar un bloqueante cercano).
+- **Excepción (se corrige en el momento):** seguridad, privacidad, datos
+  personales, datos ficticios visibles, pérdida de datos o contradicción fuerte de
+  producto.
+
+---
+
+## 7. Numeración de specs y migraciones
+
+Se numeran **independientemente** y van desfasadas. **No confiar en los números de
+ChatGPT** (suelen estar obsoletos). Antes de numerar, comprobar `origin/main`:
 
 ```powershell
-npm.cmd run build        # desde la raíz del repo; valida también los <script type="module"> inline
-git diff --check         # espacios/conflictos
-npm.cmd test             # NO EXISTE (no hay tests) → dilo, no lo inventes
+git ls-tree origin/main specs/ --name-only | Select-Object -Last 1
+git ls-tree origin/main supabase/migrations/ --name-only | Select-Object -Last 1
 ```
 
-- El warning `LF will be replaced by CRLF` es normal en Windows, inofensivo.
-- Las migraciones SQL viven en `supabase/migrations/` (raíz), **fuera** del root
-  de Vite → no entran al build; para ellas el check real es leerlas con cuidado.
+Usar el siguiente número libre de cada carpeta. **Si el humano se salta un número,
+avísale.** Si un número de ChatGPT ya está ocupado, renumera y díselo.
 
----
-
-## 7. Lecciones aprendidas (NO repetir errores)
-
-1. **Numeración**: specs y migraciones se numeran **independientemente** y van
-   desfasadas. ChatGPT suele dar números obsoletos. **Antes de numerar, mira
-   `origin/main`**:
-   ```powershell
-   git ls-tree origin/main specs/ --name-only | Select-Object -Last 1
-   git ls-tree origin/main supabase/migrations/ --name-only | Select-Object -Last 1
-   ```
-   Usa el siguiente número libre de cada uno.
-2. **El esquema YA suele tener lo que la spec propone añadir.** Verifica las
-   columnas reales antes de crear migraciones. Casos vistos: `relaciones` ya
-   tenía `iniciada_at`/`dias_prueba_total`/`decision_*`; `resenas` ya tenía
-   `relacion_id` + unique; `mensajes` usa `autor_id` (no `emisor_id`). **Adapta a
-   los nombres reales; no dupliques columnas.** Si hay un choque de diseño,
-   **avisa al humano antes de implementar** (se hizo con AskUserQuestion).
-3. **Corrige los hallazgos de Codex en la misma rama ANTES de mergear.** Una vez
-   se mergeó la versión vieja y los fixes quedaron sin commitear → divergencia
-   git/Supabase dolorosa. La rama que se mergea debe ser la que revisó Codex.
-4. **Migraciones ya aplicadas son inmutables.** Si una migración ya está en
-   `main`/Supabase, **no la edites**: crea una migración nueva (idempotente:
-   `create or replace`, `drop policy if exists` + `create`, `create table if not
-   exists`, `add column if not exists`).
-5. **Triggers que cuentan filas y deben serializar** (sobre cerrado, límite de
-   sesiones): usa `perform 1 from <tabla padre> where id = ... for no key update`
-   antes de contar. **`FOR NO KEY UPDATE`**, no `FOR UPDATE` (este último choca
-   con el `FOR KEY SHARE` que toma el INSERT por el FK → deadlock).
-6. **RLS**: las policies se suman en **OR**. Si endureces una regla, **elimina la
-   policy permisiva antigua** (si no, sigue abriendo el hueco). Para reglas
-   "solo el sistema": función `SECURITY DEFINER` + `REVOKE EXECUTE` a
-   public/anon/authenticated; sin policy de INSERT para clientes.
-7. **No tocar `relaciones.estado` a ciegas.** Estados válidos:
-   `prueba, consolidada, pausada, finalizada, cancelada`. Transiciones desde
-   `prueba` solo por trigger; los participantes no deberían poder ponerlas a mano
-   (policy con `using estado <> 'prueba'` + `with check estado <> 'consolidada' and estado <> 'prueba'`).
-8. **XSS**: escapa SIEMPRE el texto de usuario que metas por `innerHTML` con
-   `escHtml()` (global en `components.js`). Saneа `avatar_color` (solo hex o
-   `var(--...)`).
-9. **No dejes datos demo en el HTML estático.** Las páginas con datos remotos
-   deben arrancar en "Cargando…"/vacío, no con contenido ficticio (si el JS se
-   cuelga, no se ven datos falsos). Distingue **cargando / vacío / error**.
-10. **El hook de auto-commit fue eliminado.** Hubo un hook `Stop` en
-    `.claude/settings.json` que hacía `git add -A` + commit + push solo. Se
-    desactivó. **No lo reintroduzcas.** Los commits los controla el humano.
-11. **`await new Promise(()=>{})` para "parar" un módulo es frágil.** Si necesitas
-    early-return en un módulo con top-level await, envuelve la lógica en una
-    `(async () => { ... })()` (las imports quedan fuera) y usa `return`.
+Estado al escribir esta guía (verificar siempre `origin/main`): última **spec
+mergeada 023**, última **migración 016**; en curso specs 024 (filtros) y 025 (este
+archivo). El **016 de specs** quedó como hueco histórico.
 
 ---
 
 ## 8. Reglas críticas
 
-- No trabajar en `main`. Rama nueva por cada cambio; PRs pequeños y acotados; no
-  mezclar cambios no relacionados.
-- **No tocar Supabase sin spec aprobada.** Toda migración numerada en
-  `supabase/migrations/`. Las ejecuta el humano en Supabase Studio.
-- **Nunca** commitear `.env` ni secretos (está en `.gitignore`). No tocar
-  `package.json` salvo permiso explícito.
-- No usar `git add .` (preferir rutas explícitas; excepción justificada al incluir
-  borrados, avisando).
-- No hacer merge sin aprobación humana. No borrar datos reales.
-- Avisar de contradicciones/riesgos técnicos o de UX antes de implementar.
+- No trabajar en `main`. Rama nueva por cambio, desde `main` actualizado.
+- PRs pequeños y acotados; no mezclar cambios no relacionados.
+- Implementar solo la spec; avisar de contradicciones/riesgos **antes** de implementar.
+- No tocar Supabase sin spec. Migraciones numeradas en `supabase/migrations/`.
+- **Migraciones aplicadas son inmutables**: no editarlas; crear una nueva idempotente.
+- No tocar `package.json` sin permiso. No tocar `.env`. No commitear secretos.
+- **No usar `git add .`**; usar rutas explícitas.
+- Claude no hace commit, push ni merge.
+- No borrar datos reales. No reintroducir hooks de auto-commit. No fingir checks.
 
 ---
 
-## 9. Resumen final obligatorio (al terminar cada tarea)
+## 9. Checks reales antes de terminar
 
-1. Archivos creados/modificados.
-2. Motivo de cada cambio.
-3. Checks ejecutados (resultado real).
-4. Riesgos pendientes (incluida la **acción manual de migración en Supabase** si aplica).
-5. Qué debe revisar visualmente el humano.
-6. **Comando recomendado de commit/push, sin ejecutarlo.**
-7. **Mensaje para Codex** listo para pegar (apuntándolo al repo/PR; que Codex
-   lea los archivos, no pegarle diffs enormes).
-
----
-
-## 10. Estructura del proyecto
-
-```
-/ (raíz del repo)
-├── CLAUDE.md                         <- este archivo
-├── specs/                            <- specs (NNN-nombre.md) + _template.md + _recomendados-pendientes.md
-├── supabase/migrations/             <- migraciones SQL numeradas (001..)
-├── vite.config.js · package.json · vercel.json   <- EN LA RAÍZ
-└── aurea-prototipo/aurea/           <- root de Vite (las páginas)
-    ├── index.html, como-funciona.html, registro.html, login.html, logout.html
-    ├── perfil.html, perfil-edicion.html, perfil-maestro.html, perfil-discipulo.html
-    ├── discover.html, solicitudes.html, relaciones.html, periodo-prueba.html
-    ├── mensajes.html, historia.html, contacto.html, privacidad.html
-    ├── dona.html                     <- oculta (sin enlaces en nav/footer); "no disponible aún"
-    ├── js/
-    │   ├── supabase.js               <- cliente (lee .env vía import.meta.env)
-    │   ├── auth.js                   <- getSession/requireAuth/signOut + sync rol/tema
-    │   ├── components.js             <- navs, footer, renderEmptyState, escHtml, chat asistente; campana de notificaciones
-    │   ├── scale.js                  <- zoom pantallas grandes + tema arena/dark
-    │   ├── categorias.js             <- CATS (11 categorías) + hashtags + formatSolicitud/parseSolicitud
-    │   └── notif.js                  <- badge + dropdown de notificaciones (tabla notificaciones) + Realtime
-    └── css/global.css                <- estilos globales, variables, tema arena, .empty-state, campana
+```powershell
+npm.cmd run build      # desde la raíz; valida también los <script type="module"> inline
+git diff --check       # espacios/conflictos (el aviso LF→CRLF es normal en Windows)
+npm.cmd test           # NO EXISTE
 ```
 
-> Nota: `css/components.css`, `css/home.css` y la carpeta `aurea-prototipo/aurea/pages/`
-> fueron **eliminados** (legacy duplicado sin uso). No recrearlos.
+`npm.cmd test` no está configurado. **No digas que los tests pasaron**; di
+claramente: "No hay script de test configurado." Las migraciones SQL no entran al
+build; su check real es **leerlas con cuidado** (nombres de tablas/columnas,
+policies, triggers, orden de borrado/creación, idempotencia).
 
 ---
 
-## 11. Base de datos (Supabase)
+## 10. Resumen final obligatorio de Claude
 
-Tablas: `profiles`, `maestro_perfiles`, `discipulo_perfiles`, `trayectoria`,
+1. **Archivos creados/modificados** (rutas exactas).
+2. **Motivo** de cada cambio.
+3. **Checks ejecutados** (resultado real de `npm.cmd run build` y `git diff
+   --check`; y "no hay tests" si aplica).
+4. **Riesgos pendientes** (incl. **migración manual en Supabase Studio** si aplica).
+5. **Qué revisar visualmente** (páginas/flujos concretos).
+6. **Comando de commit/push recomendado** (sin ejecutarlo; rutas explícitas, nunca
+   `git add .`).
+7. **Mensaje para Codex** listo para pegar (que lea los archivos del PR, sin
+   pegarle diffs enormes).
+
+Ejemplo de bloque de commit:
+
+```powershell
+git add specs/NNN-nombre.md ruta/archivo1 ruta/archivo2
+git commit -m "feat: descripcion breve en una linea - spec NNN"
+git push -u origin nombre-rama
+```
+
+---
+
+## 11. Supabase y migraciones
+
+Claude no tiene acceso remoto; el humano ejecuta las migraciones en Studio. Si una
+spec toca Supabase: revisar migraciones y nombres reales, no duplicar columnas, no
+inventar esquema, adaptar al esquema real, SQL idempotente y explicar riesgos.
+
+Patrones preferidos: `create or replace function`, `drop policy if exists` +
+`create policy`, `add column if not exists`, `create table if not exists`.
+
+---
+
+## 12. Tablas y Storage conocidos
+
+`profiles`, `maestro_perfiles`, `discipulo_perfiles`, `trayectoria`,
 `solicitudes`, `relaciones`, `sesiones_prueba`, `mensajes`, `resenas`,
 `historial_discipulo`, `decisiones_consolidacion`, `resultados_consolidacion`,
-`notificaciones`. Bucket de Storage: `avatars` (versionado en migración 007).
+`notificaciones`. Bucket de Storage: `avatars`.
 
-Claves de RLS/triggers ya implementadas:
-- `handle_new_user()` crea el perfil al registrarse (categorías alineadas, mig. 006).
-- **Sobre cerrado** (specs 007-009 / migs 008-010): `decisiones_consolidacion` +
-  `resultados_consolidacion`, RLS de privacidad, trigger con `FOR NO KEY UPDATE`,
-  sincroniza `relaciones.estado`; `relaciones` UPDATE bloqueado para participantes
-  desde `prueba` y para poner `consolidada` a mano.
-- **Límites del periodo** (spec 010 / mig 011): trigger en `sesiones_prueba`
-  (máx. 3, no tras vencer; fin = `iniciada_at + dias_prueba_total`).
-- **Reseñas** (spec 012 / mig 012): solo el discípulo de una relación con
-  `resultado='consolidada'`; trigger + RLS; `actualizar_reputacion()` intacto.
-- **Notificaciones** (spec 013 / mig 013): tabla + triggers en solicitudes,
-  mensajes (`autor_id`), `resultados_consolidacion` y `resenas`; `crear_notificacion`
-  SECURITY DEFINER con REVOKE.
-
-`localStorage`: `aurea-rol` (maestro|discipulo|ambos), `aurea-tema` (dark|arena).
-discípulo→arena, maestro→dark, ambos→preferencia. Pantalla 4K: `scale.js` aplica
-`zoom`; para alturas usar `--real-vh` (`window.innerHeight / zoom`).
+**No asumir nombres de columnas. Verificar siempre en el esquema real**
+(`supabase/migrations/001_schema_inicial.sql` y posteriores).
 
 ---
 
-## 12. Estado actual (al crear esta guía)
+## 13. Lecciones aprendidas (NO repetir errores)
 
-- Última **spec** en repo: **014** (estados vacíos / onboarding).
-- Última **migración**: **013** (notificaciones).
-- Specs 001-014 implementadas. PR en curso al escribir esto:
-  `feat/estados-vacios` (spec 014 + lote de recomendados R1/R2/O1/O2/O3a + C1-C4).
-- Backlog (`specs/_recomendados-pendientes.md`): solo queda **O3b** = quitar las
-  columnas `relaciones.decision_*` sin uso → necesita su propia migración + spec.
-- EmailJS (claves públicas, en `contacto.html`): KEY `3hq5zg5R_U9rgRnER`,
-  SERVICE `service_pre7dnv`, TEMPLATE `template_otepyoq`.
+**13.1 El esquema suele tener ya lo que la spec propone.** Verifica las columnas
+reales antes de crear migraciones. Vistos: `relaciones` ya tenía
+`iniciada_at`/`dias_prueba_total`; `resenas` ya tenía `relacion_id` + unique;
+`mensajes` usa **`autor_id`** (no `emisor_id`); `maestro_perfiles` y
+`discipulo_perfiles` usan **`id`** (= `profiles.id`), no `user_id`; `trayectoria`
+usa `maestro_id`. No dupliques columnas. Si hay choque spec↔esquema, avisa antes
+de implementar.
+
+**13.2 Corrige los hallazgos de Codex en la MISMA rama antes de mergear.** Una vez
+se mergeó una versión vieja y hubo divergencia git/Supabase dolorosa.
+
+**13.3 Migraciones aplicadas son inmutables.** No las edites; crea una nueva
+idempotente (`create or replace`, `if not exists`, `drop policy if exists` + `create`).
+
+**13.4 Triggers que cuentan filas y deben serializar:** `perform 1 from <tabla>
+where id = ... for no key update;` — **`FOR NO KEY UPDATE`**, no `FOR UPDATE`
+(este choca con el `FOR KEY SHARE` del FK → deadlock).
+
+**13.5 RLS suma policies en OR.** Al endurecer, elimina la policy permisiva
+antigua. Para "solo sistema": función `SECURITY DEFINER` + `REVOKE EXECUTE` a
+public/anon/authenticated; sin policy de INSERT para clientes.
+
+**13.6 No tocar `relaciones.estado` a ciegas.** Estados: `prueba, consolidada,
+pausada, finalizada, cancelada`. Transiciones desde `prueba` solo por trigger.
+
+**13.7 Escapa el texto de usuario en `innerHTML`.** Usa `escHtml()` (global en
+`components.js`) o `textContent`. Para color usa `safeColor()` (global, solo
+acepta hex o `var(--...)`). Para incrustar texto en una cadena JS dentro de un
+atributo (`onclick="...'X'..."`) hay que escapar **dos** contextos (JS + HTML).
+`categorias.js` tiene su propio `esc` local (es módulo ES).
+
+**13.8 Nada de datos demo en el HTML estático.** Las páginas con datos remotos
+arrancan en "Cargando…"/vacío/error, nunca con contenido ficticio. Distingue
+**cargando / vacío / error** (y "sin resultados" si hay filtros).
+
+**13.9 No reintroducir el hook de auto-commit** (había un `Stop` en
+`.claude/settings.json` que hacía `git add -A` + commit + push). Eliminado. Los
+commits los controla el humano.
+
+**13.10 Top-level await + early return:** envuelve la lógica en `(async () => {
+... return; })()`. No uses `await new Promise(()=>{})` para "parar" un módulo.
+
+**13.11 Storage: NO borres `storage.objects` por SQL.** Supabase lo bloquea
+(trigger `storage.protect_delete`: "Use the Storage API instead"). Borra ficheros
+desde el frontend con la Storage API (`supabase.storage.from(bucket).remove([...])`)
+antes del RPC. (`auth.users` **sí** se puede borrar por SQL como `postgres`.)
+
+**13.12 Operaciones críticas atómicas, sin tragar errores.** Ej.: en el borrado de
+cuenta NO captures el error de `delete from auth.users`; si falla, que la
+transacción entera se revierta (todo o nada). No dejes un estado a medias que se
+reporte como éxito.
+
+**13.13 Git: commitea ANTES de pushear.** Pushear una rama sin commits crea una
+rama remota vacía → **GitHub no ofrece PR**. No dejes trabajo en `git stash`
+saltando entre ramas (genera ramas vacías y líos). Verifica con `git log
+origin/main..<rama>` que la rama tiene commits antes de pedir el push.
+
+**13.14 No metas caracteres U+2028/U+2029 literales en literales de regex** (los
+cuela el copy-paste): rompen el build de Vite/esbuild ("Unterminated regular
+expression"). Usa `\s` (que ya los cubre) o escapes `  `.
+
+**13.15 Mensajes de commit en una sola línea.** En la PowerShell del humano los
+here-strings `@'...'@` y las comillas/paréntesis dentro del mensaje fallan. Dale
+`git commit -m "mensaje en una linea sin comillas dobles ni parentesis"` (+ otro
+`-m` para el trailer `Co-Authored-By` si hace falta).
 
 ---
 
-## 13. Credenciales / secretos
+## 14. RLS y seguridad
 
-`.env` (NUNCA al repo; también en Vercel > Environment Variables):
+Nunca confíes solo en el frontend para proteger datos. Privacidad/permisos →
+RLS, constraints, triggers o funciones seguras. Las policies se combinan en **OR**
+(una permisiva antigua invalida una restrictiva nueva → elimínala/reemplázala). No
+exponer `service_role` en cliente. No commitear `.env`.
+
+---
+
+## 15. Auth, roles y tema
+
+`localStorage`: `aurea-rol` (`maestro|discipulo|ambos`), `aurea-tema`
+(`dark|arena`). Reglas: discípulo→arena, maestro→dark, ambos→preferencia guardada.
+Pantallas grandes: `scale.js` aplica `zoom` solo si el viewport es lo bastante
+ancho; para alturas usa `--real-vh`. No rompas esta lógica al tocar responsive/temas.
+
+---
+
+## 16. Secretos y entorno
+
+`.env` nunca al repo (también en Vercel > Environment Variables):
+`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. No imprimir secretos, no crear
+archivos de entorno nuevos, no modificar `.env`.
+
+---
+
+## 17. EmailJS, NSFWJS y avatares
+
+- **Contacto** usa EmailJS sin backend. Si una UI dice que envía algo al equipo,
+  debe haber envío real (no widgets simulados).
+- **Avatares**: moderación con NSFWJS en cliente (no eliminarla). Al tocar avatar:
+  validar tipo (JPG/PNG/WEBP) y tamaño, mantener la moderación, respetar el bucket
+  `avatars` y sus policies (ruta `{auth.uid()}/avatar.jpg`).
+
+---
+
+## 18. Sistema visual (specs 017–020, 024)
+
+`global.css` tiene el sistema base: variables `--space-*`, contenedores, tipografía
+fluida, botones (`.btn-primary/.btn-secondary/.btn-ghost/.btn-danger`), tarjetas,
+avatares, breakpoints (≤599 / 600–899 / 900+) y una barra de navegación inferior
+móvil (`renderMobileTabbar` en `components.js`). Reutiliza estas clases en vez de
+crear estilos locales nuevos.
+
+---
+
+## 19. Al empezar una tarea
+
+1. Lee la spec completa y este `CLAUDE.md`.
+2. Actualiza `main`; crea rama nueva.
+3. Mira el último número real en `origin/main` si vas a crear spec/migración.
+4. Revisa los archivos reales (y el esquema/migraciones si toca Supabase) antes de
+   tocar.
+5. Avisa de contradicciones spec↔código.
+6. Implementa solo lo aprobado; ejecuta checks; entrega el resumen final.
+
+---
+
+## 20. Qué NO hacer
+
+`git add .` · trabajar en `main` · commit/push/merge · editar migraciones
+aplicadas · tocar `package.json` sin permiso · tocar `.env` · inventar
+tests/datos demo · añadir frameworks · mezclar refactors grandes con una feature
+pequeña · ocultar riesgos.
+
+---
+
+## 21. Plantilla "Mensaje para Codex"
+
 ```
-VITE_SUPABASE_URL=...
-VITE_SUPABASE_ANON_KEY=...
+Revisa este PR del repo positfilms-hash/Aurea.
+
+Contexto:
+- Implementa la spec NNN: <nombre>.
+- Cambios esperados: <resumen breve>.
+- Si hay migración: revisar especialmente SQL, RLS, triggers, idempotencia y
+  compatibilidad con el esquema existente.
+
+Clasifica los hallazgos como: bloqueante / recomendado / menor.
+Lee los archivos modificados del PR; no hace falta el diff entero.
 ```
-Repo GitHub: `positfilms-hash/Aurea`.
+
+---
+
+## 22. Prioridad general
+
+Aurea prioriza **producción estable**. Antes de añadir complejidad:
+1) evitar pérdida de datos · 2) evitar errores de permisos · 3) evitar UI
+engañosa · 4) evitar divergencias git↔Supabase · 5) PRs pequeños · 6) claridad
+para el humano.

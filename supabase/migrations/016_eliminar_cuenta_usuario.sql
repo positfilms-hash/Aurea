@@ -22,11 +22,17 @@
 --     resenas.relacion_id / historial_discipulo.relacion_id.
 -- ============================================================
 
+-- NOTA SOBRE EL AVATAR: Supabase bloquea el DELETE directo sobre
+-- storage.objects (trigger storage.protect_delete: "Direct deletion from storage
+-- tables is not allowed. Use the Storage API instead."). Por eso el avatar NO se
+-- borra aquí: el FRONTEND lo elimina vía Storage API
+-- (supabase.storage.from('avatars').remove([...])) ANTES de llamar a esta función.
+-- Como el perfil se borra abajo, ninguna fila referencia ya ese avatar.
 create or replace function public.eliminar_mi_cuenta()
 returns void
 language plpgsql
 security definer
-set search_path = public, storage, auth
+set search_path = public, auth
 as $$
 declare
   v_user_id uuid := auth.uid();
@@ -40,25 +46,17 @@ begin
   delete from public.relaciones
   where maestro_id = v_user_id or discipulo_id = v_user_id;
 
-  -- 2) Avatar(es) del usuario en Storage: avatars/{uid}/...  (limpieza defensiva;
-  --    el frontend también intenta borrarlo vía Storage API antes del RPC).
-  if to_regclass('storage.objects') is not null then
-    delete from storage.objects
-    where bucket_id = 'avatars'
-      and (storage.foldername(name))[1] = v_user_id::text;
-  end if;
-
-  -- 3) Perfil principal. CASCADE borra todo lo personal restante (ver cabecera).
+  -- 2) Perfil principal. CASCADE borra todo lo personal restante (ver cabecera).
   delete from public.profiles where id = v_user_id;
 
-  -- 4) Usuario de Auth. Si el entorno no permitiera borrar auth.users desde esta
-  --    función, los datos personales (paso 3) YA están borrados y no se revierte;
-  --    se deja un warning para activar el fallback (Edge Function service_role).
-  begin
-    delete from auth.users where id = v_user_id;
-  exception when others then
-    raise warning 'eliminar_mi_cuenta: no se pudo borrar auth.users (%). Datos personales ya borrados.', sqlerrm;
-  end;
+  -- 3) Usuario de Auth. NO se captura el error a propósito: si el entorno no
+  --    permitiera borrar auth.users desde esta función, la excepción se propaga
+  --    y TODA la transacción (pasos 1–2 incluidos) se revierte. Así la operación
+  --    es atómica: o se borra todo (datos + auth) o no se borra nada, y el
+  --    cliente recibe un error real (sin falsos "cuenta eliminada"). Si esto
+  --    fallara en producción, se implementa el fallback con Edge Function
+  --    (service_role) — ver spec 023.
+  delete from auth.users where id = v_user_id;
 end;
 $$;
 
