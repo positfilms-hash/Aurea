@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -10,21 +10,14 @@
     .layout{display:grid;grid-template-columns:300px 1fr;}
     .col-left{align-self:start;position:sticky;top:var(--nav-height);height:calc(var(--real-vh) - var(--nav-height));border-right:0.5px solid var(--border);padding:28px 24px;display:flex;flex-direction:column;gap:22px;background:var(--night-soft);overflow-y:auto;}
     .profile-header{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;}
-    .big-avatar{width:88px;height:88px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:34px;font-weight:600;color:var(--night);}
-    .profile-name{font-family:var(--font-serif);font-size:26px;font-weight:500;color:var(--text-primary);line-height:1.1;}
+    .big-avatar{width:88px;height:88px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:34px;font-weight:600;color:var(--night);overflow:hidden;}
+    .big-avatar img{width:100%;height:100%;object-fit:cover;}
+    .profile-name{font-family:var(--font-serif);font-size:26px;font-weight:500;color:var(--text-primary);line-height:1.1;overflow-wrap:break-word;}
     .profile-disc{font-size:10px;font-weight:300;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-top:4px;}
     .profile-location{font-size:11px;font-weight:300;color:var(--text-faint);margin-top:4px;}
-    .stat-box{background:var(--night-mid);border:0.5px solid var(--border);border-radius:8px;padding:12px;text-align:center;}
-    .stat-n{font-family:var(--font-serif);font-size:24px;font-weight:500;color:var(--gold);}
-    .stat-l{font-size:8px;font-weight:300;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);margin-top:3px;}
-    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-    .const-wrap{background:var(--night-mid);border:0.5px solid var(--border);border-radius:10px;padding:18px;text-align:center;}
-    .const-n{font-family:var(--font-serif);font-size:40px;font-weight:500;color:var(--gold);line-height:1;}
-    .const-bar-bg{height:6px;background:var(--border);border-radius:100px;overflow:hidden;margin:10px 0;}
-    .const-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,#7A4F2A,#C8973A);}
-    .const-sub{font-size:10px;font-weight:300;color:var(--text-faint);}
+    .cat-line{font-family:var(--font-serif);font-size:16px;color:var(--text-secondary);}
     .tag{font-size:10px;color:var(--text-muted);border:0.5px solid var(--border);padding:4px 10px;border-radius:100px;}
-    .tags-wrap{display:flex;flex-wrap:wrap;gap:5px;}
+    .tags-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
     .avail-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);}
     .avail-row:last-child{border-bottom:none;}
     .avail-label{font-size:11px;font-weight:300;color:var(--text-muted);}
@@ -33,76 +26,83 @@
     .btn-ac{font-family:var(--font-serif);font-size:17px;font-style:italic;font-weight:500;color:var(--night);background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));border:none;padding:14px;border-radius:100px;cursor:pointer;box-shadow:0 4px 12px #C8973A33;transition:opacity 0.2s;width:100%;}
     .btn-ac:hover{opacity:0.85;}
     .btn-re{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--text-muted);background:none;border:0.5px solid var(--border);padding:14px;border-radius:100px;cursor:pointer;transition:all 0.2s;width:100%;}
-    .btn-re:hover{color:var(--red);border-color:var(--red);}
+    .btn-re:hover{color:var(--gold);border-color:var(--gold);}
+    .btn-chat-gold{font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--gold);background:none;border:0.5px solid var(--border-gold);padding:10px 18px;border-radius:100px;cursor:pointer;transition:all 0.18s;white-space:nowrap;width:100%;}
+    .btn-chat-gold:hover{background:rgba(200,151,58,0.08);}
     .col-right{padding:28px 32px;display:flex;flex-direction:column;gap:28px;}
     .bio-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);margin-bottom:12px;}
     .bio-text{font-family:var(--font-serif);font-size:17px;font-style:italic;color:var(--text-secondary);line-height:1.7;}
-    .divider-sand{height:0.5px;background:var(--border);}
-    .hist-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);}
-    .hist-item:last-child{border-bottom:none;}
-    .hist-disc{font-size:12px;font-weight:400;color:var(--text-primary);}
-    .hist-sub{font-size:10px;font-weight:300;color:var(--text-faint);}
-    .hist-badge{font-size:8px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;padding:3px 8px;border-radius:100px;margin-left:auto;flex-shrink:0;white-space:nowrap;}
-    .hb-complete{color:var(--green);background:#1A2A12;border:0.5px solid #3B6D1144;}
-    .hb-partial{color:var(--gold);background:rgba(200,151,58,0.1);border:0.5px solid var(--border-gold);}
-    .review-item{background:var(--night-mid);border:0.5px solid var(--border);border-radius:8px;padding:16px;margin-bottom:10px;}
-    .review-author{font-size:12px;font-weight:400;color:var(--text-primary);}
-    .review-disc{font-size:10px;font-weight:300;color:var(--text-faint);margin-bottom:6px;}
-    .review-text{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-muted);line-height:1.6;}
+    .nivel-line{font-size:11px;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-faint);margin-top:10px;}
     .msg-mot{background:var(--night-mid);border:0.5px solid var(--border-gold);border-radius:10px;padding:16px;}
     .msg-mot-label{font-size:9px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-faint);margin-bottom:8px;}
-    .msg-mot-text{font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--text-primary);line-height:1.7;}
-    .btn-chat-gold{font-family:var(--font-serif);font-size:15px;font-style:italic;color:var(--gold);background:none;border:0.5px solid var(--border-gold);padding:10px 18px;border-radius:100px;cursor:pointer;transition:all 0.18s;white-space:nowrap;width:100%;}
-    .btn-chat-gold:hover{background:rgba(200,151,58,0.08);}
-    .activa-item{display:flex;align-items:center;gap:12px;background:rgba(200,151,58,0.04);border:0.5px solid var(--border-gold);border-radius:8px;padding:12px 14px;margin-bottom:10px;}
+    .msg-mot-text{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-primary);line-height:1.7;}
+    .pd-fullstate{padding:80px 20px;}
+    @media(max-width:899px){
+      .layout{grid-template-columns:1fr;}
+      .col-left{position:static;height:auto;border-right:none;border-bottom:0.5px solid var(--border);}
+      .col-right{padding:24px 20px;}
+    }
   </style>
 </head>
 <body>
   <div id="nav-container"></div>
 
-  <div class="layout">
+  <!-- Estado de página completa (no encontrado / error) -->
+  <div id="pd-fullstate" class="pd-fullstate" style="display:none;"></div>
+
+  <div class="layout" id="pd-layout">
     <div class="col-left">
       <div class="profile-header">
         <div class="big-avatar" id="pd-avatar">—</div>
         <div>
-          <div class="profile-name" id="pd-nombre">…</div>
-          <div class="profile-disc" id="pd-disc"></div>
-          <div class="profile-location" id="pd-loc"></div>
+          <div class="profile-name" id="pd-nombre">Cargando…</div>
+          <div class="profile-disc">Discípulo</div>
+          <div class="profile-location" id="pd-loc" style="display:none;"></div>
         </div>
       </div>
-      <div class="const-wrap">
-        <span class="section-label">Constancia</span>
-        <div class="const-n" id="pd-const-n">—</div>
-        <div class="const-bar-bg"><div class="const-bar" id="pd-const-bar" style="width:50%;"></div></div>
-        <div class="const-sub" id="pd-const-sub">de 100 puntos</div>
+      <div id="pd-cat-sec" style="display:none;">
+        <span class="section-label">Área de interés</span>
+        <div class="cat-line" id="pd-categoria"></div>
       </div>
-      <div class="stats-grid">
-        <div class="stat-box"><div class="stat-n" id="pd-activas">—</div><div class="stat-l">Prácticas activas</div></div>
+      <div id="pd-intereses-sec" style="display:none;">
+        <span class="section-label">Intereses</span>
+        <div class="tags-wrap" id="pd-intereses"></div>
       </div>
-      <div id="pd-actions" class="action-btns">
-        <button class="btn-ac" onclick="window.aceptarDisc()">Aceptar solicitud</button>
-        <button class="btn-re" onclick="window.rechazarDisc()">No aceptar</button>
-      </div>
+      <div id="pd-actions" class="action-btns" style="display:none;"></div>
     </div>
+
     <div class="col-right">
-      <div id="pd-sol-sec">
+      <!-- Carta de motivación: solo cuando el maestro revisa una solicitud (?sol=) -->
+      <div id="pd-sol-sec" style="display:none;">
         <div class="bio-title">Su mensaje de motivación</div>
         <div class="msg-mot">
           <div class="msg-mot-label">Por qué quiere aprender contigo</div>
-          <p class="msg-mot-text" id="pd-motivacion" style="font-style:italic;font-size:14px;">Cargando…</p>
+          <p class="msg-mot-text" id="pd-motivacion">Cargando…</p>
         </div>
       </div>
-      <div class="divider-sand"></div>
-      <div>
-        <div class="bio-title" id="pd-bio-title">Sobre este discípulo</div>
-        <p class="bio-text" id="pd-bio" style="color:var(--text-faint);font-style:italic;font-size:14px;">Sin descripción todavía.</p>
+
+      <!-- Qué quiere aprender -->
+      <div id="pd-aprender-sec">
+        <div class="bio-title">Qué quiere aprender</div>
+        <p class="bio-text" id="pd-aprender">Cargando…</p>
+        <div class="nivel-line" id="pd-nivel" style="display:none;"></div>
       </div>
-      <div class="divider-sand"></div>
-      <div>
-        <span class="section-label">Historial de prácticas</span>
-        <div id="pd-historial">
-          <p style="font-size:12px;color:var(--text-muted);padding:8px 0;">Cargando…</p>
-        </div>
+
+      <!-- Disponibilidad (solo si hay datos) -->
+      <div id="pd-disp-sec" style="display:none;">
+        <span class="section-label">Disponibilidad</span>
+        <div id="pd-disp"></div>
+      </div>
+
+      <!-- Sobre mí (frase pública, solo si existe) -->
+      <div id="pd-bio-sec" style="display:none;">
+        <div class="bio-title">Sobre mí</div>
+        <p class="bio-text" id="pd-bio"></p>
+      </div>
+
+      <!-- Perfil sin ningún dato público -->
+      <div id="pd-incompleto" style="display:none;">
+        <p class="bio-text" style="color:var(--text-faint);">Este discípulo aún está completando su perfil.</p>
       </div>
     </div>
   </div>
@@ -119,203 +119,237 @@
     import { getSession } from './js/auth.js';
     import { checkNotificaciones } from './js/notif.js';
 
-    const params      = new URLSearchParams(location.search);
-    const discipuloId = params.get('id');
-    const solId       = params.get('sol');
+    // Top-level await + early return → IIFE async (lección 13.10).
+    (async () => {
+      const params      = new URLSearchParams(location.search);
+      const discipuloId = params.get('id');
+      const solId       = params.get('sol');
 
-    if (!discipuloId) { location.href = 'solicitudes.html'; }
+      // Sin id: entrada de bandeja malformada → volver a solicitudes.
+      if (!discipuloId) { location.href = 'solicitudes.html'; return; }
 
-    let _maestroId = null;
-    let _solData   = null;
+      let _maestroId = null;   // id del maestro que mira, si es maestro
+      let _solData   = null;   // solicitud (solo si ?sol=)
+      let _esPropio  = false;  // el discípulo mira su propio perfil
 
-    // Sesión del maestro que está viendo
-    const session = await getSession();
-    if (session) {
-      const { data: mp } = await supabase
-        .from('maestro_perfiles').select('id').eq('id', session.user.id).single();
-      _maestroId = mp ? session.user.id : null;
-
-      const { data: me } = await supabase
-        .from('profiles').select('nombre, apellido').eq('id', session.user.id).single();
-      if (me) {
-        const i = ((me.nombre||'')[0] + (me.apellido||'')[0]).toUpperCase() || '?';
-        document.getElementById('nav-container').innerHTML = renderNavAuth('solicitudes', i);
-        checkNotificaciones();
+      // — Estado de página completa (no encontrado / error) —
+      function estadoPagina(title, body) {
+        document.getElementById('pd-layout').style.display = 'none';
+        const el = document.getElementById('pd-fullstate');
+        el.style.display = '';
+        el.innerHTML = renderEmptyState({
+          icon: '🔍', title, body, ctaLabel: 'Volver', ctaHref: 'solicitudes.html',
+        });
       }
-    }
 
-    // Cargar perfil + historial + solicitud + relación activa en paralelo
-    const fetches = [
-      // 0 — perfil del discípulo
-      supabase.from('profiles')
-        .select('nombre, apellido, avatar_color, ubicacion, frase, constancia_score')
-        .eq('id', discipuloId).single(),
-      // 1 — historial de prácticas
-      supabase.from('historial_discipulo')
-        .select('disciplina, duracion_meses, estado, maestro_nombre')
-        .eq('discipulo_id', discipuloId)
-        .order('created_at', { ascending: false }),
-      // 2 — solicitud (si viene por URL)
-      solId
-        ? supabase.from('solicitudes').select('motivacion, disciplina, estado').eq('id', solId).single()
-        : Promise.resolve({ data: null }),
-      // 3 — relación activa entre este maestro y este discípulo
-      _maestroId
-        ? supabase.from('relaciones')
-            .select('id, disciplina, estado')
-            .eq('maestro_id', _maestroId)
-            .eq('discipulo_id', discipuloId)
-            .in('estado', ['prueba', 'consolidada'])
-            .maybeSingle()
-        : Promise.resolve({ data: null }),
-    ];
-
-    const [perfilRes, histRes, solRes, relActivaRes] = await Promise.all(fetches);
-    const perfil    = perfilRes.data;
-    const historial = histRes.data || [];
-    _solData        = solRes?.data || null;
-    const relActiva = relActivaRes?.data || null;
-
-    // — Columna izquierda —
-    if (perfil) {
-      const nombre   = perfil.nombre   || '';
-      const apellido = perfil.apellido || '';
-      const initials = ((nombre[0]||'') + (apellido[0]||'')).toUpperCase() || '?';
-
-      document.getElementById('pd-avatar').textContent    = initials;
-      document.getElementById('pd-avatar').style.background = perfil.avatar_color || 'var(--gold)';
-      document.getElementById('pd-nombre').textContent    = (nombre + ' ' + apellido).trim();
-      document.getElementById('pd-loc').textContent       = perfil.ubicacion || '—';
-      document.getElementById('pd-bio-title').textContent = `Sobre ${nombre || 'este discípulo'}`;
-
-      // Disciplina: de la solicitud o del historial
-      const disc = _solData?.disciplina || historial[0]?.disciplina || '—';
-      document.getElementById('pd-disc').textContent = disc;
-
-      // Constancia
-      const c = perfil.constancia_score ?? 50;
-      document.getElementById('pd-const-n').textContent    = c;
-      document.getElementById('pd-const-bar').style.width  = c + '%';
-      const nivel = c >= 80 ? 'Alta' : c >= 50 ? 'Media' : 'Baja';
-      document.getElementById('pd-const-sub').textContent  = `de 100 puntos · ${nivel}`;
-
-      // Stats de historial (sin señaladores de "fracaso" en el perfil público).
-      const activas = historial.filter(h => h.estado === 'en_curso').length;
-      document.getElementById('pd-activas').textContent = activas;
-
-      // Bio
-      if (perfil.frase) {
-        document.getElementById('pd-bio').textContent = `"${perfil.frase}"`;
-        document.getElementById('pd-bio').style.color = 'var(--text-secondary)';
-      } else {
-        document.getElementById('pd-bio').textContent = 'Este discípulo aún está completando su perfil.';
-        document.getElementById('pd-bio').style.color = 'var(--text-faint)';
-      }
-    }
-
-    // — Solicitud / mensaje de motivación —
-    if (_solData) {
-      const motEl = document.getElementById('pd-motivacion');
-      if (!_solData.motivacion) {
-        motEl.textContent = '(Sin mensaje de motivación)';
-      } else {
-        const c = (typeof parseSolicitud === 'function')
-          ? parseSolicitud(_solData.motivacion) : { estructurada: false };
-        if (c.estructurada) {
-          // Carta estructurada: mostrar con cabeceras y saltos de línea
-          motEl.style.fontStyle  = 'normal';
-          motEl.style.whiteSpace = 'pre-wrap';
-          motEl.textContent = _solData.motivacion;
-        } else {
-          motEl.textContent = `"${_solData.motivacion}"`;
+      try {
+        // Sesión de quien mira
+        const session = await getSession();
+        if (session) {
+          _esPropio = session.user.id === discipuloId;
+          const { data: mp } = await supabase
+            .from('maestro_perfiles').select('id').eq('id', session.user.id).maybeSingle();
+          _maestroId = mp ? session.user.id : null;
+          const { data: me } = await supabase
+            .from('profiles').select('nombre, apellido').eq('id', session.user.id).maybeSingle();
+          if (me) {
+            const i = ((me.nombre||'')[0] + (me.apellido||'')[0]).toUpperCase() || '?';
+            document.getElementById('nav-container').innerHTML = renderNavAuth('solicitudes', i);
+            checkNotificaciones();
+          }
         }
-      }
 
-      // Si ya fue respondida, reemplazar botones
-      if (_solData.estado === 'aceptada' || _solData.estado === 'rechazada') {
-        if (_solData.estado === 'aceptada' && relActiva) {
-          document.getElementById('pd-actions').innerHTML =
-            `<button class="btn-chat-gold" onclick="location.href='periodo-prueba.html?id=${relActiva.id}'">Entrar al chat →</button>
-             <div style="text-align:center;font-size:10px;color:var(--text-faint);font-style:italic;padding:4px;">✓ Solicitud aceptada</div>`;
-        } else {
-          document.getElementById('pd-actions').innerHTML =
-            `<div style="text-align:center;font-size:12px;color:var(--text-muted);font-family:var(--font-serif);font-style:italic;padding:8px;">
-              ${_solData.estado === 'aceptada' ? '✓ Ya aceptaste esta solicitud' : '✕ Ya rechazaste esta solicitud'}
-             </div>`;
+        // Cargas: perfil público + perfil de discípulo siempre; solicitud y
+        // relación solo cuando procede (RLS limita lo que se puede leer).
+        const [perfilRes, dpRes, solRes, relRes] = await Promise.all([
+          supabase.from('profiles')
+            .select('nombre, apellido, avatar_color, avatar_url, ubicacion, frase, rol')
+            .eq('id', discipuloId).maybeSingle(),
+          supabase.from('discipulo_perfiles')
+            .select('disciplina_buscada, categoria, nivel, disponibilidad_dias, horas_semanales, hashtags')
+            .eq('id', discipuloId).maybeSingle(),
+          solId
+            ? supabase.from('solicitudes').select('motivacion, disciplina, estado').eq('id', solId).maybeSingle()
+            : Promise.resolve({ data: null }),
+          (_maestroId && !_esPropio)
+            ? supabase.from('relaciones')
+                .select('id, disciplina, estado')
+                .eq('maestro_id', _maestroId)
+                .eq('discipulo_id', discipuloId)
+                .in('estado', ['prueba', 'consolidada'])
+                .maybeSingle()
+            : Promise.resolve({ data: null }),
+        ]);
+
+        // Errores reales de carga (no "sin filas") → estado de error amable.
+        if (perfilRes.error) throw perfilRes.error;
+
+        const perfil = perfilRes.data;
+        if (!perfil) {
+          estadoPagina('No hemos encontrado este discípulo.',
+            'Es posible que el enlace ya no esté disponible.');
+          return;
         }
+
+        const dp        = dpRes.data || {};
+        _solData        = solRes?.data || null;
+        const relActiva = relRes?.data || null;
+
+        // ── Cabecera ──────────────────────────────────────────────────────
+        const nombre   = (perfil.nombre || '').trim();
+        const apellido = (perfil.apellido || '').trim();
+        const initials = ((nombre[0]||'') + (apellido[0]||'')).toUpperCase() || '?';
+
+        const avatarEl = document.getElementById('pd-avatar');
+        if (perfil.avatar_url) {
+          avatarEl.innerHTML = `<img src="${escHtml(perfil.avatar_url)}" alt="${escHtml(nombre || 'Discípulo')}">`;
+          avatarEl.style.background = 'transparent';
+        } else {
+          avatarEl.textContent = initials;
+          avatarEl.style.background = safeColor(perfil.avatar_color);
+        }
+        document.getElementById('pd-nombre').textContent = (nombre + ' ' + apellido).trim() || 'Discípulo';
+        if (perfil.ubicacion) {
+          const loc = document.getElementById('pd-loc');
+          loc.textContent = perfil.ubicacion;
+          loc.style.display = '';
+        }
+
+        // Categoría principal de interés ('Otra' = por defecto → no se muestra)
+        if (dp.categoria && dp.categoria !== 'Otra') {
+          document.getElementById('pd-categoria').textContent = dp.categoria;
+          document.getElementById('pd-cat-sec').style.display = '';
+        }
+
+        // Intereses (hashtags)
+        const tags = (dp.hashtags || []).filter(Boolean);
+        if (tags.length) {
+          document.getElementById('pd-intereses').innerHTML =
+            tags.map(t => `<span class="tag">${escHtml(t)}</span>`).join('');
+          document.getElementById('pd-intereses-sec').style.display = '';
+        }
+
+        // ── Qué quiere aprender ───────────────────────────────────────────
+        const NIVEL = { principiante: 'Principiante', intermedio: 'Intermedio', avanzado: 'Avanzado' };
+        const dispParts = [];
+        if (dp.disponibilidad_dias) dispParts.push(['Días', dp.disponibilidad_dias]);
+        if (dp.horas_semanales)     dispParts.push(['Horas semanales', dp.horas_semanales]);
+
+        const hayCategoria = !!(dp.categoria && dp.categoria !== 'Otra');
+        const hayAlgo = !!(dp.disciplina_buscada || perfil.frase || tags.length || dispParts.length || hayCategoria);
+
+        if (!hayAlgo) {
+          // Perfil sin ningún dato público: un único mensaje general.
+          document.getElementById('pd-aprender-sec').style.display = 'none';
+          document.getElementById('pd-incompleto').style.display = '';
+        } else {
+          const aprEl = document.getElementById('pd-aprender');
+          if (dp.disciplina_buscada) {
+            aprEl.textContent = dp.disciplina_buscada;
+            aprEl.style.color = 'var(--text-secondary)';
+            if (dp.nivel && NIVEL[dp.nivel]) {
+              const nivEl = document.getElementById('pd-nivel');
+              nivEl.textContent = 'Nivel: ' + NIVEL[dp.nivel];
+              nivEl.style.display = '';
+            }
+          } else {
+            aprEl.textContent = 'Este discípulo aún está completando qué quiere aprender.';
+            aprEl.style.color = 'var(--text-faint)';
+          }
+        }
+
+        // ── Disponibilidad (opcional) ─────────────────────────────────────
+        if (dispParts.length) {
+          document.getElementById('pd-disp').innerHTML = dispParts.map(([k, v]) =>
+            `<div class="avail-row"><span class="avail-label">${escHtml(k)}</span><span class="avail-val">${escHtml(v)}</span></div>`
+          ).join('');
+          document.getElementById('pd-disp-sec').style.display = '';
+        }
+
+        // ── Sobre mí (frase) ──────────────────────────────────────────────
+        if (perfil.frase) {
+          document.getElementById('pd-bio').textContent = perfil.frase;
+          document.getElementById('pd-bio-sec').style.display = '';
+        }
+
+        // ── Carta de motivación (solo ?sol=) ──────────────────────────────
+        if (_solData) {
+          document.getElementById('pd-sol-sec').style.display = '';
+          const motEl = document.getElementById('pd-motivacion');
+          if (!_solData.motivacion) {
+            motEl.textContent = '(Sin mensaje de motivación)';
+          } else {
+            const c = (typeof parseSolicitud === 'function')
+              ? parseSolicitud(_solData.motivacion) : { estructurada: false };
+            if (c.estructurada) {
+              motEl.style.fontStyle  = 'normal';
+              motEl.style.whiteSpace = 'pre-wrap';
+              motEl.textContent = _solData.motivacion;
+            } else {
+              motEl.textContent = `"${_solData.motivacion}"`;
+            }
+          }
+        }
+
+        // ── Acciones (columna izquierda) ──────────────────────────────────
+        const actionsEl = document.getElementById('pd-actions');
+        const showActions = (html) => { actionsEl.innerHTML = html; actionsEl.style.display = ''; };
+
+        if (_esPropio) {
+          // El discípulo viendo su propio perfil → editar.
+          showActions(`<button class="btn-re" onclick="location.href='perfil-edicion.html'">Editar mi perfil de discípulo</button>`);
+        } else if (_solData && (_solData.estado === 'aceptada' || _solData.estado === 'rechazada')) {
+          // Solicitud ya respondida.
+          if (_solData.estado === 'aceptada' && relActiva) {
+            showActions(
+              `<button class="btn-chat-gold" onclick="location.href='periodo-prueba.html?id=${relActiva.id}'">Entrar al chat →</button>
+               <div style="text-align:center;font-size:10px;color:var(--text-faint);font-style:italic;padding:4px;">✓ Solicitud aceptada</div>`);
+          } else {
+            showActions(
+              `<div style="text-align:center;font-size:12px;color:var(--text-muted);font-family:var(--font-serif);font-style:italic;padding:8px;">
+                ${_solData.estado === 'aceptada' ? '✓ Ya aceptaste esta solicitud' : '✕ Ya rechazaste esta solicitud'}
+               </div>`);
+          }
+        } else if (_solData && solId && _maestroId) {
+          // Solicitud pendiente → aceptar / no aceptar.
+          showActions(
+            `<button class="btn-ac" onclick="window.aceptarDisc()">Aceptar solicitud</button>
+             <button class="btn-re" onclick="window.rechazarDisc()">No aceptar</button>`);
+        } else if (relActiva) {
+          // Relación ya activa con este maestro → chat.
+          showActions(`<button class="btn-chat-gold" onclick="location.href='periodo-prueba.html?id=${relActiva.id}'">Entrar al chat →</button>`);
+        }
+        // En cualquier otro caso (vista pública sin acción real): sin CTA.
+
+        // ── Aceptar / rechazar solicitud ──────────────────────────────────
+        window.aceptarDisc = async function() {
+          if (!solId || !_maestroId) { location.href = 'solicitudes.html'; return; }
+          const btn = document.querySelector('.btn-ac');
+          btn.textContent = 'Aceptando…'; btn.disabled = true;
+
+          await supabase.from('solicitudes').update({ estado: 'aceptada' }).eq('id', solId);
+          const { data: rel, error } = await supabase.from('relaciones').insert({
+            maestro_id:   _maestroId,
+            discipulo_id: discipuloId,
+            disciplina:   _solData?.disciplina || '',
+            estado:       'prueba',
+          }).select('id').single();
+          if (error) { console.error('Error aceptando solicitud:', error); btn.textContent = 'No se pudo aceptar. Reintenta'; btn.disabled = false; return; }
+          location.href = `periodo-prueba.html?id=${rel.id}`;
+        };
+
+        window.rechazarDisc = async function() {
+          if (!solId) { location.href = 'solicitudes.html'; return; }
+          await supabase.from('solicitudes').update({ estado: 'rechazada' }).eq('id', solId);
+          location.href = 'solicitudes.html';
+        };
+
+      } catch (e) {
+        console.warn('Error cargando perfil de discípulo:', e?.message || e);
+        estadoPagina('No hemos podido cargar este perfil ahora mismo.',
+          'Inténtalo de nuevo en un momento.');
       }
-    } else {
-      // Sin solicitud: ocultar sección de motivación
-      document.getElementById('pd-sol-sec').style.display = 'none';
-      const dividers = document.querySelectorAll('.divider-sand');
-      if (dividers[0]) dividers[0].style.display = 'none';
-      // Si hay relación activa, mostrar botón de chat; si no, ocultar acciones
-      if (relActiva) {
-        document.getElementById('pd-actions').innerHTML =
-          `<button class="btn-chat-gold" onclick="location.href='periodo-prueba.html?id=${relActiva.id}'">Entrar al chat →</button>`;
-      } else {
-        document.getElementById('pd-actions').style.display = 'none';
-      }
-    }
-
-    // — Historial —
-    // Item de relación activa (al principio, si existe)
-    const activaHTML = relActiva ? `
-      <div class="activa-item">
-        <div style="flex:1;">
-          <div class="hist-disc">${escHtml(relActiva.disciplina || '—')}</div>
-          <div class="hist-sub">${relActiva.estado === 'prueba' ? 'Periodo de prueba en curso' : 'Relación consolidada'}</div>
-        </div>
-        <span class="hist-badge hb-partial" style="margin-right:8px;">${relActiva.estado === 'prueba' ? '⏳ En prueba' : '✦ Activa'}</span>
-        <button onclick="location.href='periodo-prueba.html?id=${relActiva.id}'"
-          style="font-family:var(--font-serif);font-size:12px;font-style:italic;color:var(--gold);background:none;border:0.5px solid var(--border-gold);padding:6px 14px;border-radius:100px;cursor:pointer;white-space:nowrap;transition:background 0.18s;"
-          onmouseover="this.style.background='rgba(200,151,58,0.08)'" onmouseout="this.style.background='none'">
-          Chat →
-        </button>
-      </div>` : '';
-
-    document.getElementById('pd-historial').innerHTML = activaHTML + (historial.length
-      ? historial.map(h => {
-          const done = h.estado === 'completada';
-          const cancel = h.estado === 'cancelada';
-          const badgeClass = done ? 'hb-complete' : cancel ? '' : 'hb-partial';
-          const badgeText  = done ? '✓ Completada' : cancel ? '✕ Cancelada' : 'En curso';
-          const badgeStyle = cancel
-            ? 'color:var(--red);background:rgba(113,43,19,0.1);border:0.5px solid rgba(113,43,19,0.3);'
-            : '';
-          return `
-            <div class="hist-item">
-              <div>
-                <div class="hist-disc">${escHtml(h.disciplina)}</div>
-                <div class="hist-sub">${h.maestro_nombre ? 'Maestro: ' + escHtml(h.maestro_nombre) : ''}${h.duracion_meses ? ' · ' + escHtml(h.duracion_meses) + ' meses' : ''}</div>
-              </div>
-              <span class="hist-badge ${badgeClass}" style="${badgeStyle}">${badgeText}</span>
-            </div>`;
-        }).join('')
-      : `<p style="font-size:12px;color:var(--text-muted);padding:8px 0;">Sin historial de prácticas todavía.</p>`);
-
-    // — Acciones aceptar / rechazar —
-    window.aceptarDisc = async function() {
-      if (!solId || !_maestroId) { location.href = 'solicitudes.html'; return; }
-      const btn = document.querySelector('.btn-ac');
-      btn.textContent = 'Aceptando…'; btn.disabled = true;
-
-      await supabase.from('solicitudes').update({ estado: 'aceptada' }).eq('id', solId);
-      const { data: rel, error } = await supabase.from('relaciones').insert({
-        maestro_id:   _maestroId,
-        discipulo_id: discipuloId,
-        disciplina:   _solData?.disciplina || '',
-        estado:       'prueba',
-      }).select('id').single();
-      if (error) { console.error('Error aceptando solicitud:', error); btn.textContent = 'No se pudo aceptar. Reintenta'; btn.disabled = false; return; }
-      location.href = `periodo-prueba.html?id=${rel.id}`;
-    };
-
-    window.rechazarDisc = async function() {
-      if (!solId) { location.href = 'solicitudes.html'; return; }
-      await supabase.from('solicitudes').update({ estado: 'rechazada' }).eq('id', solId);
-      location.href = 'solicitudes.html';
-    };
+    })();
   </script>
 </body>
 </html>
