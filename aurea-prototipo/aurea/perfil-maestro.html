@@ -114,14 +114,19 @@
       </div>
       <div>
         <span class="section-label">Disponibilidad</span>
+        <div class="avail-row"><span class="avail-label">Estado</span><span class="avail-val" id="av-estado">—</span></div>
+        <div class="avail-row"><span class="avail-label">Ritmo</span><span class="avail-val" id="av-ritmo">—</span></div>
+        <div class="avail-row"><span class="avail-label">Modalidad</span><span class="avail-val" id="av-modalidad">—</span></div>
         <div class="avail-row"><span class="avail-label">Días</span><span class="avail-val" id="av-dias">—</span></div>
         <div class="avail-row"><span class="avail-label">Horas semanales</span><span class="avail-val" id="av-horas">—</span></div>
         <div class="avail-row"><span class="avail-label">Nivel requerido</span><span class="avail-val" id="av-nivel">—</span></div>
+        <p id="av-notas" style="display:none;font-size:12px;font-weight:300;font-style:italic;color:var(--text-muted);line-height:1.6;margin-top:10px;"></p>
       </div>
       <div style="text-align:center;">
         <div id="btn-plaza" class="btn-circle" onclick="window.openSolicitud()"><div class="btn-circle-label">Enviar<br>solicitud</div></div>
         <div id="btn-wait" class="btn-circle wait hidden"><div class="btn-circle-label">Lista de<br>espera</div></div>
         <a id="btn-own" class="btn-secondary hidden" href="perfil.html" style="display:inline-block;text-decoration:none;">Ver mi cuenta</a>
+        <p id="disp-msg" style="display:none;font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.6;margin-top:12px;"></p>
       </div>
     </div>
     <div class="col-right">
@@ -218,6 +223,7 @@
     let _maestroId   = null;
     let _disciplina  = '';
     let _nombreCompleto = 'este maestro';
+    let _estadoDisp  = 'abierta';   // disponibilidad del maestro (spec 036)
 
     // Usuario actual (para impedir solicitarse a uno mismo — spec 031).
     let _currentUserId = null;
@@ -254,6 +260,12 @@
       // Defensa: nunca crear una solicitud hacia uno mismo, aunque se manipule el front.
       if (session && _maestroId && session.user.id === _maestroId) {
         err.textContent = 'No puedes enviarte una solicitud a ti mismo.';
+        err.classList.add('show');
+        return;
+      }
+      // Defensa: si el maestro está en pausa, no se crea solicitud (spec 036).
+      if (_estadoDisp === 'pausada') {
+        err.textContent = 'Este maestro no acepta nuevas solicitudes ahora mismo.';
         err.classList.add('show');
         return;
       }
@@ -310,6 +322,7 @@
           .from('maestro_perfiles')
           .select(`disciplina, categoria, subcategoria, hashtags, experiencia_anos, formato,
                    disponibilidad_dias, horas_semanales, max_discipulos,
+                   disponibilidad_estado, ritmo_preferido, disponibilidad_notas,
                    acepta_solicitudes, constancia_minima, motivacion_obligatoria,
                    nivel_requerido, requisitos_libres, reputacion,
                    profiles (nombre, apellido, avatar_color, bio, ubicacion, verified)`)
@@ -366,7 +379,7 @@
         ? (m.subcategoria ? `${m.categoria} › ${m.subcategoria}` : m.categoria)
         : '';
       document.getElementById('p-disc').textContent = m.disciplina || '';
-      const fmtLabel = { presencial:'Presencial', online:'Online', ambos:'Presencial y online' };
+      const fmtLabel = { presencial:'Presencial', online:'Online', ambos:'Online o presencial', a_acordar:'A acordar' };
       document.getElementById('p-ubicacion').textContent =
         (p?.ubicacion || '') + (m.formato ? ' · ' + (fmtLabel[m.formato] || '') : '');
 
@@ -390,9 +403,33 @@
       document.getElementById('av-nivel').textContent =
         nivel ? nivel[0].toUpperCase() + nivel.slice(1) : 'Sin requisito';
 
-      if (!m.acepta_solicitudes || plazas === 0) {
+      // — Disponibilidad y ritmo (spec 036) —
+      const ESTADO_LBL = { abierta:'Acepta solicitudes', limitada:'Disponibilidad limitada', pausada:'No acepta solicitudes ahora' };
+      const RITMO_LBL  = { mensual:'Una sesión al mes', quincenal:'Cada dos semanas', semanal:'Una sesión semanal', intensivo:'Ritmo intensivo', flexible:'Flexible', a_acordar:'A acordar' };
+      // Estado: usa disponibilidad_estado; si falta (perfil antiguo) se deriva de acepta_solicitudes.
+      _estadoDisp = m.disponibilidad_estado || (m.acepta_solicitudes ? 'abierta' : 'pausada');
+      document.getElementById('av-estado').textContent    = ESTADO_LBL[_estadoDisp] || '—';
+      document.getElementById('av-ritmo').textContent     = RITMO_LBL[m.ritmo_preferido] || 'A acordar';
+      document.getElementById('av-modalidad').textContent = fmtLabel[m.formato] || 'A acordar';
+      if (m.disponibilidad_notas) {
+        const nEl = document.getElementById('av-notas');
+        nEl.textContent = m.disponibilidad_notas;   // texto plano (textContent), sin HTML
+        nEl.style.display = 'block';
+      }
+
+      // — CTA según el estado de disponibilidad —
+      const dispMsg = document.getElementById('disp-msg');
+      if (_estadoDisp === 'pausada') {
+        document.getElementById('btn-plaza').classList.add('hidden');
+        document.getElementById('btn-wait').classList.add('hidden');
+        dispMsg.textContent = 'Este maestro no acepta nuevas solicitudes ahora mismo.';
+        dispMsg.style.display = 'block';
+      } else if (plazas === 0) {
         document.getElementById('btn-plaza').classList.add('hidden');
         document.getElementById('btn-wait').classList.remove('hidden');
+      } else if (_estadoDisp === 'limitada') {
+        dispMsg.textContent = 'Este maestro tiene disponibilidad limitada. Envía una solicitud cuidada y concreta.';
+        dispMsg.style.display = 'block';
       }
 
       // Perfil propio: no puedes solicitarte a ti mismo (spec 031). Oculta

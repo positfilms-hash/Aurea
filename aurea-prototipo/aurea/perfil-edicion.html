@@ -122,11 +122,12 @@
             </div>
             <div class="edit-field" style="margin-bottom:18px;"><span class="edit-label">Disciplina principal</span><input class="edit-input" id="f-disciplina" type="text" placeholder="Ej. Estoicismo clásico, Carpintería japonesa…"></div>
             <div class="edit-row" style="margin-bottom:18px;">
-              <div class="edit-field"><span class="edit-label">Formato</span>
+              <div class="edit-field"><span class="edit-label">Modalidad de acompañamiento</span>
                 <select class="edit-input" id="f-formato" style="cursor:pointer;">
-                  <option value="ambos">Presencial y online</option>
-                  <option value="presencial">Solo presencial</option>
-                  <option value="online">Solo online</option>
+                  <option value="ambos">Online o presencial</option>
+                  <option value="online">Online</option>
+                  <option value="presencial">Presencial</option>
+                  <option value="a_acordar">A acordar</option>
                 </select>
               </div>
               <div class="edit-field"><span class="edit-label">Años de experiencia</span><input class="edit-input" id="f-anos" type="number" min="0" max="60" placeholder="10"></div>
@@ -145,11 +146,31 @@
               </div>
               <div class="edit-field"><span class="edit-label">Radio presencial (km)</span><input class="edit-input" id="f-radio" type="number" min="0" placeholder="30"></div>
             </div>
-            <div class="edit-field" style="margin-bottom:6px;"><span class="edit-label">Aceptar solicitudes</span>
-              <select class="edit-input" id="f-acepta" style="cursor:pointer;">
-                <option value="true">Sí, acepto solicitudes</option>
-                <option value="false">No (en pausa)</option>
-              </select>
+            <!-- Disponibilidad y ritmo (spec 036) -->
+            <div style="font-size:9px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin:8px 0 4px;">Disponibilidad y ritmo</div>
+            <div style="font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.6;margin-bottom:14px;">Indica qué tipo de relación puedes sostener ahora. Esto ayuda a que las solicitudes sean más realistas.</div>
+            <div class="edit-row" style="margin-bottom:18px;">
+              <div class="edit-field"><span class="edit-label">¿Aceptas nuevas solicitudes?</span>
+                <select class="edit-input" id="f-estado" style="cursor:pointer;">
+                  <option value="abierta">Acepto solicitudes</option>
+                  <option value="limitada">Disponibilidad limitada</option>
+                  <option value="pausada">No acepto ahora</option>
+                </select>
+              </div>
+              <div class="edit-field"><span class="edit-label">¿Qué ritmo prefieres?</span>
+                <select class="edit-input" id="f-ritmo" style="cursor:pointer;">
+                  <option value="a_acordar">A acordar</option>
+                  <option value="mensual">Una sesión al mes</option>
+                  <option value="quincenal">Cada dos semanas</option>
+                  <option value="semanal">Una sesión semanal</option>
+                  <option value="intensivo">Ritmo intensivo</option>
+                  <option value="flexible">Flexible</option>
+                </select>
+              </div>
+            </div>
+            <div class="edit-field" style="margin-bottom:6px;">
+              <span class="edit-label">Nota breve de disponibilidad</span>
+              <textarea class="edit-input" id="f-notas" rows="2" maxlength="500" placeholder="Ej. Ahora mismo acepto pocas relaciones y prefiero empezar con una conversación inicial." style="resize:vertical;font-family:inherit;"></textarea>
             </div>
             <div class="edit-field" style="margin-bottom:18px;">
               <span class="edit-label">Hashtags del maestro</span>
@@ -924,7 +945,11 @@
           const dias         = document.getElementById('f-dias')?.value.trim() || '';
           const horas        = document.getElementById('f-horas')?.value.trim() || '';
           const maxDisc      = parseInt(document.getElementById('f-max-disc')?.value) || 4;
-          const acepta       = document.getElementById('f-acepta')?.value === 'true';
+          const estadoDisp   = document.getElementById('f-estado')?.value || 'abierta';
+          const ritmo        = document.getElementById('f-ritmo')?.value  || 'a_acordar';
+          const notasDisp    = (document.getElementById('f-notas')?.value || '').trim();
+          // acepta_solicitudes se mantiene como espejo del estado (spec 036).
+          const acepta       = estadoDisp !== 'pausada';
           const hashtags     = _htMaestro.getTags();
 
           const constancia = parseInt(document.getElementById('f-constancia')?.value) || 0;
@@ -943,6 +968,9 @@
               horas_semanales:      horas || null,
               max_discipulos:       maxDisc,
               acepta_solicitudes:   acepta,
+              disponibilidad_estado: estadoDisp,
+              ritmo_preferido:       ritmo,
+              disponibilidad_notas:  notasDisp || null,
               hashtags,
               constancia_minima:    constancia,
               motivacion_obligatoria: motivacion,
@@ -1150,7 +1178,11 @@
           document.getElementById('f-dias').value         = m.disponibilidad_dias || '';
           document.getElementById('f-horas').value        = m.horas_semanales    || '';
           document.getElementById('f-max-disc').value     = String(m.max_discipulos || 4);
-          document.getElementById('f-acepta').value       = m.acepta_solicitudes ? 'true' : 'false';
+          // disponibilidad_estado es la fuente de verdad; si falta (perfil antiguo),
+          // se deriva de acepta_solicitudes (spec 036).
+          document.getElementById('f-estado').value = m.disponibilidad_estado || (m.acepta_solicitudes ? 'abierta' : 'pausada');
+          document.getElementById('f-ritmo').value  = m.ritmo_preferido || 'a_acordar';
+          document.getElementById('f-notas').value  = m.disponibilidad_notas || '';
           if (m.categoria) {
             document.getElementById('f-categoria').value = m.categoria;
             poblarSub(document.getElementById('f-categoria'), document.getElementById('f-subcategoria'), m.subcategoria || '');

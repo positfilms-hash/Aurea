@@ -194,6 +194,9 @@
         avatarUrl:    p.avatar_url || '',
         avatarBg:     p.avatar_color,
         abierto:      !!m.acepta_solicitudes,
+        estado:       m.disponibilidad_estado || (m.acepta_solicitudes ? 'abierta' : 'pausada'),
+        ritmo:        (m.ritmo_preferido || '').trim(),
+        modalidad:    (m.formato || '').trim(),
       };
     }
 
@@ -213,7 +216,11 @@
       const tags  = m.tags.length ? `<div class="mcard-tags">${m.tags.map(t => `<span class="mcard-tag">${escHtml(t)}</span>`).join('')}</div>` : '';
       const repNum = Number(m.rep);
       const rep   = (m.rep != null && Number.isFinite(repNum)) ? `<span class="mcard-rep">★ ${repNum.toFixed(1)}</span>` : '';
-      const meta  = `<div class="mcard-meta">${rep}<span>${m.abierto ? 'Acepta solicitudes' : 'Lista de espera'}</span></div>`;
+      const ESTADO_C = { abierta:'Acepta solicitudes', limitada:'Disponibilidad limitada', pausada:'No acepta ahora' };
+      const RITMO_C  = { mensual:'Mensual', quincenal:'Quincenal', semanal:'Semanal', intensivo:'Intensivo', flexible:'Flexible' };
+      const MOD_C    = { online:'Online', presencial:'Presencial', ambos:'Online/presencial' };
+      const compact  = [RITMO_C[m.ritmo], MOD_C[m.modalidad]].filter(Boolean).join(' · ');
+      const meta  = `<div class="mcard-meta">${rep}<span>${ESTADO_C[m.estado] || 'Acepta solicitudes'}</span>${compact ? `<span style="color:var(--text-faint);">${escHtml(compact)}</span>` : ''}</div>`;
       const solicitar = _puedeSolicitar
         ? `<button type="button" class="btn-card btn-solicitar" onclick="event.stopPropagation();window.location.href='${href}'">Solicitar aprendizaje</button>`
         : '';
@@ -326,7 +333,8 @@
       try {
         const { data, error } = await supabase
           .from('maestro_perfiles')
-          .select(`id, disciplina, categoria, subcategoria, hashtags, acepta_solicitudes, reputacion,
+          .select(`id, disciplina, categoria, subcategoria, hashtags, acepta_solicitudes,
+                   disponibilidad_estado, ritmo_preferido, formato, reputacion,
                    profiles (nombre, apellido, avatar_color, avatar_url, frase)`)
           .order('reputacion', { ascending: false, nullsFirst: false });
         if (error) throw error;
