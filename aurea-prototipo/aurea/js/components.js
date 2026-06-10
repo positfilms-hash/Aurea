@@ -19,7 +19,7 @@ function renderMobileTabbar(active='') {
     { id:'discover',    href:'discover.html',    label:'Inicio',      icon:'🏠' },
     { id:'solicitudes', href:'solicitudes.html', label:'Solicitudes', icon:'✉' },
     { id:'relaciones',  href:'relaciones.html',  label:'Relaciones',  icon:'✦' },
-    { id:'mensajes',    href:'mensajes.html',    label:'Mensajes',    icon:'💬', badge:true },
+    { id:'mensajes',    href:'mensajes.html',    label:'Actividad',   icon:'💬', badge:true },
     { id:'perfil',      href:'perfil.html',      label:'Perfil',      icon:'👤' },
   ];
   return `<nav class="mobile-tabbar" aria-label="Navegación principal">
@@ -66,7 +66,7 @@ function renderNavAuth(active='', user='') {
     ddItems += `<div class="nav-dd-sep"></div>`;
   }
   ddItems += `<a class="nav-dd-item" href="perfil.html">Ver mi perfil</a>`;
-  ddItems += `<a class="nav-dd-item" href="perfil-edicion.html">Editar perfil</a>`;
+  ddItems += `<a class="nav-dd-item" href="perfil-edicion.html">Ajustes de cuenta</a>`;
   ddItems += `<a class="nav-dd-item" href="historia.html">Mi historia</a>`;
   if (rol !== 'ambos') {
     const otro = rol === 'maestro' ? 'discipulo' : 'maestro';
@@ -80,13 +80,13 @@ function renderNavAuth(active='', user='') {
     <div class="nav-links">
       <a class="nav-link${active==='discover'?' active':''}" href="discover.html">Discover</a>
       ${relDd}
-      <a class="nav-link${active==='mensajes'?' active':''}" href="mensajes.html" id="nav-msg-link">Mensajes <span id="nav-msg-badge" class="notif-badge" style="display:none;margin-left:3px;">0</span></a>
       ${pages.filter(p=>p.id!=='discover').map(p=>`<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('')}
     </div>
     <div class="nav-notif-wrap" id="nav-notif-wrap">
-      <button class="nav-notif-btn" id="nav-notif-btn" onclick="toggleNotifDd()" title="Notificaciones" aria-label="Notificaciones">🔔<span id="nav-notif-badge" class="notif-badge" style="display:none;">0</span></button>
+      <button class="nav-notif-btn" id="nav-notif-btn" onclick="toggleNotifDd()" title="Actividad" aria-label="Actividad">🔔<span id="nav-notif-badge" class="notif-badge" style="display:none;">0</span></button>
       <div class="nav-dd nav-notif-dd" id="nav-notif-dd">
-        <div class="nav-notif-head"><span>Notificaciones</span><button class="nav-notif-readall" onclick="marcarTodasLeidas()">Marcar todas</button></div>
+        <div class="nav-notif-head"><span>Actividad</span><button class="nav-notif-readall" onclick="marcarTodasLeidas()">Marcar todas</button></div>
+        <a class="nav-notif-msglink" href="mensajes.html">💬 Ver mensajes</a>
         <div class="nav-notif-list" id="nav-notif-list"><div class="nav-notif-empty">Cargando…</div></div>
       </div>
     </div>
@@ -173,6 +173,13 @@ function cambiarRolNav(rol) {
       }
     });
     if (targetBtn) window.setRole(rol, targetBtn);
+  }
+
+  // 6. Cambiar el CONTEXTO de navegación (spec 031): el cambio de rol no es solo
+  //    visual. En perfil.html (hay .role-btn) el cambio es en sitio y NO se navega;
+  //    en el resto de páginas se lleva al contexto del rol elegido.
+  if (roleBtns.length === 0) {
+    window.location.href = (rol === 'discipulo') ? 'discover.html' : 'solicitudes.html';
   }
 }
 
