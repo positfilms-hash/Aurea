@@ -198,7 +198,8 @@
       const disc  = m.disciplina ? `<div class="mcard-disc">${escHtml(m.disciplina)}</div>` : '';
       const frase = m.frase ? `<p class="mcard-frase">${escHtml(m.frase)}</p>` : '';
       const tags  = m.tags.length ? `<div class="mcard-tags">${m.tags.map(t => `<span class="mcard-tag">${escHtml(t)}</span>`).join('')}</div>` : '';
-      const rep   = (m.rep != null) ? `<span class="mcard-rep">★ ${Number(m.rep).toFixed(1)}</span>` : '';
+      const repNum = Number(m.rep);
+      const rep   = (m.rep != null && Number.isFinite(repNum)) ? `<span class="mcard-rep">★ ${repNum.toFixed(1)}</span>` : '';
       const meta  = `<div class="mcard-meta">${rep}<span>${m.abierto ? 'Acepta solicitudes' : 'Lista de espera'}</span></div>`;
       const solicitar = _puedeSolicitar
         ? `<button type="button" class="btn-card btn-solicitar" onclick="event.stopPropagation();window.location.href='${href}'">Solicitar aprendizaje</button>`
@@ -246,6 +247,17 @@
 
     // — "Sin resultados" según el filtro activo (spec 026) —
     function sinResultados() {
+      // Con búsqueda libre activa, el vacío puede deberse a la búsqueda y no a
+      // que la categoría/subcategoría esté vacía: estado genérico (no engañar).
+      if ((searchEl.value || '').trim()) {
+        estadoVacioConCTA(
+          'No hemos encontrado maestros con esos filtros.',
+          'Prueba con otra categoría, subcategoría o términos de búsqueda distintos.',
+          'Limpiar filtros',
+          limpiarFiltros,
+          'Sin resultados');
+        return;
+      }
       if (activeSub) {
         // Subcategoría activa sin maestros → volver a toda la categoría.
         estadoVacioConCTA(

@@ -31,3 +31,5 @@ Regla: guardar salvo que sea fundamental; resolver cada 2-3 specs o al tocar un 
 |---|--------|-------------|--------|
 | R5 | spec 028 (Codex) | `perfil.html`: panel "Rol y apariencia" mostraba tema de localStorage sin aplicar reglas reales (discipulo→arena, maestro→dark). Label se desincronizaba al alternar el toggle en `ambos`. | ✅ hecho (derivación correcta en `buildAjustesHTML` + sync en `setRole`) |
 | O3b | legacy | Columnas `relaciones.decision_maestro` / `decision_discipulo` sin uso. | ✅ hecho (spec 018 + migración 014: `DROP COLUMN IF EXISTS`). |
+| R3 | spec 026 (Codex) | `discover.html`: los estados vacíos específicos no contemplaban la búsqueda libre activa (copy engañoso si la búsqueda dejaba `FILTERED` a 0). | ✅ hecho (misma rama 026: con `searchEl.value` no vacío se prioriza "sin resultados con esos filtros" + Limpiar filtros). |
+| R4 | spec 026 (Codex) | `discover.html`: `Number(m.rep).toFixed(1)` podía pintar `NaN` si `reputacion` no fuera numérico. | ✅ hecho (misma rama 026: guard `m.rep != null && Number.isFinite(repNum)`). |
