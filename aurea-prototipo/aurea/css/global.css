@@ -8,7 +8,7 @@
      Antes el oscuro era el default con override .theme-arena; ahora el claro es
      el único tema. El dorado se oscurece para contrastar sobre fondo claro. */
   --gold:        #7A4F2A;
-  --gold-light:  #9A6A3A;
+  --gold-light:  #875A2E;
   --gold-dark:   #5A3010;
   --gold-dim:    #7A4F2A33;
   --night:       #F5EDE0;
@@ -96,7 +96,7 @@ img { max-width: 100%; display: block; }
 .nav-cta:hover { opacity:0.85; }
 .nav-cta-outline { font-size:11px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold); background:transparent; padding:9px 20px; border-radius:4px; border:1px solid var(--gold); transition:all 0.2s; }
 .nav-cta-outline:hover { background:var(--gold); color:var(--night); }
-.nav-avatar { width:30px; height:30px; border-radius:50%; background:#2A1F14; border:0.5px solid var(--gold); display:flex; align-items:center; justify-content:center; font-family:var(--font-serif); font-size:12px; color:var(--gold); cursor:pointer; text-decoration:none; transition:background 0.2s; }
+.nav-avatar { width:30px; height:30px; border-radius:50%; background:var(--night-mid); border:0.5px solid var(--gold); display:flex; align-items:center; justify-content:center; font-family:var(--font-serif); font-size:12px; color:var(--gold); cursor:pointer; text-decoration:none; transition:background 0.2s; }
 .nav-avatar:hover { background:var(--night-deep); }
 .nav-perfil-btn { font-size:10px; font-weight:400; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold); background:var(--night-deep); border:0.5px solid var(--gold); border-radius:100px; padding:6px 14px; cursor:pointer; text-decoration:none; transition:all 0.2s; white-space:nowrap; }
 .nav-perfil-btn:hover, .nav-perfil-btn.active { background:var(--gold); color:var(--night); }
@@ -191,7 +191,7 @@ img { max-width: 100%; display: block; }
 .badge-nueva     { color:var(--gold);   background:var(--night-deep); border:0.5px solid var(--gold-dim); }
 .badge-vista     { color:var(--text-faint); background:var(--night-mid); border:0.5px solid var(--border); }
 .badge-aceptada  { color:var(--green);  background:#E2EFD3; border:0.5px solid #3B6D1144; }
-.badge-rechazada { color:var(--red);    background:#2A1210; border:0.5px solid #71291344; }
+.badge-rechazada { color:var(--red);    background:#F5DAD5; border:0.5px solid #8A1A0833; }
 .badge-prueba    { color:var(--purple); background:#E7E4F5; border:0.5px solid #53489744; }
 
 /* DIVIDER */
