@@ -168,8 +168,16 @@
           supabase.from('discipulo_perfiles')
             .select('disciplina_buscada, categoria, nivel, disponibilidad_dias, horas_semanales, hashtags')
             .eq('id', discipuloId).maybeSingle(),
-          solId
-            ? supabase.from('solicitudes').select('motivacion, disciplina, estado').eq('id', solId).maybeSingle()
+          // Solicitud: solo si la mira el maestro implicado, y validando que la
+          // solicitud pertenece a ESTE discípulo y a ESTE maestro (evita IDOR
+          // por URL manipulada). Sin match → null → ni carta ni acciones.
+          (solId && _maestroId)
+            ? supabase.from('solicitudes')
+                .select('motivacion, disciplina, estado, discipulo_id, maestro_id')
+                .eq('id', solId)
+                .eq('discipulo_id', discipuloId)
+                .eq('maestro_id', _maestroId)
+                .maybeSingle()
             : Promise.resolve({ data: null }),
           (_maestroId && !_esPropio)
             ? supabase.from('relaciones')
@@ -191,7 +199,15 @@
           return;
         }
 
-        const dp        = dpRes.data || {};
+        // discipulo_perfiles: anon no tiene GRANT (degradación silenciosa). Un
+        // error inesperado con sesión sí se trata como fallo de carga.
+        let dp = {};
+        if (dpRes.error) {
+          const esPermiso = dpRes.error.code === '42501' || dpRes.status === 401 || dpRes.status === 403;
+          if (!esPermiso) throw dpRes.error;
+        } else {
+          dp = dpRes.data || {};
+        }
         _solData        = solRes?.data || null;
         const relActiva = relRes?.data || null;
 
@@ -323,18 +339,23 @@
 
         // ── Aceptar / rechazar solicitud ──────────────────────────────────
         window.aceptarDisc = async function() {
-          if (!solId || !_maestroId) { location.href = 'solicitudes.html'; return; }
+          // _solData solo existe si la solicitud pertenece a este maestro y a este
+          // discípulo (validado en la carga); sin él no se acepta nada.
+          if (!solId || !_maestroId || !_solData) { location.href = 'solicitudes.html'; return; }
           const btn = document.querySelector('.btn-ac');
           btn.textContent = 'Aceptando…'; btn.disabled = true;
 
-          await supabase.from('solicitudes').update({ estado: 'aceptada' }).eq('id', solId);
+          // Crear la relación PRIMERO; solo si se crea, marcar la solicitud
+          // aceptada (evita dejar una solicitud aceptada sin relación). La
+          // atomicidad total exigiría un RPC, fuera del alcance de la spec 027.
           const { data: rel, error } = await supabase.from('relaciones').insert({
             maestro_id:   _maestroId,
-            discipulo_id: discipuloId,
-            disciplina:   _solData?.disciplina || '',
+            discipulo_id: _solData.discipulo_id,
+            disciplina:   _solData.disciplina || '',
             estado:       'prueba',
           }).select('id').single();
           if (error) { console.error('Error aceptando solicitud:', error); btn.textContent = 'No se pudo aceptar. Reintenta'; btn.disabled = false; return; }
+          await supabase.from('solicitudes').update({ estado: 'aceptada' }).eq('id', solId);
           location.href = `periodo-prueba.html?id=${rel.id}`;
         };
 
