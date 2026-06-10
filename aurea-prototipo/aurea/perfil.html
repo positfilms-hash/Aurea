@@ -64,6 +64,18 @@
     .disc-name{font-size:12px;font-weight:400;color:var(--text-primary);}
     .disc-sub{font-size:10px;font-weight:300;color:var(--text-faint);}
     .disc-since{font-size:10px;color:var(--text-faint);}
+    /* — Ajustes de cuenta (spec 028) — */
+    #ajustes-section{display:flex;flex-direction:column;gap:14px;}
+    .ajuste-card{background:var(--night-mid);border:0.5px solid var(--border);border-radius:12px;padding:20px 22px;}
+    .ajuste-card-hd{font-size:9px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+    .ajuste-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);}
+    .ajuste-row:last-child{border-bottom:none;}
+    .ajuste-lbl{font-size:12px;font-weight:300;color:var(--text-muted);}
+    .ajuste-val{font-size:12px;color:var(--text-primary);}
+    .ajuste-ctas{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+    .completitud-bar-wrap{background:var(--border);border-radius:100px;height:4px;margin:6px 0 12px;overflow:hidden;}
+    .completitud-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--gold-dark),var(--gold));}
+    .ajuste-card.danger{border-color:#E8707044;}
   </style>
 </head>
 <body>
@@ -120,7 +132,10 @@
       </div>
       <button class="btn-editar" id="btn-editar" onclick="location.href='perfil-edicion.html'">Editar perfil</button>
     </div>
-    <div class="col-right" id="col-right"></div>
+    <div class="col-right" id="col-right">
+      <div id="ajustes-section"></div>
+      <div id="col-right-content" style="display:flex;flex-direction:column;gap:28px;"></div>
+    </div>
   </div>
   <div id="chat-container"></div>
   <script src="js/components.js"></script>
@@ -150,6 +165,9 @@
 
       // — Cambiar tema directamente (sin llamar a cambiarRolNav para evitar recursión) —
       if (typeof aureaSetTema === 'function') aureaSetTema(esMaestro ? 'dark' : 'arena');
+      // Sincronizar label de tema en la card de ajustes (spec 028)
+      const _temaValEl = document.getElementById('ajuste-tema-val');
+      if (_temaValEl) _temaValEl.textContent = esMaestro ? 'Oscuro' : 'Arena';
       // Sincronizar badge del nav y dropdown
       const _badge = document.getElementById('nav-rol-badge');
       if (_badge) _badge.textContent = '· ' + (esMaestro ? 'Maestro' : 'Discípulo');
@@ -204,10 +222,10 @@
             <a class="btn-primary" href="perfil-edicion.html" style="margin-top:6px;">Completar perfil</a>
           </div>` + html;
         }
-        document.getElementById('col-right').innerHTML = html;
+        document.getElementById('col-right-content').innerHTML = html;
       } catch(e) {
         console.error('Error renderizando perfil:', e);
-        document.getElementById('col-right').innerHTML =
+        document.getElementById('col-right-content').innerHTML =
           `<div style="padding:40px;font-size:13px;color:var(--text-faint);">Error al cargar el contenido. <a href="javascript:location.reload()" style="color:var(--gold);">Reintentar</a></div>`;
       }
     };
@@ -220,6 +238,69 @@
     }
     function nombreCompleto(p) {
       return ((p?.nombre||'') + ' ' + (p?.apellido||'')).trim() || '—';
+    }
+
+    function buildAjustesHTML(uid, email) {
+      const rolActual  = _profile?.rol || localStorage.getItem('aurea-rol') || 'maestro';
+      // Derivar tema por las reglas reales, no solo localStorage
+      const temaActual = rolActual === 'discipulo' ? 'arena'
+                       : rolActual === 'maestro'   ? 'dark'
+                       : (localStorage.getItem('aurea-tema') || 'dark');
+      const rolLabel   = rolActual === 'ambos' ? 'Maestro y Discípulo'
+                       : rolActual === 'maestro' ? 'Maestro' : 'Discípulo';
+      const temaLabel  = temaActual === 'arena' ? 'Arena' : 'Oscuro';
+
+      // Completitud básica del perfil
+      let tot = 3, done = 0;
+      if (_profile?.nombre?.trim())   done++;
+      if (_profile?.frase?.trim())    done++;
+      if (_profile?.ubicacion?.trim()) done++;
+      if (_maestro) {
+        tot += 2;
+        if (_maestro.disciplina?.trim()) done++;
+        if (_maestro.categoria) done++;
+      }
+      if (_discipulo) {
+        tot += 1;
+        if (_discipulo.disciplina_buscada?.trim()) done++;
+      }
+      const pct       = Math.round(done / tot * 100);
+      const compLabel = pct >= 100 ? 'Perfil completo' : pct + '% completado';
+      const compColor = pct >= 100 ? 'var(--gold)' : 'var(--text-muted)';
+
+      // CTAs perfil público
+      const uidSafe = encodeURIComponent(uid);
+      let ctasPublico = `<a class="btn-primary" href="perfil-edicion.html" style="font-size:13px;">Editar perfil</a>`;
+      if (_maestro)   ctasPublico += `<a class="btn-ghost" href="perfil-maestro.html?id=${uidSafe}" style="font-size:11px;">Ver perfil de maestro</a>`;
+      if (_discipulo) ctasPublico += `<a class="btn-ghost" href="perfil-discipulo.html?id=${uidSafe}" style="font-size:11px;">Ver perfil de discípulo</a>`;
+
+      return `
+        <div style="font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);margin-bottom:6px;">Mi cuenta</div>
+        <div class="ajuste-card">
+          <div class="ajuste-card-hd">Perfil público</div>
+          <div style="font-size:12px;color:${compColor};">${escHtml(compLabel)}</div>
+          <div class="completitud-bar-wrap"><div class="completitud-bar" style="width:${pct}%;"></div></div>
+          <div class="ajuste-ctas">${ctasPublico}</div>
+        </div>
+        <div class="ajuste-card">
+          <div class="ajuste-card-hd">Rol y apariencia</div>
+          <div class="ajuste-row"><span class="ajuste-lbl">Rol activo</span><span class="ajuste-val">${escHtml(rolLabel)}</span></div>
+          <div class="ajuste-row"><span class="ajuste-lbl">Tema</span><span class="ajuste-val" id="ajuste-tema-val">${escHtml(temaLabel)}</span></div>
+        </div>
+        <div class="ajuste-card">
+          <div class="ajuste-card-hd">Cuenta</div>
+          ${email ? `<div class="ajuste-row"><span class="ajuste-lbl">Email</span><span class="ajuste-val" style="font-size:11px;word-break:break-all;">${escHtml(email)}</span></div>` : ''}
+          <div class="ajuste-row"><span class="ajuste-lbl">Estado</span><span class="ajuste-val" style="color:var(--gold);">Conectado</span></div>
+        </div>
+        <div class="ajuste-card">
+          <div class="ajuste-card-hd">Sesión</div>
+          <div class="ajuste-ctas"><a class="btn-ghost" href="logout.html" style="font-size:12px;">Cerrar sesión</a></div>
+        </div>
+        <div class="ajuste-card danger">
+          <div class="ajuste-card-hd" style="color:#E87070;">Zona peligrosa</div>
+          <div style="font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.7;margin-bottom:12px;">Eliminar tu cuenta es irreversible. Todos tus datos serán borrados permanentemente.</div>
+          <div class="ajuste-ctas"><a class="btn-ghost" href="perfil-edicion.html?tab=cuenta" style="font-size:12px;color:#E87070;border-color:#E8707055;">Eliminar cuenta</a></div>
+        </div>`;
     }
 
     function buildMaestroHTML() {
@@ -333,7 +414,7 @@
       _maestro  = mRes.error ? null : mRes.data;
 
       if (!_profile) {
-        document.getElementById('col-right').innerHTML =
+        document.getElementById('col-right-content').innerHTML =
           `<div style="padding:40px;font-size:13px;color:var(--text-faint);">No se pudo cargar el perfil. <a href="perfil-edicion.html" style="color:var(--gold);">Completa tu perfil aquí</a>.</div>`;
         return;
       }
@@ -342,7 +423,7 @@
       const nombre = _profile.nombre || '', apellido = _profile.apellido || '';
       const initials = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
       const av = document.querySelector('.big-avatar');
-      av.style.background = _profile.avatar_url ? 'transparent' : (_profile.avatar_color || 'var(--gold)');
+      av.style.background = _profile.avatar_url ? 'transparent' : safeColor(_profile.avatar_color);
       av.innerHTML = _profile.avatar_url
         ? `<img src="${escHtml(_profile.avatar_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${escHtml(initials)}"><div class="avatar-overlay" onclick="location.href='perfil-edicion.html'">✎</div>`
         : `${initials}<div class="avatar-overlay" onclick="location.href='perfil-edicion.html'">📷</div>`;
@@ -425,6 +506,9 @@
         if (avM[3]) avM[3].textContent = _maestro.radio_km ? `${_maestro.radio_km} km` : '—';
       }
 
+      // — Panel de ajustes de cuenta (spec 028) —
+      document.getElementById('ajustes-section').innerHTML = buildAjustesHTML(uid, session.user.email);
+
       // Toggle: si solo tiene un rol, el otro botón ofrece activarlo
       const rol = _profile.rol || 'discipulo';
       const btns = document.querySelectorAll('.role-btn');
@@ -451,7 +535,7 @@
 
       } catch (err) {
         console.error('Error cargando perfil:', err);
-        document.getElementById('col-right').innerHTML =
+        document.getElementById('col-right-content').innerHTML =
           `<div style="padding:40px;font-size:13px;color:var(--text-faint);">Error al cargar el perfil. <a href="javascript:location.reload()" style="color:var(--gold);">Reintentar</a></div>`;
       }
     }

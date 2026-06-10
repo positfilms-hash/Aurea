@@ -27,6 +27,26 @@ export const CATS = {
 };
 
 /**
+ * Descripciones breves de cada categoría para las cabeceras de exploración
+ * (spec 026). Fuente única en frontend; no se duplican en el HTML. Incluye
+ * 'Otra' (que no aparece en CATS porque no tiene subcategorías).
+ */
+export const CAT_DESC = {
+  'Filosofía':      'Pensamiento, criterio y preguntas profundas sobre cómo vivir y entender el mundo.',
+  'Artes':          'Prácticas creativas, sensibilidad estética y procesos de expresión.',
+  'Oficios':        'Saber práctico, técnica, herramientas y aprendizaje manual o profesional.',
+  'Deportes':       'Disciplina física, entrenamiento, práctica y mejora del rendimiento.',
+  'Negocios':       'Criterio profesional, emprendimiento, estrategia y toma de decisiones.',
+  'Salud':          'Hábitos, cuidado personal y acompañamiento hacia una vida más equilibrada.',
+  'Relaciones':     'Comunicación, vínculos, familia, pareja y vida social.',
+  'Tecnología':     'Habilidades digitales, programación, herramientas y criterio técnico.',
+  'Aprendizaje':    'Métodos de estudio, disciplina, memoria, lectura y desarrollo intelectual.',
+  'Espiritualidad': 'Prácticas interiores, sentido, contemplación y tradiciones espirituales.',
+  'Estilo de vida': 'Rutinas, orden personal, hábitos cotidianos y formas de vivir mejor.',
+  'Otra':           'Áreas de aprendizaje que no encajan claramente en una categoría anterior.',
+};
+
+/**
  * Rellena el <select> de subcategoría según la categoría seleccionada.
  * @param {HTMLSelectElement} catSel  — el select de categoría
  * @param {HTMLSelectElement} subSel  — el select de subcategoría
