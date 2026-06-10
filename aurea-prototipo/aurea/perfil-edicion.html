@@ -1118,6 +1118,13 @@
         });
         if (!tray?.length) window.addTL();
       }
+      // Activar tab por URL (?tab=perfil|trayectoria|requisitos|cuenta) — spec 028
+      const _TABS_OK = ['perfil','trayectoria','requisitos','cuenta'];
+      const _tabP = new URLSearchParams(location.search).get('tab');
+      if (_TABS_OK.includes(_tabP)) {
+        const _tabBtnEl = document.querySelector(`.tab-btn[onclick="showTab('${_tabP}',this)"]`);
+        if (_tabBtnEl && _tabBtnEl.style.display !== 'none') window.showTab(_tabP, _tabBtnEl);
+      }
     }
 
     init();
