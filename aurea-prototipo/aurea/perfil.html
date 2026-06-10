@@ -389,7 +389,7 @@
       const uid = session.user.id;
 
       const [pRes, mRes] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', uid).single(),
+        supabase.from('profiles').select('id, nombre, apellido, avatar_url, avatar_color, bio, frase, ubicacion, rol, constancia_score, verified, activo').eq('id', uid).single(),
         supabase.from('maestro_perfiles').select('*').eq('id', uid).single(),
       ]);
 

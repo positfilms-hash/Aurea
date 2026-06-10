@@ -61,10 +61,12 @@ end $$;
 -- ============================================================
 -- 4. relaciones: el INSERT solo exigía auth.uid() = maestro_id, así que
 --    un maestro podía fabricar relaciones con cualquier discípulo sin
---    una solicitud previa. Se exige que exista una solicitud entre
---    ambos (no que esté 'aceptada': el flujo de aceptación inserta la
---    relación antes de marcar la solicitud aceptada — spec 031) y que
---    maestro y discípulo sean distintos.
+--    una solicitud previa. Se exige que maestro y discípulo sean
+--    distintos y que exista una solicitud entre ambos NO rechazada.
+--    No se exige 'aceptada' porque el flujo de aceptación (spec 031)
+--    inserta la relación antes de marcar la solicitud aceptada, así que
+--    en ese momento está en 'nueva'/'vista'. Se excluye 'rechazada'
+--    para no permitir crear una relación tras rechazar la solicitud.
 -- ============================================================
 drop policy if exists "Maestro puede crear relaciones" on public.relaciones;
 drop policy if exists "Maestro crea relacion con solicitud previa" on public.relaciones;
@@ -75,7 +77,26 @@ create policy "Maestro crea relacion con solicitud previa"
     and maestro_id <> discipulo_id
     and exists (
       select 1 from public.solicitudes s
-      where s.maestro_id  = relaciones.maestro_id
+      where s.maestro_id   = relaciones.maestro_id
         and s.discipulo_id = relaciones.discipulo_id
+        and s.estado in ('nueva', 'vista', 'aceptada')
     )
   );
+
+
+-- ============================================================
+-- 5. (BLOQUEANTE) profiles.email es PII y era legible: por `anon` en los
+--    perfiles de maestro y por CUALQUIER `authenticated` en todos los
+--    perfiles (policy `using(true)` + GRANT de tabla de la 015). La RLS
+--    no filtra por columnas; se quita el SELECT de TABLA y se concede
+--    SELECT solo de las columnas públicas (todas menos `email`). El email
+--    propio se lee de `auth.users` (session.user.email), no de profiles.
+--    (Frontend: los dos `select('*')` sobre profiles se cambian a columnas
+--    explícitas en el mismo PR para no romper.)
+-- ============================================================
+revoke select on public.profiles from anon, authenticated;
+grant select (
+  id, nombre, apellido, avatar_url, avatar_color, bio, frase,
+  ubicacion, rol, constancia_score, verified, activo,
+  created_at, updated_at
+) on public.profiles to anon, authenticated;

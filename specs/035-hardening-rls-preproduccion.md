@@ -35,17 +35,30 @@ constraint). Cuatro cambios:
 
 4. **`relaciones` (INSERT):** la policy pasaba con solo `auth.uid() = maestro_id`, lo
    que permitía a un maestro fabricar relaciones con cualquier discípulo. Se exige
-   además `maestro_id <> discipulo_id` y que **exista una solicitud** entre ambos.
-   No se exige `estado = 'aceptada'` porque el flujo de aceptación (spec 031) inserta
-   la relación **antes** de marcar la solicitud aceptada.
+   además `maestro_id <> discipulo_id` y que **exista una solicitud** entre ambos
+   **no rechazada** (`estado in ('nueva','vista','aceptada')`). No se exige
+   `'aceptada'` porque el flujo de aceptación (spec 031) inserta la relación **antes**
+   de marcar la solicitud aceptada; se excluye `'rechazada'` para no permitir crear
+   una relación tras rechazar (hallazgo Codex).
 
-## Fuera de alcance (documentado, no en 017)
+5. **(Bloqueante) `profiles.email` (PII):** era legible por `anon` (perfiles de
+   maestro) y por **cualquier `authenticated`** (todos los perfiles), vía
+   `using(true)` + el GRANT de tabla de la 015. La RLS no filtra por columnas, así que
+   se **quita el SELECT de tabla** a `anon`/`authenticated` y se **concede SELECT solo
+   de las columnas públicas** (todas menos `email`). El email propio se sigue leyendo
+   de `auth.users` (`session.user.email`). **Cambios de frontend** (en este mismo PR)
+   para no romper: los dos `select('*')` sobre `profiles` pasan a columnas explícitas
+   (`perfil.html` perfil propio, `index.html` el contador). El resto de lecturas ya
+   eran columnas explícitas y los `update` de `profiles` no devuelven `email`.
 
-- **`profiles` con `SELECT using(true)`** expone `constancia_score`/`ubicacion`/
-  `apellido` de todos. Restringir columnas en Postgres requiere una **vista** o
-  **split de tabla** (no hay RLS por columna), y hacerlo mal rompería discover y los
-  perfiles públicos. Se deja para una migración dedicada con diseño cuidadoso. Dato
-  de baja sensibilidad; no bloqueante para abrir a usuarios.
+## Fuera de alcance (documentado, migración futura)
+
+- **Otras columnas de `profiles`** (`constancia_score`, `ubicacion`, `apellido`)
+  siguen siendo legibles por usuarios (son datos semipúblicos del perfil; `ubicacion`
+  y `apellido` se muestran en perfiles públicos por diseño; `constancia_score` del
+  discípulo se oculta en UI pero no en BD). Menor sensibilidad que el email; si se
+  quiere ocultar la constancia, requiere mover esa columna o una vista, en una
+  migración dedicada.
 
 ## Riesgos / verificación manual (¡importante!)
 
