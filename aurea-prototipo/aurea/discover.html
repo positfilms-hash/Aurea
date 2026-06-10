@@ -50,6 +50,11 @@
     .mcard-avatar{width:60px;height:60px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--night);overflow:hidden;background:var(--gold);}
     .mcard-avatar img{width:100%;height:100%;object-fit:cover;}
     .mcard-id{min-width:0;}
+    /* — Botón guardar/favorito en la card (spec 037) — */
+    .mcard-fav{margin-left:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:5px;flex-shrink:0;background:none;border:0.5px solid var(--border);border-radius:100px;padding:7px 11px;font-size:11px;color:var(--text-muted);cursor:pointer;transition:border-color .18s,color .18s,background .18s;}
+    .mcard-fav:hover{border-color:var(--border-gold);color:var(--gold);}
+    .mcard-fav.on{color:var(--gold);border-color:var(--border-gold);background:rgba(200,151,58,.08);}
+    .mcard-fav-ico{font-size:13px;line-height:1;}
     .mcard-name{font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--text-primary);line-height:1.2;overflow-wrap:break-word;}
     .mcard-cat{font-size:10px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-top:4px;line-height:1.3;}
     .mcard-body{display:flex;flex-direction:column;gap:var(--space-3);padding:0 var(--space-5);flex:1;}
@@ -136,21 +141,51 @@
     import { supabase } from './js/supabase.js';
     import { checkNotificaciones } from './js/notif.js';
     import { CATS, CAT_DESC } from './js/categorias.js';
+    import { fetchFavoritos, guardarFavorito, quitarFavorito } from './js/favoritos.js';
 
     // Nav inteligente: público si no hay sesión, auth si la hay.
-    // _puedeSolicitar: solo discípulos (o ambos) autenticados ven el CTA secundario.
+    // _puedeSolicitar / _canSave: solo discípulos (o ambos) autenticados ven el
+    // CTA secundario y el botón de guardar (spec 037, acción de aprendizaje).
     let _puedeSolicitar = false;
+    let _userId = null;
+    let _canSave = false;
+    let FAVS = new Set();        // maestro_id guardados por el usuario actual
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
+      _userId = session.user.id;
       const { data: p } = await supabase.from('profiles')
         .select('nombre, apellido, rol').eq('id', session.user.id).single();
       const ini = p ? ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?' : '?';
       _puedeSolicitar = p?.rol === 'discipulo' || p?.rol === 'ambos';
+      _canSave = _puedeSolicitar;
+      if (_canSave) FAVS = await fetchFavoritos(_userId);
       document.getElementById('nav-container').innerHTML = renderNavAuth('discover', ini);
       checkNotificaciones();
     } else {
       document.getElementById('nav-container').innerHTML = renderNavPublic('');
     }
+
+    // — Toggle guardar/quitar desde una card (favoritos, spec 037) —
+    function setFavBtn(btn, saved) {
+      btn.classList.toggle('on', saved);
+      btn.setAttribute('aria-pressed', saved ? 'true' : 'false');
+      btn.title = saved ? 'Quitar de guardados' : 'Guardar maestro';
+      btn.querySelector('.mcard-fav-ico').textContent = saved ? '♥' : '♡';
+      btn.querySelector('.mcard-fav-lbl').textContent = saved ? 'Guardado' : 'Guardar';
+    }
+    window._toggleFav = async function(btn, id) {
+      if (!_userId || btn.dataset.busy === '1') return;
+      btn.dataset.busy = '1';
+      const wasSaved = FAVS.has(id);
+      const ok = wasSaved
+        ? await quitarFavorito(_userId, id)
+        : await guardarFavorito(_userId, id);
+      if (ok) {
+        if (wasSaved) FAVS.delete(id); else FAVS.add(id);
+        setFavBtn(btn, !wasSaved);
+      }
+      btn.dataset.busy = '0';
+    };
 
 
     let ALL = [], FILTERED = [];
@@ -224,6 +259,12 @@
       const solicitar = _puedeSolicitar
         ? `<button type="button" class="btn-card btn-solicitar" onclick="event.stopPropagation();window.location.href='${href}'">Solicitar aprendizaje</button>`
         : '';
+      // Guardar (favoritos): solo para discípulo/ambos autenticados. id = UUID de BD.
+      const idEsc = escHtml(m.id);
+      const saved = FAVS.has(m.id);
+      const fav = _canSave
+        ? `<button type="button" class="mcard-fav${saved ? ' on' : ''}" aria-pressed="${saved}" title="${saved ? 'Quitar de guardados' : 'Guardar maestro'}" onclick="event.stopPropagation();window._toggleFav(this,'${idEsc}')"><span class="mcard-fav-ico" aria-hidden="true">${saved ? '♥' : '♡'}</span><span class="mcard-fav-lbl">${saved ? 'Guardado' : 'Guardar'}</span></button>`
+        : '';
       return `<div class="mcard" onclick="window.location.href='${href}'">
         <div class="mcard-head">
           ${avatar}
@@ -231,6 +272,7 @@
             <div class="mcard-name">${escHtml(m.nombre)}</div>
             ${cat ? `<div class="mcard-cat">${cat}</div>` : ''}
           </div>
+          ${fav}
         </div>
         <div class="mcard-body">${disc}${frase}${tags}</div>
         ${meta}
