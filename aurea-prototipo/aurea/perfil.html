@@ -165,6 +165,9 @@
 
       // — Cambiar tema directamente (sin llamar a cambiarRolNav para evitar recursión) —
       if (typeof aureaSetTema === 'function') aureaSetTema(esMaestro ? 'dark' : 'arena');
+      // Sincronizar label de tema en la card de ajustes (spec 028)
+      const _temaValEl = document.getElementById('ajuste-tema-val');
+      if (_temaValEl) _temaValEl.textContent = esMaestro ? 'Oscuro' : 'Arena';
       // Sincronizar badge del nav y dropdown
       const _badge = document.getElementById('nav-rol-badge');
       if (_badge) _badge.textContent = '· ' + (esMaestro ? 'Maestro' : 'Discípulo');
@@ -239,7 +242,10 @@
 
     function buildAjustesHTML(uid, email) {
       const rolActual  = _profile?.rol || localStorage.getItem('aurea-rol') || 'maestro';
-      const temaActual = localStorage.getItem('aurea-tema') || 'dark';
+      // Derivar tema por las reglas reales, no solo localStorage
+      const temaActual = rolActual === 'discipulo' ? 'arena'
+                       : rolActual === 'maestro'   ? 'dark'
+                       : (localStorage.getItem('aurea-tema') || 'dark');
       const rolLabel   = rolActual === 'ambos' ? 'Maestro y Discípulo'
                        : rolActual === 'maestro' ? 'Maestro' : 'Discípulo';
       const temaLabel  = temaActual === 'arena' ? 'Arena' : 'Oscuro';
@@ -279,7 +285,7 @@
         <div class="ajuste-card">
           <div class="ajuste-card-hd">Rol y apariencia</div>
           <div class="ajuste-row"><span class="ajuste-lbl">Rol activo</span><span class="ajuste-val">${escHtml(rolLabel)}</span></div>
-          <div class="ajuste-row"><span class="ajuste-lbl">Tema</span><span class="ajuste-val">${escHtml(temaLabel)}</span></div>
+          <div class="ajuste-row"><span class="ajuste-lbl">Tema</span><span class="ajuste-val" id="ajuste-tema-val">${escHtml(temaLabel)}</span></div>
         </div>
         <div class="ajuste-card">
           <div class="ajuste-card-hd">Cuenta</div>
