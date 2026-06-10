@@ -86,6 +86,21 @@ comportamiento/UX** restantes. No toca Supabase, `package.json` ni `.env`.
 - La nav superior de páginas **públicas** queda algo apretada en móvil (pre-existente,
   sin scroll horizontal); buen momento para pulirla en la 032.
 
+## Refinamientos (revisión humana + Codex, misma rama)
+
+- **Nav:** el botón de notificaciones muestra el texto **"Notificaciones"** (en vez
+  del emoji 🔔); su desplegable conserva "Ver mensajes" + lista. `toggleRelDd`
+  ahora cierra también el desplegable de notificaciones (simetría; hallazgo Codex).
+- **Mi cuenta (`perfil.html`)** se simplifica: se elimina el botón duplicado
+  "Editar perfil", los enlaces "Ver perfil de maestro/discípulo" (ya están en la
+  barra lateral), la tarjeta "Sesión", y las tarjetas "Seguridad" y "Zona
+  peligrosa" (no deben aparecer en Mi cuenta). Queda: perfil + "Perfil público"
+  (CTA "Ajustes de cuenta") + "Rol y apariencia" + "Cuenta".
+- **Ajustes de cuenta (`perfil-edicion.html`)** organiza todo en apartados de la
+  barra lateral: Perfil · Trayectoria · Requisitos · **Seguridad** (cambiar
+  contraseña, movido desde Mi cuenta) · **Cuenta** (zona peligrosa / eliminar
+  cuenta, ya existente). `?tab=seguridad` válido.
+
 ## SQL de migración
 
 No aplica.

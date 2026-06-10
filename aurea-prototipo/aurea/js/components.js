@@ -83,9 +83,9 @@ function renderNavAuth(active='', user='') {
       ${pages.filter(p=>p.id!=='discover').map(p=>`<a class="nav-link${active===p.id?' active':''}" href="${p.href}">${p.label}</a>`).join('')}
     </div>
     <div class="nav-notif-wrap" id="nav-notif-wrap">
-      <button class="nav-notif-btn" id="nav-notif-btn" onclick="toggleNotifDd()" title="Actividad" aria-label="Actividad">🔔<span id="nav-notif-badge" class="notif-badge" style="display:none;">0</span></button>
+      <button class="nav-notif-btn" id="nav-notif-btn" onclick="toggleNotifDd()" title="Notificaciones" aria-label="Notificaciones">Notificaciones<span id="nav-notif-badge" class="notif-badge" style="display:none;margin-left:5px;">0</span></button>
       <div class="nav-dd nav-notif-dd" id="nav-notif-dd">
-        <div class="nav-notif-head"><span>Actividad</span><button class="nav-notif-readall" onclick="marcarTodasLeidas()">Marcar todas</button></div>
+        <div class="nav-notif-head"><span>Notificaciones</span><button class="nav-notif-readall" onclick="marcarTodasLeidas()">Marcar todas</button></div>
         <a class="nav-notif-msglink" href="mensajes.html">💬 Ver mensajes</a>
         <div class="nav-notif-list" id="nav-notif-list"><div class="nav-notif-empty">Cargando…</div></div>
       </div>
@@ -107,6 +107,8 @@ function toggleRelDd() {
     dd.classList.toggle('open');
     var dd2 = document.getElementById('nav-perfil-dd');
     if (dd2) dd2.classList.remove('open');
+    var dd3 = document.getElementById('nav-notif-dd');
+    if (dd3) dd3.classList.remove('open');
   }
 }
 
