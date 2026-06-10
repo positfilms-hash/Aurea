@@ -147,7 +147,8 @@
         btn.style.display = 'none';
         document.getElementById('success').classList.add('show');
       } catch (err) {
-        mostrarError('Error al enviar. Inténtalo de nuevo o escríbenos directamente.');
+        console.error('EmailJS error:', err);
+        mostrarError('No hemos podido enviar el mensaje ahora mismo. Inténtalo de nuevo o escríbenos a info.aureacatena@gmail.com.');
         btn.disabled    = false;
         btn.textContent = 'Enviar mensaje';
       }
@@ -155,12 +156,14 @@
   </script>
   <script type="module">
     import { supabase } from './js/supabase.js';
+    import { checkNotificaciones } from './js/notif.js';
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       const { data: p } = await supabase.from('profiles')
         .select('nombre, apellido').eq('id', session.user.id).single();
       const ini = p ? ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?' : '?';
       document.getElementById('nav-container').innerHTML = renderNavAuth('contacto', ini);
+      checkNotificaciones();
     }
   </script>
 </body>

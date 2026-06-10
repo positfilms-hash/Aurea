@@ -33,6 +33,27 @@
   --font-serif: 'Playfair Display', Georgia, serif;
   --font-sans:  'Inter', system-ui, sans-serif;
   --nav-height: 57px;
+
+  /* ── Sistema visual base (spec 017) ─────────────────────────── */
+  /* Escala de espaciado */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  /* Anchos de contenedor */
+  --container-narrow: 640px;
+  --container:        960px;
+  --container-wide:   1120px;
+  /* Radios y altura táctil */
+  --radius-sm: 6px;
+  --radius:    10px;
+  --radius-lg: 14px;
+  --tap:       44px; /* altura mínima táctil en móvil */
+  --mobile-tabbar-height: 64px; /* barra de navegación inferior móvil (spec 020) */
 }
 
 /* ── TEMA ARENA (vista discípulo) ─────────────────────────────── */
@@ -113,6 +134,33 @@ img { max-width: 100%; display: block; }
 .nav-dd-item.active { color:var(--gold); background:var(--night-deep); font-weight:500; }
 .nav-dd-add { color:var(--gold) !important; }
 .nav-dd-sep { height:0.5px; background:var(--border); margin:3px 4px; }
+
+/* — Notificaciones (campana del nav) — */
+.nav-notif-wrap { position:relative; display:inline-flex; align-items:center; }
+.nav-notif-btn { position:relative; background:none; border:none; cursor:pointer; font-size:15px; line-height:1; padding:4px 6px; color:var(--text-muted); transition:color 0.2s; }
+.nav-notif-btn:hover { color:var(--gold); }
+.nav-notif-btn .notif-badge { position:absolute; top:-2px; right:-2px; margin:0; }
+.nav-notif-dd { min-width:300px; max-width:340px; padding:0; overflow:hidden; }
+.nav-notif-head { display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-bottom:0.5px solid var(--border); font-size:11px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); }
+.nav-notif-readall { background:none; border:none; cursor:pointer; font-size:10px; letter-spacing:0.06em; text-transform:none; color:var(--gold); }
+.nav-notif-list { max-height:360px; overflow-y:auto; display:flex; flex-direction:column; }
+.nav-notif-item { display:block; text-decoration:none; padding:11px 14px; border-bottom:0.5px solid var(--border); transition:background 0.15s; }
+.nav-notif-item:last-child { border-bottom:none; }
+.nav-notif-item:hover { background:var(--night-deep); }
+.nav-notif-item.unread { background:var(--night-soft); border-left:2px solid var(--gold); }
+.nav-notif-item-title { font-size:12px; font-weight:500; color:var(--text-primary); }
+.nav-notif-item-body { font-size:11px; font-weight:300; color:var(--text-muted); margin-top:2px; line-height:1.5; }
+.nav-notif-item-date { font-size:9px; color:var(--text-ghost); margin-top:4px; }
+.nav-notif-empty { padding:24px 14px; text-align:center; font-size:11px; color:var(--text-faint); }
+
+/* — Estado vacío / onboarding reutilizable — */
+.empty-state { max-width:420px; margin:0 auto; padding:56px 24px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px; }
+.empty-state-icon { font-size:34px; opacity:0.8; margin-bottom:4px; }
+.empty-state-title { font-family:var(--font-serif); font-size:20px; font-weight:500; font-style:italic; color:var(--text-secondary); line-height:1.3; }
+.empty-state-body { font-size:13px; font-weight:300; color:var(--text-muted); line-height:1.8; }
+.empty-state-actions { display:flex; align-items:center; gap:14px; margin-top:10px; flex-wrap:wrap; justify-content:center; }
+.empty-state-sec { font-size:12px; font-weight:300; color:var(--text-muted); text-decoration:none; border-bottom:0.5px solid var(--border); transition:color 0.2s; }
+.empty-state-sec:hover { color:var(--gold); }
 
 /* FOOTER */
 .footer { background:var(--night-soft); border-top:0.5px solid var(--border); padding:40px 80px 28px; }
@@ -195,3 +243,209 @@ img { max-width: 100%; display: block; }
 .chat-fab.dragging { cursor:grabbing; transform:scale(1.12); opacity:1; transition:none; }
 .chat-widget { position:fixed; bottom:92px; right:28px; width:340px; background:var(--night-mid); border:0.5px solid var(--border); border-radius:16px; overflow:hidden; z-index:200; box-shadow:0 8px 40px #00000088; display:none; flex-direction:column; }
 .chat-widget.open { display:flex; }
+
+/* ============================================================
+   SISTEMA VISUAL RESPONSIVE BASE (spec 017)
+   Capa aditiva: clases reutilizables + red de seguridad
+   responsive. No renombra clases existentes.
+   ============================================================ */
+
+/* — Guardas globales contra overflow — */
+html, body { max-width: 100%; }
+/* Nota: overflow-x:hidden NO va aquí en global porque al fijar overflow-x el
+   overflow-y computa a "auto" y rompería position:sticky de las sidebars en
+   desktop. Se aplica solo en la capa móvil, donde las sidebars ya no son sticky. */
+img, svg, video, canvas { max-width: 100%; height: auto; }
+h1, h2, h3, h4, p, span, a, button, li, td, th, label { overflow-wrap: break-word; }
+pre, code { overflow-wrap: anywhere; white-space: pre-wrap; }
+
+/* — Contenedores con ancho máximo coherente — */
+.container, .container-narrow, .container-wide {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--space-5);
+}
+.container-narrow { max-width: var(--container-narrow); }
+.container        { max-width: var(--container); }
+.container-wide   { max-width: var(--container-wide); }
+/* Ancho de lectura cómodo para textos largos en desktop */
+.prose { max-width: 68ch; }
+
+/* — Tipografía fluida (utilidades opcionales) — */
+.fluid-h1   { font-size: clamp(28px, 6vw, 52px); line-height: 1.1; }
+.fluid-h2   { font-size: clamp(22px, 4.5vw, 36px); line-height: 1.2; }
+.fluid-h3   { font-size: clamp(18px, 3vw, 24px); line-height: 1.3; }
+.fluid-lead { font-size: clamp(15px, 2.2vw, 19px); line-height: 1.6; }
+
+/* — Sistema de botones — */
+.btn {
+  font-family: var(--font-sans); font-size: 13px; font-weight: 500;
+  letter-spacing: 0.04em; color: var(--text-primary);
+  background: var(--night-mid); border: 0.5px solid var(--border-soft);
+  border-radius: 100px; padding: 11px 22px; cursor: pointer;
+  transition: all 0.2s; text-decoration: none;
+}
+.btn:hover { border-color: var(--gold); color: var(--gold); }
+.btn-secondary {
+  font-family: var(--font-sans); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted); background: none;
+  border: 0.5px solid var(--border-soft); border-radius: 100px;
+  padding: 12px 24px; cursor: pointer; transition: all 0.2s; text-decoration: none;
+}
+.btn-secondary:hover { color: var(--gold); border-color: var(--gold); }
+.btn-danger {
+  font-family: var(--font-sans); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--red); background: none;
+  border: 0.5px solid var(--red); border-radius: 100px;
+  padding: 12px 24px; cursor: pointer; transition: all 0.2s; text-decoration: none;
+}
+.btn-danger:hover { background: #71291311; }
+/* Comportamiento común: altura táctil, centrado y sin desbordar el contenedor */
+.btn, .btn-primary, .btn-secondary, .btn-ghost, .btn-danger {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--tap); max-width: 100%; text-align: center; line-height: 1.2;
+}
+
+/* — Tarjetas / paneles reutilizables — */
+.card, .card-panel, .card-persona, .card-action {
+  background: var(--night-mid); border: 0.5px solid var(--border);
+  border-radius: var(--radius); padding: var(--space-5);
+}
+.card-persona { display: flex; align-items: center; gap: var(--space-4); }
+.card-action  { display: flex; flex-direction: column; gap: var(--space-3); }
+.card-grid {
+  display: grid; gap: var(--space-4);
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+/* — Avatares e imágenes — */
+.avatar {
+  border-radius: 50%; object-fit: cover; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-serif); font-weight: 600; color: var(--night);
+  background: var(--gold); overflow: hidden;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+.avatar-md { width: 56px; height: 56px; font-size: 20px; }
+.avatar-lg { width: 88px; height: 88px; font-size: 34px; }
+.media-cover { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* — Formularios — */
+.form { display: flex; flex-direction: column; gap: var(--space-4); }
+.form-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+
+/* ============================================================
+   BREAKPOINTS
+   móvil base ≤599 · tablet 600–899 · desktop 900+ · ancho 1200+
+   ============================================================ */
+
+/* — Tablet y móvil: colapsar el "app-shell" de dos columnas — */
+@media (max-width: 899px) {
+  /* Ahora sí: evitar scroll horizontal accidental. Las sidebars dejan de ser
+     sticky en este breakpoint, así que clipar overflow-x es seguro. */
+  body { overflow-x: hidden; }
+
+  /* Las páginas usan .layout o .page como grid de 2 columnas
+     (sidebar fija + contenido). En pantallas estrechas se apila.
+     Se incluyen también los "split" de las páginas públicas
+     (registro, login, hero de inicio, secciones de cómo-funciona). */
+  .layout, .page, .registro, .login-wrap, .hero, .section-inner, .steps { display: block !important; }
+  /* Splits a pantalla completa: altura natural al apilar */
+  .registro, .login-wrap { height: auto !important; min-height: 0 !important; }
+
+  /* Columnas/sidebars que eran sticky a altura de viewport:
+     pasan a flujo normal y altura automática. */
+  .sidebar, .col-left, .col-right, .main-content {
+    position: static !important;
+    height: auto !important;
+    max-height: none !important;
+    width: auto !important;
+    overflow: visible !important;
+  }
+  /* El borde lateral pasa a inferior al apilarse */
+  .sidebar, .col-left { border-right: none !important; border-bottom: 0.5px solid var(--border); }
+
+  /* Rejillas internas de dos columnas → una sola */
+  .edit-row, .stats-grid { grid-template-columns: 1fr !important; }
+
+  /* Listas con filas multi-columna (solicitudes/relaciones): que
+     puedan desplazarse en horizontal dentro de su contenedor en
+     lugar de romper el ancho de la página. */
+  .list, .conv-list { overflow-x: auto; }
+
+  /* Nav: reducir padding y permitir scroll horizontal de los enlaces
+     sin empujar el ancho de la página (mobile nav completo = otra spec). */
+  .nav { padding: 0 var(--space-4); gap: var(--space-3); }
+  .nav-links { gap: 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .nav-links::-webkit-scrollbar { display: none; }
+  /* Dropdowns y modales dentro de pantalla */
+  .nav-dd { right: 0; max-width: calc(100vw - var(--space-5)); }
+  .modal { width: calc(100vw - var(--space-5)) !important; max-width: 100%; max-height: 88vh; overflow-y: auto; }
+
+  /* Footer en una columna */
+  .footer { padding: var(--space-6) var(--space-5) var(--space-5); }
+  .footer-top { grid-template-columns: 1fr 1fr !important; gap: var(--space-5); }
+  .footer-bottom { flex-direction: column; gap: var(--space-3); align-items: flex-start; }
+}
+
+/* — Móvil base ≤599: una sola columna también en rejillas de contenido — */
+@media (max-width: 599px) {
+  .footer-top { grid-template-columns: 1fr !important; }
+  .empty-state { padding: var(--space-7) var(--space-4); }
+  /* Rejillas internas de dos columnas → una sola en móvil */
+  .field-row { grid-template-columns: 1fr !important; }
+  /* Paddings/gaps generosos de las páginas públicas, reducidos en móvil */
+  .hero { padding: 48px var(--space-5) !important; gap: var(--space-6) !important; }
+  .section-inner { gap: var(--space-6) !important; }
+  .card-stats { grid-template-columns: 1fr 1fr 1fr; }
+  /* Acciones en columna para que los botones no se desborden ni solapen */
+  .form-actions, .empty-state-actions, .modal-actions { flex-direction: column; align-items: stretch; }
+  .modal-actions .btn, .modal-actions .btn-primary, .modal-actions .btn-secondary,
+  .form-actions > * { width: 100%; }
+}
+
+/* ============================================================
+   NAVEGACIÓN INFERIOR MÓVIL (spec 020)
+   Barra de tabs fija solo en móvil/tablet para páginas autenticadas
+   (la genera renderNavAuth). En desktop manda la nav superior.
+   ============================================================ */
+.mobile-tabbar { display: none; }
+.tabbar-badge {
+  display: none; align-items: center; justify-content: center;
+  min-width: 16px; height: 16px; padding: 0 4px; border-radius: 100px;
+  background: var(--gold); color: var(--night); font-size: 9px; font-weight: 600; line-height: 1;
+}
+@media (max-width: 899px) {
+  .mobile-tabbar {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 150;
+    background: var(--night); border-top: 0.5px solid var(--border);
+    height: calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tabbar-item {
+    flex: 1; min-width: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3px;
+    min-height: var(--tap); padding: 8px 2px; text-decoration: none;
+    color: var(--text-faint); transition: color 0.18s;
+  }
+  .tabbar-item.active { color: var(--gold); }
+  .tabbar-icon { font-size: 18px; line-height: 1; position: relative; }
+  .tabbar-badge { position: absolute; top: -5px; left: 100%; transform: translateX(-7px); }
+  .tabbar-label { font-size: 10px; letter-spacing: 0.02em; line-height: 1; white-space: nowrap; }
+
+  /* La barra inferior asume la navegación principal: se ocultan los enlaces
+     superiores SOLO cuando hay tabbar (páginas autenticadas). En páginas
+     públicas (sin tabbar) se mantiene la nav superior. */
+  body:has(.mobile-tabbar) .nav-links { display: none !important; }
+  /* Padding inferior para que la tabbar no tape el final del contenido. */
+  body:has(.mobile-tabbar) { padding-bottom: calc(var(--mobile-tabbar-height) + env(safe-area-inset-bottom)); }
+  /* La fina barra de copyright sobra bajo la tabbar en móvil. */
+  body:has(.mobile-tabbar) .page-footer-bar { display: none; }
+  /* El FAB del chat (esquina inferior derecha) chocaría con el tab Perfil:
+     se oculta en móvil autenticado (sigue disponible en desktop). */
+  body:has(.mobile-tabbar) .chat-fab,
+  body:has(.mobile-tabbar) .chat-widget { display: none !important; }
+}

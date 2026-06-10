@@ -55,6 +55,9 @@
     .toggle-label-sub{font-size:10px;font-weight:300;color:var(--text-faint);margin-top:2px;}
     input[type=range]{width:100%;accent-color:var(--gold);}
     .range-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text-ghost);margin-top:4px;}
+    /* — Validación (spec 015) — */
+    .edit-input.invalid,.edit-textarea.invalid{border-color:#E87070;}
+    .field-error{font-size:11px;color:#E87070;margin-top:2px;line-height:1.4;}
   </style>
 </head>
 <body>
@@ -271,6 +274,24 @@
             <button onclick="darseDebaja('discipulo')" style="font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#E87070;background:none;border:0.5px solid #E8707055;padding:9px 20px;border-radius:100px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#E8707011'" onmouseout="this.style.background='none'">Darme de baja como Discípulo</button>
           </div>
 
+          <!-- Eliminar cuenta (irreversible) — spec 023 -->
+          <div id="eliminar-cuenta" style="background:var(--night-mid);border:0.5px solid #E8707088;border-radius:10px;padding:20px 24px;">
+            <div style="font-size:9px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:#E87070;margin-bottom:10px;">Zona de peligro</div>
+            <div style="font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--text-primary);margin-bottom:6px;">Eliminar cuenta</div>
+            <div style="font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.7;margin-bottom:16px;">Esta acción eliminará tu cuenta y tus datos personales de Aurea. No podrás recuperar tu perfil, relaciones, mensajes ni reseñas.</div>
+            <button id="btn-del-start" type="button" onclick="mostrarConfirmEliminar()" style="font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#E87070;background:none;border:0.5px solid #E8707055;padding:9px 20px;border-radius:100px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#E8707011'" onmouseout="this.style.background='none'">Eliminar mi cuenta</button>
+
+            <div id="del-confirm" style="display:none;margin-top:16px;border-top:0.5px solid var(--border);padding-top:16px;">
+              <div style="font-size:12px;color:var(--text-primary);line-height:1.7;margin-bottom:4px;"><strong>Esta acción es irreversible.</strong></div>
+              <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">Para confirmar, escribe <strong>ELIMINAR</strong>.</div>
+              <input id="del-confirm-input" class="edit-input" type="text" autocomplete="off" placeholder="ELIMINAR" style="max-width:240px;margin-bottom:12px;" oninput="onDelInput()">
+              <div>
+                <button id="btn-del-final" type="button" onclick="eliminarCuenta()" disabled style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#fff;background:#8A1A08;border:none;padding:10px 22px;border-radius:100px;cursor:not-allowed;opacity:0.5;transition:opacity 0.2s;">Eliminar cuenta definitivamente</button>
+              </div>
+              <div id="del-error" style="display:none;font-size:11px;color:#E87070;margin-top:10px;line-height:1.5;"></div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -291,6 +312,7 @@
     import { supabase } from './js/supabase.js';
     import { requireAuth } from './js/auth.js';
     import { CATS, poblarSub, initHashtags } from './js/categorias.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     // Poblar selects de categoría con las 11 categorías
     function poblarCats(selId) {
@@ -315,6 +337,7 @@
     let _htDiscipulo = { getTags: () => [] };
 
     document.getElementById('nav-container').innerHTML = renderNavAuth('perfil');
+    checkNotificaciones();
 
     let _uid = null, _esMaestro = false, _esDiscipulo = false, _rol = null;
 
@@ -382,9 +405,9 @@
       if (!el) return;
       if (url) {
         el.style.background = 'transparent';
-        el.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${initials}">`;
+        el.innerHTML = `<img src="${escHtml(url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${escHtml(initials)}">`;
       } else {
-        el.style.background = color || 'var(--gold)';
+        el.style.background = safeColor(color);
         el.textContent = initials || '?';
       }
     }
@@ -394,14 +417,27 @@
       document.getElementById('avatar-file')?.addEventListener('change', async (e) => {
         const file = e.target.files?.[0];
         if (!file || !_uid) return;
-        if (file.size > 5 * 1024 * 1024) { document.getElementById('avatar-upload-msg').textContent = 'El archivo supera 5 MB.'; return; }
         const msg = document.getElementById('avatar-upload-msg');
+        // — Validar tipo (además del atributo accept, que se puede esquivar) —
+        const TIPOS_OK = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!TIPOS_OK.includes(file.type)) {
+          msg.style.color = '#E87070';
+          msg.textContent = 'La imagen debe ser JPG, PNG o WEBP.';
+          e.target.value = '';
+          setTimeout(() => { msg.textContent = ''; msg.style.color = ''; }, 5000);
+          return;
+        }
+        // El blob se redimensiona a 400 px/JPEG (<1 MB) antes de subir y el
+        // bucket `avatars` aplica un límite de 1 MB (spec 003). El check del
+        // archivo original a 5 MB es un guardarraíl previo al redimensionado.
+        if (file.size > 5 * 1024 * 1024) { msg.style.color = '#E87070'; msg.textContent = 'El archivo supera 5 MB.'; setTimeout(() => { msg.textContent = ''; msg.style.color = ''; }, 5000); return; }
         // — Verificar contenido apropiado —
+        msg.style.color = '';
         msg.textContent = '🔍 Verificando imagen…';
         const inapropiada = await esImagenInapropiada(file);
         if (inapropiada) {
           msg.style.color = '#E87070';
-          msg.textContent = '⚠ Imagen no permitida. Por favor sube una foto apropiada.';
+          msg.textContent = 'No hemos podido usar esta imagen. Prueba con otra foto clara y adecuada.';
           e.target.value = '';
           setTimeout(() => { msg.textContent = ''; msg.style.color = ''; }, 5000);
           return;
@@ -425,7 +461,9 @@
           msg.textContent = '✓ Foto actualizada';
           setTimeout(() => { msg.textContent = ''; }, 3000);
         } catch (err) {
-          msg.textContent = 'Error: ' + (err.message || err);
+          console.error('Error subiendo avatar:', err);
+          msg.style.color = '#E87070';
+          msg.textContent = 'No hemos podido subir la foto. Inténtalo de nuevo.';
         }
       });
     });
@@ -465,7 +503,54 @@
           window.location.href = 'index.html';
         }
       } catch (err) {
-        alert('Error al procesar la baja: ' + (err.message || err));
+        console.error('Error al procesar la baja:', err);
+        alert('No hemos podido procesar la baja ahora mismo. Inténtalo de nuevo.');
+      }
+    };
+
+    // — Eliminar cuenta (spec 023): irreversible, exige escribir ELIMINAR —
+    window.mostrarConfirmEliminar = function() {
+      document.getElementById('del-confirm').style.display = 'block';
+      const start = document.getElementById('btn-del-start');
+      if (start) start.style.display = 'none';
+      document.getElementById('del-confirm-input')?.focus();
+    };
+
+    window.onDelInput = function() {
+      const inp = document.getElementById('del-confirm-input');
+      const btn = document.getElementById('btn-del-final');
+      const ok  = (inp?.value || '').trim().toUpperCase() === 'ELIMINAR';
+      btn.disabled = !ok;
+      btn.style.opacity = ok ? '1' : '0.5';
+      btn.style.cursor  = ok ? 'pointer' : 'not-allowed';
+    };
+
+    window.eliminarCuenta = async function() {
+      const inp = document.getElementById('del-confirm-input');
+      if ((inp?.value || '').trim().toUpperCase() !== 'ELIMINAR') return;
+      const btn = document.getElementById('btn-del-final');
+      const errEl = document.getElementById('del-error');
+      btn.disabled = true; btn.style.opacity = '0.6'; btn.style.cursor = 'default';
+      btn.textContent = 'Eliminando…';
+      if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+      try {
+        // Intento de borrado del avatar vía Storage API (best-effort; la función
+        // SQL también limpia storage.objects de forma defensiva).
+        if (_uid) { try { await supabase.storage.from('avatars').remove([`${_uid}/avatar.jpg`]); } catch (e) { /* ignorar */ } }
+
+        const { error } = await supabase.rpc('eliminar_mi_cuenta');
+        if (error) throw error;
+
+        try { await supabase.auth.signOut(); } catch (e) { /* ya sin sesión */ }
+        localStorage.removeItem('aurea-rol');
+        localStorage.removeItem('aurea-rol-ts');
+        btn.textContent = '✓ Cuenta eliminada';
+        window.location.href = 'index.html';
+      } catch (err) {
+        console.error('Error eliminando cuenta:', err);
+        btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
+        btn.textContent = 'Eliminar cuenta definitivamente';
+        if (errEl) { errEl.textContent = 'No hemos podido eliminar la cuenta ahora mismo. Inténtalo de nuevo o contacta con Aurea.'; errEl.style.display = 'block'; }
       }
     };
 
@@ -499,7 +584,7 @@
         window.location.reload();
       } catch (err) {
         console.error('Error añadiendo rol:', err);
-        btn.textContent = '✕ Error: ' + (err.message || err);
+        btn.textContent = '✕ No se pudo activar. Reintenta';
         btn.disabled = false;
       }
     };
@@ -572,16 +657,149 @@
           <button class="btn-del" onclick="this.closest('.tl-block').remove()">Eliminar</button>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;">
-          <div class="edit-field"><span class="edit-label">Año o periodo</span><input class="edit-input tl-periodo" type="text" value="${t.periodo || ''}" placeholder="2022"></div>
-          <div class="edit-field"><span class="edit-label">Título</span><input class="edit-input tl-titulo" type="text" value="${t.titulo || ''}" placeholder="Título o nombre del hito"></div>
-          <div class="edit-field"><span class="edit-label">Descripción</span><input class="edit-input tl-descripcion" type="text" value="${t.descripcion || ''}" placeholder="Descripción breve (opcional)"></div>
+          <div class="edit-field"><span class="edit-label">Año o periodo</span><input class="edit-input tl-periodo" type="text" placeholder="2022"></div>
+          <div class="edit-field"><span class="edit-label">Título</span><input class="edit-input tl-titulo" type="text" placeholder="Título o nombre del hito"></div>
+          <div class="edit-field"><span class="edit-label">Descripción</span><input class="edit-input tl-descripcion" type="text" placeholder="Descripción breve (opcional)"></div>
         </div>`;
+      // Los valores se asignan por .value (nunca por innerHTML) para evitar
+      // inyección por atributo si el dato guardado contiene comillas o HTML.
+      d.querySelector('.tl-periodo').value     = t.periodo     || '';
+      d.querySelector('.tl-titulo').value      = t.titulo      || '';
+      d.querySelector('.tl-descripcion').value = t.descripcion || '';
       return d;
+    }
+
+    // — Validación de perfil antes de guardar (spec 015) —
+    const CATS_VALIDAS = [...Object.keys(CATS), 'Otra'];
+    const LIM = {
+      nombre:     { min: 2, max: 60,  label: 'El nombre' },
+      apellido:   { min: 0, max: 60,  label: 'El apellido' },
+      ubicacion:  { min: 0, max: 80,  label: 'La ubicación' },
+      frase:      { min: 0, max: 600, label: 'La frase' },
+      disciplina: { min: 0, max: 80,  label: 'La disciplina' },
+      texto60:    { min: 0, max: 60,  label: 'Este campo' },
+      trayTitulo: { max: 120 },
+      trayPeriodo:{ max: 40  },
+      trayDesc:   { max: 400 },
+      reqLinea:   { max: 200 },
+    };
+
+    // Detecta javascript: y spam evidente de enlaces en un texto.
+    function problemaTexto(text) {
+      if (!text) return null;
+      if (/javascript:/i.test(text)) return 'No se permiten enlaces de tipo javascript:.';
+      const urls = text.match(/https?:\/\/[^\s]+/gi) || [];
+      if (urls.length >= 2) {
+        const norm = urls.map(u => u.toLowerCase().replace(/[.,;:)\]]+$/, ''));
+        if (new Set(norm).size < norm.length) return 'No repitas el mismo enlace varias veces.';
+        const sinUrls = text.replace(/https?:\/\/[^\s]+/gi, '').replace(/\s+/g, '');
+        if (sinUrls.length < 15) return 'Este campo no puede componerse casi solo de enlaces.';
+      }
+      return null;
+    }
+
+    function clearErrors() {
+      document.querySelectorAll('.edit-input.invalid, .edit-textarea.invalid')
+        .forEach(e => e.classList.remove('invalid'));
+      document.querySelectorAll('.field-error').forEach(e => e.remove());
+    }
+    function markError(target, msg) {
+      const el = typeof target === 'string' ? document.getElementById(target) : target;
+      if (!el) return;
+      el.classList.add('invalid');
+      const field = el.closest('.edit-field') || el.parentElement;
+      let err = field.querySelector('.field-error');
+      if (!err) { err = document.createElement('div'); err.className = 'field-error'; field.appendChild(err); }
+      err.textContent = msg;
+    }
+    // Limpiar el error de un campo en cuanto el usuario lo edita.
+    document.addEventListener('input', e => {
+      const t = e.target;
+      if (t.classList && (t.classList.contains('edit-input') || t.classList.contains('edit-textarea'))) {
+        t.classList.remove('invalid');
+        const f = t.closest('.edit-field');
+        const er = f && f.querySelector('.field-error');
+        if (er) er.remove();
+      }
+    });
+
+    function validarPerfil() {
+      clearErrors();
+      let firstTab = null, n = 0;
+      const fail = (target, msg, tab) => { markError(target, msg); if (!firstTab) firstTab = tab; n++; };
+      const lenChk = (id, lim, tab, reqMsg) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const v = el.value.trim();
+        if (lim.min > 0 && v.length === 0) { fail(id, reqMsg || `${lim.label} es obligatorio.`, tab); return; }
+        if (v.length > 0 && lim.min > 0 && v.length < lim.min) { fail(id, `${lim.label} es demasiado corto (mínimo ${lim.min} caracteres).`, tab); return; }
+        if (v.length > lim.max) { fail(id, `${lim.label} es demasiado largo (máximo ${lim.max} caracteres).`, tab); return; }
+        const p = problemaTexto(v);
+        if (p) fail(id, p, tab);
+      };
+
+      // Datos comunes (profiles)
+      lenChk('f-nombre', LIM.nombre, 'perfil', 'El nombre es obligatorio.');
+      lenChk('f-apellido', LIM.apellido, 'perfil');
+      lenChk('f-ubicacion', LIM.ubicacion, 'perfil');
+      lenChk('f-frase', LIM.frase, 'perfil');
+
+      if (_esMaestro) {
+        lenChk('f-disciplina', LIM.disciplina, 'perfil');
+        lenChk('f-dias', LIM.texto60, 'perfil');
+        lenChk('f-horas', LIM.texto60, 'perfil');
+        const cat = document.getElementById('f-categoria')?.value || '';
+        if (cat && !CATS_VALIDAS.includes(cat)) fail('f-categoria', 'Elige una categoría válida.', 'perfil');
+
+        const reqEl = document.getElementById('f-req-libres');
+        if (reqEl) {
+          const lineas = reqEl.value.split('\n').map(s => s.trim()).filter(Boolean);
+          if (lineas.length > 12) fail('f-req-libres', 'Demasiados requisitos (máximo 12 líneas).', 'requisitos');
+          else if (lineas.some(l => l.length > LIM.reqLinea.max)) fail('f-req-libres', `Algún requisito es demasiado largo (máximo ${LIM.reqLinea.max} caracteres).`, 'requisitos');
+          else { const p = lineas.map(problemaTexto).find(Boolean); if (p) fail('f-req-libres', p, 'requisitos'); }
+        }
+
+        document.querySelectorAll('#tl-list .tl-block').forEach(b => {
+          const per = b.querySelector('.tl-periodo'), tit = b.querySelector('.tl-titulo'), des = b.querySelector('.tl-descripcion');
+          const pv = per?.value.trim() || '', tv = tit?.value.trim() || '', dv = des?.value.trim() || '';
+          if ((pv || dv) && !tv) fail(tit, 'Añade un título a esta entrada de trayectoria.', 'trayectoria');
+          if (tv.length > LIM.trayTitulo.max) fail(tit, `El título es demasiado largo (máximo ${LIM.trayTitulo.max} caracteres).`, 'trayectoria');
+          if (pv.length > LIM.trayPeriodo.max) fail(per, `El periodo es demasiado largo (máximo ${LIM.trayPeriodo.max} caracteres).`, 'trayectoria');
+          if (dv.length > LIM.trayDesc.max) fail(des, `La descripción es demasiado larga (máximo ${LIM.trayDesc.max} caracteres).`, 'trayectoria');
+          [[per, pv], [tit, tv], [des, dv]].forEach(([el, val]) => { const p = problemaTexto(val); if (p) fail(el, p, 'trayectoria'); });
+        });
+      }
+
+      if (_esDiscipulo) {
+        lenChk('fd-disciplina', LIM.disciplina, 'perfil');
+        lenChk('fd-dias', LIM.texto60, 'perfil');
+        lenChk('fd-horas', LIM.texto60, 'perfil');
+        const cat = document.getElementById('fd-categoria')?.value || '';
+        if (cat && !CATS_VALIDAS.includes(cat)) fail('fd-categoria', 'Elige una categoría válida.', 'perfil');
+      }
+
+      return { ok: n === 0, tab: firstTab };
     }
 
     // — Guardar —
     window.guardar = async function() {
       const btn = document.querySelector('.btn-save');
+
+      // — Validación previa (spec 015): no se guarda si hay errores —
+      const val = validarPerfil();
+      if (!val.ok) {
+        if (val.tab) {
+          const tabBtn = document.querySelector(`.tab-btn[onclick="showTab('${val.tab}',this)"]`);
+          if (tabBtn) window.showTab(val.tab, tabBtn);
+        }
+        const first = document.querySelector('.edit-input.invalid, .edit-textarea.invalid');
+        if (first) {
+          first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          try { first.focus({ preventScroll: true }); } catch (e) { /* noop */ }
+        }
+        return;
+      }
+
       btn.textContent = 'Guardando…';
       btn.style.opacity = '0.6';
       btn.disabled = true;
@@ -613,7 +831,9 @@
         if (_esDiscipulo) {
           const disciplinaBuscada  = document.getElementById('fd-disciplina')?.value.trim() || '';
           const categoriaDisc      = document.getElementById('fd-categoria')?.value  || 'Otra';
-          const subcategoriaDisc   = document.getElementById('fd-subcategoria')?.value || null;
+          const _subDisc           = document.getElementById('fd-subcategoria')?.value || null;
+          // Solo se guarda la subcategoría si pertenece a la categoría elegida.
+          const subcategoriaDisc   = (_subDisc && (CATS[categoriaDisc] || []).includes(_subDisc)) ? _subDisc : null;
           const nivelDisc          = document.getElementById('fd-nivel')?.value       || 'principiante';
           const maxPracticas       = parseInt(document.getElementById('fd-max-practicas')?.value) || 3;
           const diasDisc           = document.getElementById('fd-dias')?.value.trim()  || '';
@@ -638,7 +858,9 @@
         if (_esMaestro) {
           const disciplina   = document.getElementById('f-disciplina')?.value.trim() || '';
           const categoria    = document.getElementById('f-categoria')?.value  || 'Otra';
-          const subcategoria = document.getElementById('f-subcategoria')?.value || null;
+          const _subM        = document.getElementById('f-subcategoria')?.value || null;
+          // Solo se guarda la subcategoría si pertenece a la categoría elegida.
+          const subcategoria = (_subM && (CATS[categoria] || []).includes(_subM)) ? _subM : null;
           const formato      = document.getElementById('f-formato')?.value    || 'ambos';
           const anosStr      = document.getElementById('f-anos')?.value;
           const radioStr     = document.getElementById('f-radio')?.value;
@@ -701,7 +923,7 @@
           avEl.textContent = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
         }
 
-        btn.textContent = '✓ Guardado';
+        btn.textContent = '✓ Perfil actualizado';
         btn.style.background = 'var(--green)';
         btn.style.opacity = '1';
         btn.disabled = false;
@@ -721,7 +943,7 @@
 
       } catch (err) {
         console.error('Error al guardar:', err);
-        const msg = err?.message || err?.details || String(err);
+        const msg = 'No hemos podido guardar los cambios. Inténtalo de nuevo.';
         btn.textContent = '✕ Error';
         btn.title = msg;
         btn.style.background = 'var(--red)';
@@ -895,6 +1117,13 @@
           list.appendChild(crearBloqueTL(t, i + 1));
         });
         if (!tray?.length) window.addTL();
+      }
+      // Activar tab por URL (?tab=perfil|trayectoria|requisitos|cuenta) — spec 028
+      const _TABS_OK = ['perfil','trayectoria','requisitos','cuenta'];
+      const _tabP = new URLSearchParams(location.search).get('tab');
+      if (_TABS_OK.includes(_tabP)) {
+        const _tabBtnEl = document.querySelector(`.tab-btn[onclick="showTab('${_tabP}',this)"]`);
+        if (_tabBtnEl && _tabBtnEl.style.display !== 'none') window.showTab(_tabP, _tabBtnEl);
       }
     }
 

@@ -67,8 +67,10 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     import { requireAuth } from './js/auth.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     document.getElementById('nav-container').innerHTML = renderNavAuth('mensajes');
+    checkNotificaciones();
 
     function timeAgo(ts) {
       if (!ts) return '';
@@ -104,12 +106,21 @@
         .in('estado', ['prueba','consolidada'])
         .order('iniciada_at', { ascending: false });
 
-      if (error || !rels?.length) {
+      if (error) {
+        document.getElementById('conv-list-body').innerHTML = `
+          <div class="no-conv">
+            <div class="no-conv-text">No hemos podido cargar tus conversaciones ahora mismo.</div>
+            <div class="no-conv-sub">Vuelve a intentarlo en un momento.</div>
+          </div>`;
+        return;
+      }
+      if (!rels?.length) {
         document.getElementById('conv-list-body').innerHTML = `
           <div class="no-conv">
             <div class="no-conv-icon">✉</div>
-            <div class="no-conv-text">Sin conversaciones activas</div>
-            <div class="no-conv-sub">Los mensajes aparecen cuando tienes una relación en periodo de prueba o activa.</div>
+            <div class="no-conv-text">Todavía no tienes conversaciones</div>
+            <div class="no-conv-sub">El chat se abre cuando empieza una relación de aprendizaje.</div>
+            <a class="empty-state-sec" href="relaciones.html" style="margin-top:12px;">Ver relaciones</a>
           </div>`;
         return;
       }
@@ -155,11 +166,11 @@
         const estadoLabel = r.estado === 'prueba' ? 'Prueba' : 'Activa';
 
         return `<a class="conv-item${unread>0?' unread':''}" href="periodo-prueba.html?id=${r.id}">
-          <div class="conv-avatar" style="background:${otro?.avatar_color||'var(--gold)'};">${ini(otro)}</div>
+          <div class="conv-avatar" style="background:${safeColor(otro?.avatar_color)};">${escHtml(ini(otro))}</div>
           <div class="conv-info">
-            <div class="conv-name">${nombreCompleto(otro)}</div>
-            <div class="conv-disc">${r.disciplina || '—'}</div>
-            <div class="conv-preview">${last ? (last.autor_id === uid ? 'Tú: ' : '') + last.texto.substring(0,60) : 'Sin mensajes aún'}</div>
+            <div class="conv-name">${escHtml(nombreCompleto(otro))}</div>
+            <div class="conv-disc">${escHtml(r.disciplina || '—')}</div>
+            <div class="conv-preview">${last ? (last.autor_id === uid ? 'Tú: ' : '') + escHtml(last.texto.substring(0,60)) : 'Sin mensajes aún'}</div>
           </div>
           <div class="conv-meta">
             <span class="conv-time">${timeAgo(last?.created_at)}</span>

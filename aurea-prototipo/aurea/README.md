@@ -25,7 +25,7 @@ aurea/
 ├── perfil.html               Mi perfil con toggle maestro/discípulo (privada)
 ├── perfil-edicion.html       Edición inline del perfil (privada)
 ├── perfil-maestro.html       Perfil público de un maestro (privada)
-└── perfil-discipulo.html     Perfil de discípulo desde bandeja (privada)
+└── perfil-discipulo.html     Perfil público de un discípulo; con ?sol= el maestro revisa una solicitud
 ```
 
 ## Agentes de IA (componentes globales)

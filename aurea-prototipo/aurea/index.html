@@ -67,10 +67,17 @@
     .cta-actions{display:flex;align-items:center;justify-content:center;gap:20px;}
 
     /* Stats strip */
-    .stats-strip{display:flex;justify-content:center;gap:60px;padding:40px 80px;border-bottom:0.5px solid var(--border);background:var(--night-soft);}
+    .stats-strip{display:flex;flex-wrap:wrap;justify-content:center;gap:60px;padding:40px 80px;border-bottom:0.5px solid var(--border);background:var(--night-soft);}
     .strip-stat{text-align:center;}
     .strip-n{font-family:var(--font-serif);font-size:40px;font-weight:500;color:var(--gold);}
     .strip-l{font-size:11px;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-top:4px;}
+    /* Auditoría responsive (spec 016): evitar desbordes en móvil */
+    @media (max-width: 599px) {
+      .stats-strip{gap:var(--space-5);padding:var(--space-6) var(--space-5);}
+      .strip-stat{flex:1 1 40%;}
+      .divider-text{padding:var(--space-6) var(--space-5);gap:var(--space-3);}
+      .divider-quote{white-space:normal;text-align:center;}
+    }
   </style>
 </head>
 <body>
@@ -214,6 +221,7 @@
   <script type="module">
     import { supabase } from './js/supabase.js';
     import { CATS } from './js/categorias.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     // — Nav inteligente —
     const { data: { session } } = await supabase.auth.getSession();
@@ -222,6 +230,7 @@
         .select('nombre, apellido').eq('id', session.user.id).single();
       const ini = p ? ((p.nombre||'')[0]+(p.apellido||'')[0]).toUpperCase()||'?' : '?';
       document.getElementById('nav-container').innerHTML = renderNavAuth('', ini);
+      checkNotificaciones();
       const btnEmpezar = document.querySelector('[onclick*="modal-empezar"]');
       if (btnEmpezar) btnEmpezar.setAttribute('onclick', "location.href='discover.html'");
     }

@@ -146,6 +146,7 @@
   </script>
   <script type="module">
     import { supabase } from './js/supabase.js';
+    import { checkNotificaciones } from './js/notif.js';
 
     const [mRes, dRes, rRes] = await Promise.all([
       supabase.from('maestro_perfiles').select('*', { count:'exact', head:true })
@@ -167,6 +168,7 @@
         .select('nombre, apellido').eq('id', session.user.id).single();
       const ini = p ? ((p.nombre||'')[0]+(p.apellido||'')[0]).toUpperCase()||'?' : '?';
       document.getElementById('nav-container').innerHTML = renderNavAuth('como-funciona', ini);
+      checkNotificaciones();
     }
   </script>
 </body>

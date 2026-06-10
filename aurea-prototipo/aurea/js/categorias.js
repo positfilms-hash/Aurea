@@ -3,6 +3,15 @@
  * Importar con: import { CATS, poblarSub, initHashtags } from './categorias.js';
  */
 
+// Escape de texto de usuario para insertarlo de forma segura en innerHTML.
+// Local al módulo: categorias.js es un módulo ES y no depende del orden de
+// carga de components.js (donde vive el escHtml global).
+function esc(s) {
+  return (s == null ? '' : String(s)).replace(/[&<>"']/g, function (m) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+  });
+}
+
 export const CATS = {
   'Filosofía':      ['Estoicismo','Budismo','Espiritualidad','Desarrollo personal','Liderazgo','Pensamiento crítico'],
   'Artes':          ['Música','Pintura','Escritura','Fotografía','Cine','Diseño'],
@@ -15,6 +24,26 @@ export const CATS = {
   'Aprendizaje':    ['Idiomas','Estudio','Memoria','Productividad','Oposiciones','Enseñanza'],
   'Espiritualidad': ['Meditación','Energía','Religión','Consciencia','Astrología','Desarrollo espiritual'],
   'Estilo de vida': ['Imagen personal','Moda','Viajes','Minimalismo','Lujo','Hogar'],
+};
+
+/**
+ * Descripciones breves de cada categoría para las cabeceras de exploración
+ * (spec 026). Fuente única en frontend; no se duplican en el HTML. Incluye
+ * 'Otra' (que no aparece en CATS porque no tiene subcategorías).
+ */
+export const CAT_DESC = {
+  'Filosofía':      'Pensamiento, criterio y preguntas profundas sobre cómo vivir y entender el mundo.',
+  'Artes':          'Prácticas creativas, sensibilidad estética y procesos de expresión.',
+  'Oficios':        'Saber práctico, técnica, herramientas y aprendizaje manual o profesional.',
+  'Deportes':       'Disciplina física, entrenamiento, práctica y mejora del rendimiento.',
+  'Negocios':       'Criterio profesional, emprendimiento, estrategia y toma de decisiones.',
+  'Salud':          'Hábitos, cuidado personal y acompañamiento hacia una vida más equilibrada.',
+  'Relaciones':     'Comunicación, vínculos, familia, pareja y vida social.',
+  'Tecnología':     'Habilidades digitales, programación, herramientas y criterio técnico.',
+  'Aprendizaje':    'Métodos de estudio, disciplina, memoria, lectura y desarrollo intelectual.',
+  'Espiritualidad': 'Prácticas interiores, sentido, contemplación y tradiciones espirituales.',
+  'Estilo de vida': 'Rutinas, orden personal, hábitos cotidianos y formas de vivir mejor.',
+  'Otra':           'Áreas de aprendizaje que no encajan claramente en una categoría anterior.',
 };
 
 /**
@@ -81,7 +110,7 @@ export function initHashtags({ containerId, initial = [], supabase = null, onCha
   function render() {
     document.getElementById(`${containerId}-chips`).innerHTML =
       tags.map((t,i) =>
-        `<span class="ht-chip">${t}<button type="button" class="ht-del" data-i="${i}">×</button></span>`
+        `<span class="ht-chip">${esc(t)}<button type="button" class="ht-del" data-i="${i}">×</button></span>`
       ).join('');
     if (onChange) onChange([...tags]);
   }
@@ -89,6 +118,9 @@ export function initHashtags({ containerId, initial = [], supabase = null, onCha
   // ── Añadir tag ─────────────────────────────────────────────────────────
   function addTag(raw) {
     let t = raw.trim().replace(/,/g,'').replace(/\s+/g,'-');
+    // Solo letras (incl. acentos), números y guiones: descarta <>"'& y demás
+    // puntuación que podría usarse para inyectar marcado.
+    t = t.replace(/[^0-9A-Za-zÀ-ſ#-]/g, '');
     if (!t) return;
     if (!t.startsWith('#')) t = '#' + t;
     t = t.toLowerCase();
@@ -107,7 +139,7 @@ export function initHashtags({ containerId, initial = [], supabase = null, onCha
       .slice(0, 6);
     if (!matches.length) { hideSugs(); return; }
     sugsEl.innerHTML = matches.map(h =>
-      `<button type="button" class="ht-sug">${h}</button>`
+      `<button type="button" class="ht-sug">${esc(h)}</button>`
     ).join('');
     sugsEl.classList.add('open');
   }
