@@ -4,7 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="js/scale.js"></script>
-  <title>Perfil de discípulo · Aurea</title>
+  <title>Perfil de discípulo — Aurea</title>
+  <meta name="description" content="Conoce el perfil público de este discípulo en Aurea y qué busca aprender.">
+  <meta property="og:site_name" content="Aurea">
+  <meta property="og:type" content="profile">
+  <meta property="og:title" content="Perfil de discípulo — Aurea">
+  <meta property="og:description" content="Conoce el perfil público de este discípulo en Aurea y qué busca aprender.">
+  <meta property="og:image" content="https://aureacatena.com/assets/logo.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Perfil de discípulo — Aurea">
+  <meta name="twitter:description" content="Perfil público de un discípulo en Aurea.">
+  <meta name="twitter:image" content="https://aureacatena.com/assets/logo.png">
   <link rel="stylesheet" href="css/global.css">
   <style>
     .layout{display:grid;grid-template-columns:300px 1fr;}
@@ -224,7 +234,17 @@
           avatarEl.textContent = initials;
           avatarEl.style.background = safeColor(perfil.avatar_color);
         }
-        document.getElementById('pd-nombre').textContent = (nombre + ' ' + apellido).trim() || 'Discípulo';
+        const _nombrePub = (nombre + ' ' + apellido).trim();
+        document.getElementById('pd-nombre').textContent = _nombrePub || 'Discípulo';
+
+        // SEO dinámico (spec 033): solo el nombre público, sin datos privados.
+        if (_nombrePub) {
+          aureaSetMeta({
+            title: `${_nombrePub} — Discípulo en Aurea`,
+            description: `Perfil público de ${_nombrePub} en Aurea: intereses de aprendizaje y forma de acompañamiento que busca.`,
+            url: `https://aureacatena.com/perfil-discipulo.html?id=${encodeURIComponent(discipuloId)}`,
+          });
+        }
         if (perfil.ubicacion) {
           const loc = document.getElementById('pd-loc');
           loc.textContent = perfil.ubicacion;

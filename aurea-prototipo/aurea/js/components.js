@@ -205,6 +205,25 @@ function renderFooter(){
   return `<footer class="footer"><div class="footer-top"><div><div class="footer-logo"><img src="${LOGO_URL}" alt="Aurea"><span class="footer-logo-name">Aurea</span></div><p class="footer-tagline">La cadena áurea del conocimiento. Gratuito siempre.</p></div><div><div class="footer-col-title">Plataforma</div><a class="footer-link" href="como-funciona.html">Cómo funciona</a><a class="footer-link" href="discover.html">Maestros</a><a class="footer-link" href="registro.html">Registro</a></div><div><div class="footer-col-title">Proyecto</div><a class="footer-link" href="como-funciona.html">Cómo funciona</a><a class="footer-link" href="contacto.html">Contacto</a></div><div><div class="footer-col-title">Contacto</div><a class="footer-link" href="contacto.html">info.aureacatena@gmail.com</a><a class="footer-link" href="contacto.html">Formulario de contacto</a></div></div><div class="footer-bottom"><span class="footer-copy">© 2026 Aurea · Todos los derechos reservados</span><div class="footer-legal"><a class="footer-legal-link" href="privacidad.html">Privacidad</a><a class="footer-legal-link" href="cookies.html">Cookies</a><a class="footer-legal-link" href="aviso-legal.html">Aviso legal</a><a class="footer-legal-link" href="contacto.html">Contacto</a></div></div></footer>`;
 }
 
+// — SEO: actualizar metadatos del <head> dinámicamente (perfiles públicos) —
+// Crea o actualiza title, description, og:* y canonical. No incluir datos privados.
+function aureaSetMeta(o) {
+  o = o || {};
+  function meta(attr, key, val) {
+    var el = document.head.querySelector('meta[' + attr + '="' + key + '"]');
+    if (!el) { el = document.createElement('meta'); el.setAttribute(attr, key); document.head.appendChild(el); }
+    el.setAttribute('content', val);
+  }
+  function link(rel, href) {
+    var el = document.head.querySelector('link[rel="' + rel + '"]');
+    if (!el) { el = document.createElement('link'); el.setAttribute('rel', rel); document.head.appendChild(el); }
+    el.setAttribute('href', href);
+  }
+  if (o.title)       { document.title = o.title; meta('property','og:title',o.title); meta('name','twitter:title',o.title); }
+  if (o.description) { meta('name','description',o.description); meta('property','og:description',o.description); meta('name','twitter:description',o.description); }
+  if (o.url)         { meta('property','og:url',o.url); link('canonical',o.url); }
+}
+
 // — Solicitudes: carta de intención estructurada dentro del campo `motivacion` —
 // Se compone y parsea un texto legible y retrocompatible. Las solicitudes
 // antiguas (texto plano sin cabeceras) se parsean como motivación a secas.

@@ -4,7 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="js/scale.js"></script>
-  <title>Perfil de maestro · Aurea</title>
+  <title>Perfil de maestro — Aurea</title>
+  <meta name="description" content="Conoce a este maestro en Aurea y descubre si tiene sentido solicitar una relación de aprendizaje.">
+  <meta property="og:site_name" content="Aurea">
+  <meta property="og:type" content="profile">
+  <meta property="og:title" content="Perfil de maestro — Aurea">
+  <meta property="og:description" content="Conoce a este maestro en Aurea y descubre si tiene sentido solicitar una relación de aprendizaje.">
+  <meta property="og:image" content="https://aureacatena.com/assets/logo.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Perfil de maestro — Aurea">
+  <meta name="twitter:description" content="Conoce a este maestro en Aurea.">
+  <meta name="twitter:image" content="https://aureacatena.com/assets/logo.png">
   <link rel="stylesheet" href="css/global.css">
   <style>
     .layout{display:grid;grid-template-columns:300px 1fr;}
@@ -332,6 +342,18 @@
       const fullName = (nombre + ' ' + apellido).trim();
       _nombreCompleto = fullName || 'este maestro';
       _disciplina     = m.disciplina;
+
+      // SEO dinámico (spec 033): solo datos públicos (nombre, categoría).
+      if (fullName) {
+        const _cat = (m.categoria && m.categoria !== 'Otra') ? m.categoria : '';
+        aureaSetMeta({
+          title: `${fullName} — Maestro en Aurea`,
+          description: _cat
+            ? `Aprende con ${fullName} en Aurea dentro de ${_cat}. Solicita una relación de aprendizaje si encaja contigo.`
+            : `Aprende con ${fullName} en Aurea. Solicita una relación de aprendizaje si encaja contigo.`,
+          url: `https://aureacatena.com/perfil-maestro.html?id=${encodeURIComponent(id)}`,
+        });
+      }
 
       // — Columna izquierda —
       const av = document.getElementById('p-avatar');
