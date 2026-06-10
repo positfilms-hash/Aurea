@@ -86,6 +86,9 @@
     .sol-error{display:none;color:var(--red);font-size:11px;font-weight:300;margin-top:10px;line-height:1.5;}
     .sol-error.show{display:block;}
     .page-footer-bar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:36px;border-top:0.5px solid var(--border);background:var(--night-soft);}
+    /* — Guardar maestro / favoritos (spec 037) — */
+    #btn-fav.is-saved{color:var(--gold);border-color:var(--border-gold);background:rgba(200,151,58,.08);}
+    #btn-fav:disabled{opacity:0.5;cursor:default;}
   </style>
 </head>
 <body>
@@ -127,6 +130,11 @@
         <div id="btn-wait" class="btn-circle wait hidden"><div class="btn-circle-label">Lista de<br>espera</div></div>
         <a id="btn-own" class="btn-secondary hidden" href="perfil.html" style="display:inline-block;text-decoration:none;">Ver mi cuenta</a>
         <p id="disp-msg" style="display:none;font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.6;margin-top:12px;"></p>
+        <!-- Guardar maestro (favoritos, spec 037). Acción privada, no compite con solicitar. -->
+        <div id="fav-wrap" style="display:none;margin-top:14px;">
+          <button id="btn-fav" type="button" class="btn-secondary" style="width:100%;">Guardar maestro</button>
+          <p id="fav-msg" style="display:none;font-size:11px;font-weight:300;color:var(--text-faint);line-height:1.6;margin-top:10px;"></p>
+        </div>
       </div>
     </div>
     <div class="col-right">
@@ -211,6 +219,7 @@
     import { supabase } from './js/supabase.js';
     import { getSession } from './js/auth.js';
     import { checkNotificaciones } from './js/notif.js';
+    import { fetchFavoritos, guardarFavorito, quitarFavorito } from './js/favoritos.js';
 
     document.getElementById('nav-container').innerHTML = renderNavAuth('discover');
     checkNotificaciones();
@@ -314,6 +323,76 @@
       cargarPerfil(maestroId);
     } else {
       maestroNoEncontrado();
+    }
+
+    // ── Favoritos / guardar maestro (spec 037) ──────────────────────────────
+    let _favSaved = false;
+    let _favBusy  = false;
+
+    function renderFavBtn() {
+      const btn = document.getElementById('btn-fav');
+      if (_favSaved) { btn.textContent = 'Maestro guardado'; btn.classList.add('is-saved'); btn.title = 'Quitar de guardados'; }
+      else { btn.textContent = 'Guardar maestro'; btn.classList.remove('is-saved'); btn.title = ''; }
+    }
+
+    async function toggleFav(id) {
+      if (_favBusy) return;
+      _favBusy = true;
+      const btn = document.getElementById('btn-fav');
+      const msg = document.getElementById('fav-msg');
+      msg.style.display = 'none';
+      const prev = _favSaved;
+      btn.disabled = true;
+      btn.textContent = prev ? 'Quitando…' : 'Guardando…';
+      const ok = prev
+        ? await quitarFavorito(_currentUserId, id)
+        : await guardarFavorito(_currentUserId, id);
+      btn.disabled = false;
+      if (ok) { _favSaved = !prev; renderFavBtn(); }
+      else {
+        renderFavBtn();
+        msg.textContent = 'No hemos podido actualizar tus guardados ahora mismo.';
+        msg.style.display = 'block';
+      }
+      _favBusy = false;
+    }
+
+    async function initFavoritos(id) {
+      await _sessionReady;
+      // Perfil propio: no puedes guardarte a ti mismo (ya se ofrece "Ver mi cuenta").
+      if (_currentUserId && _currentUserId === id) return;
+
+      const wrap = document.getElementById('fav-wrap');
+      const btn  = document.getElementById('btn-fav');
+      const msg  = document.getElementById('fav-msg');
+      wrap.style.display = 'block';
+
+      // Sin sesión: guardar lleva a iniciar sesión.
+      if (!_currentUserId) {
+        btn.onclick = () => { window.location.href = 'login.html'; };
+        msg.textContent = 'Inicia sesión para guardar maestros.';
+        msg.style.display = 'block';
+        return;
+      }
+
+      // Solo discípulo/ambos pueden guardar (es una acción de aprendizaje).
+      let rol = 'discipulo';
+      try {
+        const { data } = await supabase.from('profiles').select('rol').eq('id', _currentUserId).single();
+        rol = data?.rol || 'discipulo';
+      } catch { /* por defecto, permitir guardar */ }
+      if (rol === 'maestro') {
+        btn.disabled = true;
+        msg.textContent = 'Cambia a rol discípulo para guardar maestros.';
+        msg.style.display = 'block';
+        return;
+      }
+
+      // Puede guardar: estado real + toggle.
+      const favs = await fetchFavoritos(_currentUserId);
+      _favSaved = favs.has(id);
+      renderFavBtn();
+      btn.onclick = () => toggleFav(id);
     }
 
     async function cargarPerfil(id) {
@@ -500,6 +579,9 @@
       document.getElementById('p-modal-title').textContent = `Solicitar a ${fullName}`;
       document.getElementById('p-modal-sub').textContent   =
         `Solicitar a ${fullName} no es pedir una clase suelta: es proponer una relación de aprendizaje en ${m.disciplina || 'su disciplina'}. Tómate un momento para escribirle bien.`;
+
+      // Guardar maestro (favoritos): solo tras confirmar que el maestro existe.
+      initFavoritos(id);
     }
   </script>
 </body>
