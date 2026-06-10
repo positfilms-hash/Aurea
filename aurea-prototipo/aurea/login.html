@@ -89,11 +89,12 @@
 
   <script type="module">
     import { supabase } from './js/supabase.js';
-    import { getSession } from './js/auth.js';
+    import { getSession, destinoPostAuth } from './js/auth.js';
 
-    // Si ya hay sesión activa, redirigir directamente
-    getSession().then(session => {
-      if (session) window.location.href = 'discover.html';
+    // Si ya hay sesión activa, redirigir al destino adecuado (onboarding si es
+    // un usuario nuevo sin configurar; discover si ya está establecido — spec 039).
+    getSession().then(async session => {
+      if (session) window.location.href = await destinoPostAuth();
     });
 
     // Carrusel de citas
@@ -144,7 +145,7 @@
         btn.disabled    = false;
         btn.textContent = 'Entrar en Aurea';
       } else {
-        window.location.href = 'discover.html';
+        window.location.href = await destinoPostAuth();
       }
     };
 

@@ -224,7 +224,8 @@
         if (error) throw error;
 
         if (data.session) {
-          window.location.href = 'perfil-edicion.html';
+          // Usuario nuevo con sesión inmediata → bienvenida/onboarding (spec 039).
+          window.location.href = 'onboarding.html';
         } else {
           btn.closest('.reg-footer').style.display = 'none';
           okDiv.style.display = 'block';
