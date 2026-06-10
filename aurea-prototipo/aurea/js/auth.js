@@ -55,6 +55,51 @@ export async function requireAuth() {
   return session;
 }
 
+/**
+ * Decide a dónde llevar al usuario tras autenticarse (login o registro con
+ * sesión inmediata). Devuelve una URL relativa. Usado por login.html y
+ * registro.html para no duplicar la lógica de bienvenida (spec 039).
+ *
+ * - Si ya vio el onboarding (`aurea-onboarding-visto`) → discover.
+ * - Si su perfil ya tiene contenido propio (frase, disciplina real de maestro o
+ *   disciplina buscada de discípulo) → es un usuario establecido → discover.
+ * - En otro caso (recién registrado, perfil vacío) → onboarding.
+ *
+ * Nota: el trigger handle_new_user crea maestro_perfiles/discipulo_perfiles al
+ * registrarse (con placeholders), así que la mera existencia de esas filas NO
+ * indica que el usuario esté configurado: se mira el contenido real.
+ */
+export async function destinoPostAuth() {
+  const session = await getSession();
+  if (!session) return 'login.html';
+  if (localStorage.getItem('aurea-onboarding-visto')) return 'discover.html';
+
+  try {
+    const uid = session.user.id;
+    const { data: p } = await supabase.from('profiles')
+      .select('rol, frase').eq('id', uid).single();
+    if (p?.frase && p.frase.trim()) return 'discover.html';
+
+    const rol = p?.rol || 'discipulo';
+    if (rol === 'maestro' || rol === 'ambos') {
+      const { data: m } = await supabase.from('maestro_perfiles')
+        .select('disciplina, categoria').eq('id', uid).maybeSingle();
+      const real = m && m.disciplina && m.disciplina !== 'Sin especificar'
+        && m.categoria && m.categoria !== 'Otra';
+      if (real) return 'discover.html';
+    }
+    if (rol === 'discipulo' || rol === 'ambos') {
+      const { data: d } = await supabase.from('discipulo_perfiles')
+        .select('disciplina_buscada').eq('id', uid).maybeSingle();
+      if (d && d.disciplina_buscada && d.disciplina_buscada.trim()) return 'discover.html';
+    }
+  } catch {
+    // Ante cualquier fallo de lectura, no atrapamos al usuario: a discover.
+    return 'discover.html';
+  }
+  return 'onboarding.html';
+}
+
 /** Cierra la sesión y redirige al inicio */
 export async function signOut() {
   await supabase.auth.signOut();

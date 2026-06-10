@@ -77,6 +77,21 @@
     .completitud-bar-wrap{background:var(--border);border-radius:100px;height:4px;margin:6px 0 12px;overflow:hidden;}
     .completitud-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--gold-dark),var(--gold));}
     .ajuste-card.danger{border-color:#E8707044;}
+    /* — Primeros pasos / onboarding (spec 039) — */
+    #primeros-pasos:empty{display:none;}
+    .pp-card{background:var(--night-mid);border:0.5px solid var(--border-gold);border-radius:12px;padding:20px 22px;}
+    .pp-hd{font-size:9px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+    .pp-intro{font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.6;margin-bottom:14px;}
+    .pp-list{display:flex;flex-direction:column;}
+    .pp-step{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);text-decoration:none;transition:color .18s;}
+    .pp-step:last-child{border-bottom:none;}
+    .pp-step-ico{flex-shrink:0;color:var(--gold);font-size:13px;}
+    .pp-step-txt{font-size:13px;font-weight:300;color:var(--text-secondary);}
+    .pp-step:hover .pp-step-txt{color:var(--gold);}
+    .pp-step-go{margin-left:auto;color:var(--text-faint);font-size:13px;}
+    .pp-foot{margin-top:14px;}
+    .pp-foot a{font-size:11px;font-weight:300;color:var(--text-muted);text-decoration:none;border-bottom:0.5px solid var(--border);}
+    .pp-foot a:hover{color:var(--gold);border-color:var(--gold);}
     /* — Maestros guardados / favoritos (spec 037) — */
     /* Maestro puro no ve la sección: vacía → fuera del layout (sin gap extra). */
     #favoritos-section:empty{display:none;}
@@ -149,6 +164,7 @@
       </div>
     </div>
     <div class="col-right" id="col-right">
+      <div id="primeros-pasos"></div>
       <div id="ajustes-section"></div>
       <div id="favoritos-section"></div>
       <div id="col-right-content" style="display:flex;flex-direction:column;gap:28px;"></div>
@@ -400,6 +416,51 @@
         <div><span class="section-label">Disciplinas activas</span>${discHTML}</div>`;
     }
 
+    // ── Primeros pasos / onboarding (spec 039) ───────────────────────────────
+    // Se muestra solo si al usuario le faltan datos básicos según su rol. Cuando
+    // el perfil está completo, la sección queda vacía (#primeros-pasos:empty).
+    function renderPrimerosPasos(rol) {
+      const sec = document.getElementById('primeros-pasos');
+      const esM = rol === 'maestro' || rol === 'ambos';
+      const esD = rol === 'discipulo' || rol === 'ambos';
+      const frase = (_profile?.frase || '').trim();
+      const pasos = [];
+
+      if (esM) {
+        const maestroIncompleto = !_maestro
+          || !_maestro.disciplina || _maestro.disciplina === 'Sin especificar'
+          || !_maestro.categoria  || _maestro.categoria === 'Otra'
+          || !frase;
+        if (maestroIncompleto) {
+          pasos.push({ ico: '✦', txt: 'Completa tu perfil de maestro', href: 'perfil-edicion.html' });
+          pasos.push({ ico: '✦', txt: 'Indica tu disponibilidad y ritmo', href: 'perfil-edicion.html' });
+        }
+      }
+      if (esD) {
+        const discipuloIncompleto = !_discipulo || !((_discipulo.disciplina_buscada || '').trim());
+        if (discipuloIncompleto) {
+          pasos.push({ ico: '🔍', txt: 'Explora maestros que te interesen', href: 'discover.html' });
+          pasos.push({ ico: '♡', txt: 'Guarda perfiles para volver más tarde', href: 'discover.html' });
+        }
+      }
+
+      if (!pasos.length) { sec.innerHTML = ''; return; }   // completo → sin bloque
+
+      const items = pasos.map(p =>
+        `<a class="pp-step" href="${escHtml(p.href)}">
+           <span class="pp-step-ico" aria-hidden="true">${p.ico}</span>
+           <span class="pp-step-txt">${escHtml(p.txt)}</span>
+           <span class="pp-step-go" aria-hidden="true">→</span>
+         </a>`).join('');
+      sec.innerHTML = `
+        <div class="pp-card">
+          <div class="pp-hd">Primeros pasos</div>
+          <p class="pp-intro">Te quedan un par de cosas para sacarle partido a Aurea.</p>
+          <div class="pp-list">${items}</div>
+          <div class="pp-foot"><a href="onboarding.html">Ver la bienvenida de nuevo</a></div>
+        </div>`;
+    }
+
     // ── Maestros guardados / favoritos (spec 037) ───────────────────────────
     function favRowHTML(m) {
       const p = m.profiles || {};
@@ -587,6 +648,9 @@
 
       // — Panel de ajustes de cuenta (spec 028) —
       document.getElementById('ajustes-section').innerHTML = buildAjustesHTML(uid, session.user.email);
+
+      // — Primeros pasos (spec 039): solo si faltan datos básicos según el rol —
+      renderPrimerosPasos(_profile.rol || 'discipulo');
 
       // — Maestros guardados (spec 037): es una acción de aprendizaje, así que
       //   solo se muestra a discípulo/ambos (un maestro puro no guarda). —

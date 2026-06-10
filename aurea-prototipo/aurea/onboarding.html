@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <script src="js/scale.js"></script>
+  <title>Bienvenido a Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .ob-wrap{max-width:680px;margin:0 auto;padding:var(--space-7) var(--space-5) var(--space-8);}
+    .ob-card{background:var(--night-mid);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:var(--space-7) var(--space-6);}
+    .ob-eyebrow{font-size:11px;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:var(--space-3);}
+    .ob-title{font-family:var(--font-serif);font-size:32px;font-weight:500;color:var(--text-primary);line-height:1.15;margin:0 0 var(--space-3);}
+    .ob-sub{font-size:15px;font-weight:300;color:var(--text-muted);line-height:1.7;margin:0 0 var(--space-6);}
+    .ob-q{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-secondary);margin:0 0 var(--space-5);}
+    .ob-options{display:flex;flex-direction:column;gap:var(--space-3);}
+    .ob-opt{display:flex;align-items:flex-start;gap:14px;width:100%;text-align:left;background:var(--night-soft);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:18px 20px;cursor:pointer;transition:border-color .18s,background .18s;}
+    .ob-opt:hover{border-color:var(--border-gold);background:rgba(200,151,58,.06);}
+    .ob-opt:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+    .ob-opt.sel{border-color:var(--gold);background:rgba(200,151,58,.1);}
+    .ob-opt-check{flex-shrink:0;width:20px;height:20px;border-radius:50%;border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--night);background:var(--night-mid);margin-top:2px;}
+    .ob-opt.sel .ob-opt-check{background:var(--gold);border-color:var(--gold);}
+    .ob-opt-tit{font-family:var(--font-serif);font-size:17px;font-weight:500;color:var(--text-primary);margin-bottom:3px;}
+    .ob-opt-desc{font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.6;}
+    .ob-actions{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);margin-top:var(--space-6);flex-wrap:wrap;}
+    .ob-skip{font-size:12px;font-weight:300;color:var(--text-muted);background:none;border:none;cursor:pointer;padding:8px 4px;}
+    .ob-skip:hover{color:var(--gold);}
+    .ob-disclaimer{font-size:12px;font-weight:300;color:var(--text-faint);line-height:1.6;margin:var(--space-6) 0 0;}
+    .page-footer-bar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:36px;border-top:0.5px solid var(--border);background:var(--night-soft);}
+    @media(max-width:599px){
+      .ob-wrap{padding:var(--space-5) var(--space-4) var(--space-7);}
+      .ob-card{padding:var(--space-6) var(--space-4);}
+      .ob-title{font-size:26px;}
+      .ob-actions{flex-direction:column-reverse;align-items:stretch;}
+      .ob-actions .btn-primary{text-align:center;}
+      .ob-skip{text-align:center;}
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <main class="ob-wrap">
+    <div class="ob-card" id="ob-card">
+      <div class="ob-eyebrow">Bienvenida</div>
+      <div class="ob-q">Cargando…</div>
+    </div>
+  </main>
+
+  <div class="page-footer-bar">
+    <span class="footer-copy">© 2026 Aurea · Todos los derechos reservados</span>
+    <div class="footer-legal">
+      <a class="footer-legal-link" href="privacidad.html">Privacidad</a>
+      <a class="footer-legal-link" href="cookies.html">Cookies</a>
+      <a class="footer-legal-link" href="aviso-legal.html">Aviso legal</a>
+      <a class="footer-legal-link" href="contacto.html">Contacto</a>
+    </div>
+  </div>
+
+  <div id="chat-container"></div>
+  <script src="js/components.js"></script>
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { requireAuth } from './js/auth.js';
+    import { checkNotificaciones } from './js/notif.js';
+
+    const VISTO_KEY = 'aurea-onboarding-visto';
+    const card = document.getElementById('ob-card');
+
+    // Marca el onboarding como visto (estado no sensible en localStorage).
+    function marcarVisto() {
+      try { localStorage.setItem(VISTO_KEY, '1'); } catch { /* sin localStorage */ }
+    }
+    function irA(url) { marcarVisto(); window.location.href = url; }
+
+    // — Las 4 intenciones. El destino se calcula con el rol real del usuario para
+    //   no duplicar la lógica de roles: la activación de un rol nuevo se delega al
+    //   flujo existente perfil-edicion.html?add=… —
+    const OPCIONES = [
+      { id: 'aprender', titulo: 'Quiero aprender',        desc: 'Encontrar maestros y empezar una relación de aprendizaje.' },
+      { id: 'ensenar',  titulo: 'Quiero enseñar',         desc: 'Crear mi perfil de maestro y recibir solicitudes cuidadas.' },
+      { id: 'ambas',    titulo: 'Quiero ambas cosas',     desc: 'Aprender de otros y compartir lo que sé.' },
+      { id: 'noclaro',  titulo: 'Aún no lo tengo claro',  desc: 'Te ayudamos a orientarte antes de elegir.' },
+    ];
+
+    let _rol = 'discipulo';
+    let _seleccion = null;
+
+    // Destino para crear/editar el perfil de maestro: si aún no es maestro,
+    // delega en el flujo de "añadir rol" (crea la fila y pone rol=ambos al guardar).
+    function destinoPerfilMaestro() {
+      const yaMaestro = _rol === 'maestro' || _rol === 'ambos';
+      return yaMaestro ? 'perfil-edicion.html' : 'perfil-edicion.html?add=maestro';
+    }
+
+    function preseleccionPorRol() {
+      if (_rol === 'maestro')  return 'ensenar';
+      if (_rol === 'ambos')    return 'ambas';
+      if (_rol === 'discipulo') return 'aprender';
+      return null;
+    }
+
+    function renderBienvenida() {
+      const opts = OPCIONES.map((o) => `
+        <button type="button" class="ob-opt${o.id === _seleccion ? ' sel' : ''}" data-op="${o.id}" aria-pressed="${o.id === _seleccion}">
+          <span class="ob-opt-check" aria-hidden="true">✓</span>
+          <span>
+            <span class="ob-opt-tit">${escHtml(o.titulo)}</span>
+            <span class="ob-opt-desc">${escHtml(o.desc)}</span>
+          </span>
+        </button>`).join('');
+      card.innerHTML = `
+        <div class="ob-eyebrow">Bienvenida</div>
+        <h1 class="ob-title">Bienvenido a Aurea</h1>
+        <p class="ob-sub">Aurea no empieza con un curso, sino con una relación de aprendizaje. Funciona mejor cuando sabemos si vienes a aprender, enseñar o ambas cosas.</p>
+        <p class="ob-q">¿Qué vienes a hacer ahora?</p>
+        <div class="ob-options" role="group" aria-label="¿Qué vienes a hacer ahora?">${opts}</div>
+        <div class="ob-actions">
+          <button type="button" class="ob-skip" id="ob-skip">Saltar por ahora</button>
+          <button type="button" class="btn-primary" id="ob-continuar" ${_seleccion ? '' : 'disabled'} style="${_seleccion ? '' : 'opacity:.5;cursor:default;'}">Continuar</button>
+        </div>
+        <p class="ob-disclaimer">Puedes cambiar tu rol cuando quieras desde tu perfil. No te pedimos datos sensibles.</p>`;
+
+      card.querySelectorAll('.ob-opt').forEach((b) => b.addEventListener('click', () => {
+        _seleccion = b.dataset.op;
+        renderBienvenida();
+      }));
+      document.getElementById('ob-continuar').addEventListener('click', continuar);
+      document.getElementById('ob-skip').addEventListener('click', () => irA('perfil.html'));
+    }
+
+    function continuar() {
+      if (!_seleccion) return;
+      switch (_seleccion) {
+        case 'aprender': irA('intencion.html'); break;
+        case 'ensenar':  irA(destinoPerfilMaestro()); break;
+        case 'noclaro':  irA('intencion.html'); break;
+        case 'ambas':    renderSecundaria(); break;
+      }
+    }
+
+    // — Pantalla secundaria para "ambas cosas": elegir qué preparar primero —
+    function renderSecundaria() {
+      card.innerHTML = `
+        <div class="ob-eyebrow">Bienvenida</div>
+        <h1 class="ob-title">¿Qué quieres preparar primero?</h1>
+        <p class="ob-sub">Puedes aprender de otros y, al mismo tiempo, compartir lo que sabes. Empieza por donde prefieras; lo otro seguirá disponible.</p>
+        <div class="ob-options">
+          <button type="button" class="ob-opt" id="ob-maestro">
+            <span class="ob-opt-check" aria-hidden="true">✦</span>
+            <span>
+              <span class="ob-opt-tit">Mi perfil de maestro</span>
+              <span class="ob-opt-desc">Explica qué sabes, cómo acompañas y qué tipo de discípulos encajan contigo.</span>
+            </span>
+          </button>
+          <button type="button" class="ob-opt" id="ob-explorar">
+            <span class="ob-opt-check" aria-hidden="true">🔍</span>
+            <span>
+              <span class="ob-opt-tit">Explorar maestros</span>
+              <span class="ob-opt-desc">Orientarte y encontrar a alguien con quien empezar a aprender.</span>
+            </span>
+          </button>
+        </div>
+        <div class="ob-actions">
+          <button type="button" class="ob-skip" id="ob-atras">← Atrás</button>
+        </div>`;
+      document.getElementById('ob-maestro').addEventListener('click', () => irA(destinoPerfilMaestro()));
+      document.getElementById('ob-explorar').addEventListener('click', () => irA('intencion.html'));
+      document.getElementById('ob-atras').addEventListener('click', renderBienvenida);
+    }
+
+    // — Init: ruta privada (requireAuth), lee el rol real para pre-seleccionar y enrutar —
+    (async () => {
+      const session = await requireAuth();
+      if (!session) return;   // requireAuth ya redirige a login si no hay sesión
+
+      const ini = '';
+      document.getElementById('nav-container').innerHTML = renderNavAuth('', ini);
+      checkNotificaciones();
+
+      try {
+        const { data: p } = await supabase.from('profiles')
+          .select('rol').eq('id', session.user.id).single();
+        _rol = p?.rol || 'discipulo';
+      } catch { _rol = 'discipulo'; }
+
+      _seleccion = preseleccionPorRol();
+      renderBienvenida();
+    })();
+  </script>
+</body>
+</html>
