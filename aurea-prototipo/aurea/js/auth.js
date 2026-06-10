@@ -60,3 +60,25 @@ export async function signOut() {
   await supabase.auth.signOut();
   window.location.href = 'index.html';
 }
+
+/**
+ * Envía un email con enlace de recuperación de contraseña.
+ * No revela si el email existe (Supabase responde igual exista o no).
+ * `redirectTo` debe estar en la allowlist de Supabase
+ * (Authentication > URL Configuration > Redirect URLs).
+ * Devuelve { data, error } del SDK; el llamador decide el mensaje neutral.
+ */
+export async function enviarRecuperacion(email, redirectTo) {
+  return supabase.auth.resetPasswordForEmail(
+    email,
+    redirectTo ? { redirectTo } : undefined,
+  );
+}
+
+/**
+ * Actualiza la contraseña del usuario con sesión válida (sesión normal o de
+ * recuperación establecida por el enlace). Devuelve { data, error } del SDK.
+ */
+export async function actualizarPassword(nuevaPassword) {
+  return supabase.auth.updateUser({ password: nuevaPassword });
+}
