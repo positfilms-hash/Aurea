@@ -379,7 +379,7 @@ pre, code { overflow-wrap: anywhere; white-space: pre-wrap; }
   /* Nav: reducir padding y permitir scroll horizontal de los enlaces
      sin empujar el ancho de la página (mobile nav completo = otra spec). */
   .nav { padding: 0 var(--space-4); gap: var(--space-3); }
-  .nav-links { gap: 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .nav-links { gap: 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; min-width: 0; }
   .nav-links::-webkit-scrollbar { display: none; }
   /* Dropdowns y modales dentro de pantalla */
   .nav-dd { right: 0; max-width: calc(100vw - var(--space-5)); }

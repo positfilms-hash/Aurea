@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="js/scale.js"></script>
+  <title>Cookies · Aurea</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .content{padding:clamp(32px,6vw,56px) clamp(20px,12vw,160px) 0;max-width:820px;margin:0 auto;}
+    .doc-section{margin-bottom:56px;}
+    .doc-eyebrow{font-size:9px;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;}
+    .doc-title{font-family:var(--font-serif);font-size:40px;font-weight:500;color:var(--text-primary);line-height:1.05;margin-bottom:14px;}
+    .doc-title em{font-style:italic;color:var(--gold);}
+    .doc-updated{font-size:11px;font-weight:300;color:var(--text-faint);margin-bottom:24px;}
+    .doc-divider{height:0.5px;background:var(--border);margin-bottom:32px;}
+    .subsection{margin-bottom:26px;}
+    .subsection-title{font-family:var(--font-serif);font-size:18px;font-weight:500;color:var(--text-primary);margin-bottom:10px;}
+    .subsection-text{font-size:13px;font-weight:300;color:var(--text-muted);line-height:1.9;}
+    .subsection-text p{margin-bottom:10px;}
+    .subsection-text a{color:var(--gold);text-decoration:none;}
+    .subsection-text a:hover{text-decoration:underline;}
+    .subsection-list{font-size:13px;font-weight:300;color:var(--text-muted);line-height:1.8;list-style:none;padding:0;}
+    .subsection-list li{padding:8px 0;border-bottom:0.5px solid var(--border);display:flex;align-items:flex-start;gap:10px;}
+    .subsection-list li:last-child{border-bottom:none;}
+    .subsection-list li::before{content:'✦';color:var(--gold);font-size:10px;flex-shrink:0;margin-top:5px;}
+    .subsection-list strong{color:var(--text-primary);font-weight:500;}
+    .subsection-list code{font-family:monospace;font-size:12px;color:var(--gold);}
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <div class="content">
+    <div class="doc-section">
+      <div class="doc-eyebrow">Documento legal</div>
+      <h2 class="doc-title">Política de<br><em>cookies</em></h2>
+      <div class="doc-updated">Última actualización: 10 de junio de 2026</div>
+      <div class="doc-divider"></div>
+
+      <div class="subsection">
+        <div class="subsection-title">Qué son las cookies y tecnologías similares</div>
+        <div class="subsection-text">
+          <p>Las cookies y tecnologías similares (como el almacenamiento local del navegador) son pequeños datos que una web guarda en tu dispositivo. Sirven para recordar tu sesión y tus preferencias.</p>
+          <p>En esta página te contamos, en lenguaje sencillo, qué usa Aurea de verdad.</p>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Qué usa Aurea</div>
+        <div class="subsection-text">
+          <p>Aurea funciona con <strong>almacenamiento técnico y de preferencias</strong> en tu navegador. No usamos cookies de analítica, de publicidad ni de marketing.</p>
+          <p>El inicio de sesión se gestiona mediante <strong>Supabase</strong>, que guarda los datos necesarios para mantener tu sesión en el almacenamiento local de tu navegador. Nuestro proveedor de alojamiento, <strong>Vercel</strong>, puede usar almacenamiento técnico necesario para servir la web.</p>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Almacenamiento local que usamos</div>
+        <ul class="subsection-list">
+          <li><code>aurea-rol</code> — <strong>preferencia.</strong> Recuerda tu rol activo (maestro, discípulo o ambos).</li>
+          <li><code>aurea-tema</code> — <strong>preferencia.</strong> Recuerda el tema visual (oscuro o arena).</li>
+          <li><code>aurea-chat-corner</code> — <strong>preferencia.</strong> Recuerda en qué esquina colocaste el asistente de ayuda.</li>
+          <li><strong>Sesión de Supabase</strong> — <strong>técnica/necesaria.</strong> Mantiene tu sesión iniciada. Sin ella no podrías permanecer conectado.</li>
+        </ul>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Categorías</div>
+        <ul class="subsection-list">
+          <li><strong>Técnico / necesario</strong> — imprescindible para que la plataforma funcione y mantengas la sesión. No requiere consentimiento. <em>Aurea lo usa.</em></li>
+          <li><strong>Preferencias</strong> — recuerda ajustes de tu experiencia (rol, tema). <em>Aurea lo usa.</em></li>
+          <li><strong>Analítica</strong> — medición de uso. <em>Aurea no la usa.</em></li>
+          <li><strong>Marketing / publicidad</strong> — seguimiento con fines comerciales. <em>Aurea no la usa.</em></li>
+        </ul>
+        <div class="subsection-text" style="margin-top:12px;"><p>Aurea no utiliza cookies de publicidad ni marketing.</p></div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Cómo gestionar el almacenamiento</div>
+        <div class="subsection-text">
+          <p>Como solo usamos almacenamiento técnico y de preferencias, no mostramos un banner de cookies. Puedes borrar este almacenamiento en cualquier momento desde la configuración de tu navegador; si lo haces, se cerrará tu sesión y se olvidarán tus preferencias.</p>
+          <p>Si en el futuro añadimos tecnologías no necesarias (por ejemplo, analítica), te pediremos consentimiento y podrás aceptarlas o rechazarlas con la misma facilidad.</p>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Más información</div>
+        <div class="subsection-text"><p>Para saber qué datos tratamos y por qué, consulta la <a href="privacidad.html">política de privacidad</a>.</p></div>
+      </div>
+    </div>
+  </div>
+  <div id="footer-container"></div>
+  <div id="chat-container"></div>
+  <script src="js/components.js"></script>
+  <script>
+    document.getElementById('nav-container').innerHTML = renderNavPublic('');
+    document.getElementById('footer-container').innerHTML = renderFooter();
+  </script>
+</body>
+</html>
