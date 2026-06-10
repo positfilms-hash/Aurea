@@ -75,6 +75,7 @@
         <button class="tab-btn active" onclick="showTab('perfil',this)"><span class="tab-icon">👤</span>Perfil</button>
         <button class="tab-btn" onclick="showTab('trayectoria',this)"><span class="tab-icon">📋</span>Trayectoria</button>
         <button class="tab-btn" onclick="showTab('requisitos',this)"><span class="tab-icon">✦</span>Requisitos mínimos</button>
+        <button class="tab-btn" onclick="showTab('seguridad',this)"><span class="tab-icon">🔒</span>Seguridad</button>
         <button class="tab-btn" onclick="showTab('cuenta',this)" style="margin-top:auto;color:var(--red);"><span class="tab-icon">⚠</span>Cuenta</button>
       </div>
       <div class="sidebar-info">Los cambios no se publican hasta que pulses "Guardar cambios".</div>
@@ -251,6 +252,26 @@
             </div>
           </div>
           <div class="edit-field"><span class="edit-label">Requisitos libres (uno por línea)</span><textarea class="edit-textarea" id="f-req-libres" style="height:90px;" placeholder="Haber leído al menos un texto de la disciplina&#10;Disponibilidad mínima de 3 horas semanales"></textarea></div>
+        </div>
+      </div>
+      <!-- SEGURIDAD (cambio de contraseña — specs 029/031) -->
+      <div class="tab-panel" id="tab-seguridad">
+        <div class="section-title">Seguridad</div>
+        <div class="edit-grid">
+          <div style="background:var(--night-mid);border:0.5px solid var(--border);border-radius:10px;padding:20px 24px;max-width:440px;">
+            <div style="font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--text-primary);margin-bottom:6px;">Cambiar contraseña</div>
+            <div style="font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.7;margin-bottom:16px;">Actualiza la contraseña con la que accedes a Aurea. Tu sesión seguirá activa.</div>
+            <div class="field-wrap" style="margin-bottom:12px;">
+              <span class="field-label">Nueva contraseña</span>
+              <input class="edit-input" type="password" id="pw-new" placeholder="Mínimo 8 caracteres" autocomplete="new-password" style="max-width:300px;">
+            </div>
+            <div class="field-wrap" style="margin-bottom:12px;">
+              <span class="field-label">Repetir contraseña</span>
+              <input class="edit-input" type="password" id="pw-new2" placeholder="Repite la contraseña" autocomplete="new-password" style="max-width:300px;">
+            </div>
+            <div id="pw-msg" style="display:none;font-size:11px;font-weight:300;line-height:1.5;margin-bottom:10px;"></div>
+            <button type="button" id="pw-btn" onclick="cambiarPassword()" style="font-size:11px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);background:none;border:0.5px solid var(--border-gold);padding:9px 20px;border-radius:100px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(200,151,58,0.08)'" onmouseout="this.style.background='none'">Guardar contraseña</button>
+          </div>
         </div>
       </div>
       <!-- CUENTA -->
@@ -621,6 +642,40 @@
           if (btn) { btn.textContent = '📍 Ubicación'; btn.disabled = false; }
         }
       );
+    };
+
+    // — Cambiar contraseña (apartado Seguridad — specs 029/031) —
+    // Requiere sesión válida (la página pasó por requireAuth). updateUser mantiene
+    // la sesión activa tras el cambio.
+    window.cambiarPassword = async function() {
+      const p1  = document.getElementById('pw-new');
+      const p2  = document.getElementById('pw-new2');
+      const msg = document.getElementById('pw-msg');
+      const btn = document.getElementById('pw-btn');
+      const show = (t, color) => { msg.textContent = t; msg.style.color = color; msg.style.display = 'block'; };
+      msg.style.display = 'none';
+
+      const v1 = p1.value, v2 = p2.value;
+      if (v1.length < 8) { show('La contraseña debe tener al menos 8 caracteres.', '#ff6b6b'); return; }
+      if (v1 !== v2)     { show('Las contraseñas no coinciden.', '#ff6b6b'); return; }
+
+      btn.disabled = true;            // evita doble envío
+      btn.textContent = 'Guardando…';
+
+      const { error } = await supabase.auth.updateUser({ password: v1 });
+
+      if (error) {
+        console.warn('No se pudo cambiar la contraseña.');
+        show('No hemos podido cambiar la contraseña ahora mismo. Inténtalo de nuevo.', '#ff6b6b');
+        btn.disabled = false;
+        btn.textContent = 'Guardar contraseña';
+        return;
+      }
+
+      p1.value = ''; p2.value = '';
+      show('Tu contraseña se ha actualizado. Tu sesión sigue activa.', 'var(--gold)');
+      btn.disabled = false;
+      btn.textContent = 'Guardar contraseña';
     };
 
     // — Tabs —
@@ -1120,7 +1175,7 @@
         if (!tray?.length) window.addTL();
       }
       // Activar tab por URL (?tab=perfil|trayectoria|requisitos|cuenta) — spec 028
-      const _TABS_OK = ['perfil','trayectoria','requisitos','cuenta'];
+      const _TABS_OK = ['perfil','trayectoria','requisitos','seguridad','cuenta'];
       const _tabP = new URLSearchParams(location.search).get('tab');
       if (_TABS_OK.includes(_tabP)) {
         const _tabBtnEl = document.querySelector(`.tab-btn[onclick="showTab('${_tabP}',this)"]`);

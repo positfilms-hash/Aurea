@@ -137,9 +137,9 @@ img { max-width: 100%; display: block; }
 
 /* — Notificaciones (campana del nav) — */
 .nav-notif-wrap { position:relative; display:inline-flex; align-items:center; }
-.nav-notif-btn { position:relative; background:none; border:none; cursor:pointer; font-size:15px; line-height:1; padding:4px 6px; color:var(--text-muted); transition:color 0.2s; }
-.nav-notif-btn:hover { color:var(--gold); }
-.nav-notif-btn .notif-badge { position:absolute; top:-2px; right:-2px; margin:0; }
+.nav-notif-btn { position:relative; background:none; border:none; cursor:pointer; font-family:var(--font-sans); font-size:11px; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; line-height:1; padding:4px 6px; color:var(--text-muted); transition:color 0.2s; white-space:nowrap; }
+.nav-notif-btn:hover, .nav-notif-btn.active { color:var(--gold); }
+.nav-notif-btn .notif-badge { position:static; margin:0; }
 .nav-notif-dd { min-width:300px; max-width:340px; padding:0; overflow:hidden; }
 .nav-notif-head { display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-bottom:0.5px solid var(--border); font-size:11px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); }
 .nav-notif-readall { background:none; border:none; cursor:pointer; font-size:10px; letter-spacing:0.06em; text-transform:none; color:var(--gold); }

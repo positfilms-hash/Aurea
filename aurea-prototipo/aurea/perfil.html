@@ -130,7 +130,6 @@
         <div class="avail-row"><span class="avail-label">Horas semanales</span><span class="avail-val">2–3 h</span></div>
         <div class="avail-row"><span class="avail-label">Prácticas activas</span><span class="avail-val">2 / 3</span></div>
       </div>
-      <button class="btn-editar" id="btn-editar" onclick="location.href='perfil-edicion.html'">Editar perfil</button>
     </div>
     <div class="col-right" id="col-right">
       <div id="ajustes-section"></div>
@@ -204,12 +203,6 @@
       ['stats-discipulo','tags-discipulo','avail-discipulo'].forEach(id =>
         document.getElementById(id).classList.toggle('hidden', esMaestro));
 
-      // Botón "Editar perfil" lleva a la sección correcta
-      const btnEd = document.getElementById('btn-editar');
-      if (btnEd) btnEd.onclick = () => {
-        location.href = esMaestro ? 'perfil-edicion.html#sec-maestro' : 'perfil-edicion.html#sec-discipulo';
-      };
-
       // Construir contenido derecho (con try local para no romper toda la init)
       try {
         let html = esMaestro ? buildMaestroHTML() : buildDiscipuloHTML();
@@ -268,11 +261,9 @@
       const compLabel = pct >= 100 ? 'Perfil completo' : pct + '% completado';
       const compColor = pct >= 100 ? 'var(--gold)' : 'var(--text-muted)';
 
-      // CTAs perfil público
-      const uidSafe = encodeURIComponent(uid);
+      // Mi cuenta solo enlaza a "Ajustes de cuenta". Los perfiles públicos ya
+      // están en la barra lateral; la edición y la seguridad viven en ajustes.
       let ctasPublico = `<a class="btn-primary" href="perfil-edicion.html" style="font-size:13px;">Ajustes de cuenta</a>`;
-      if (_maestro)   ctasPublico += `<a class="btn-ghost" href="perfil-maestro.html?id=${uidSafe}" style="font-size:11px;">Ver perfil de maestro</a>`;
-      if (_discipulo) ctasPublico += `<a class="btn-ghost" href="perfil-discipulo.html?id=${uidSafe}" style="font-size:11px;">Ver perfil de discípulo</a>`;
 
       return `
         <div style="font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--text-primary);margin-bottom:6px;">Mi cuenta</div>
@@ -291,65 +282,8 @@
           <div class="ajuste-card-hd">Cuenta</div>
           ${email ? `<div class="ajuste-row"><span class="ajuste-lbl">Email</span><span class="ajuste-val" style="font-size:11px;word-break:break-all;">${escHtml(email)}</span></div>` : ''}
           <div class="ajuste-row"><span class="ajuste-lbl">Estado</span><span class="ajuste-val" style="color:var(--gold);">Conectado</span></div>
-        </div>
-        <div class="ajuste-card">
-          <div class="ajuste-card-hd">Seguridad</div>
-          <div style="font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.7;margin-bottom:14px;">Actualiza la contraseña con la que accedes a Aurea.</div>
-          <div class="field-wrap" style="margin-bottom:10px;">
-            <span class="field-label">Nueva contraseña</span>
-            <input class="field-input" type="password" id="pw-new" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
-          </div>
-          <div class="field-wrap" style="margin-bottom:10px;">
-            <span class="field-label">Repetir contraseña</span>
-            <input class="field-input" type="password" id="pw-new2" placeholder="Repite la contraseña" autocomplete="new-password">
-          </div>
-          <div id="pw-msg" style="display:none;font-size:11px;font-weight:300;line-height:1.5;margin-bottom:4px;"></div>
-          <div class="ajuste-ctas"><button class="btn-ghost" id="pw-btn" onclick="cambiarPassword()" style="font-size:12px;">Guardar contraseña</button></div>
-        </div>
-        <div class="ajuste-card">
-          <div class="ajuste-card-hd">Sesión</div>
-          <div class="ajuste-ctas"><a class="btn-ghost" href="logout.html" style="font-size:12px;">Cerrar sesión</a></div>
-        </div>
-        <div class="ajuste-card danger">
-          <div class="ajuste-card-hd" style="color:#E87070;">Zona peligrosa</div>
-          <div style="font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.7;margin-bottom:12px;">Eliminar tu cuenta es irreversible. Todos tus datos serán borrados permanentemente.</div>
-          <div class="ajuste-ctas"><a class="btn-ghost" href="perfil-edicion.html?tab=cuenta" style="font-size:12px;color:#E87070;border-color:#E8707055;">Eliminar cuenta</a></div>
         </div>`;
     }
-
-    // — Cambiar contraseña desde ajustes (spec 029) —
-    // Requiere sesión válida (la página ya pasó por requireAuth). updateUser
-    // mantiene la sesión activa tras el cambio.
-    window.cambiarPassword = async function() {
-      const p1  = document.getElementById('pw-new');
-      const p2  = document.getElementById('pw-new2');
-      const msg = document.getElementById('pw-msg');
-      const btn = document.getElementById('pw-btn');
-      const show = (t, color) => { msg.textContent = t; msg.style.color = color; msg.style.display = 'block'; };
-      msg.style.display = 'none';
-
-      const v1 = p1.value, v2 = p2.value;
-      if (v1.length < 8) { show('La contraseña debe tener al menos 8 caracteres.', '#ff6b6b'); return; }
-      if (v1 !== v2)     { show('Las contraseñas no coinciden.', '#ff6b6b'); return; }
-
-      btn.disabled = true;            // evita doble envío
-      btn.textContent = 'Guardando…';
-
-      const { error } = await supabase.auth.updateUser({ password: v1 });
-
-      if (error) {
-        console.warn('No se pudo cambiar la contraseña.');
-        show('No hemos podido cambiar la contraseña ahora mismo. Inténtalo de nuevo.', '#ff6b6b');
-        btn.disabled = false;
-        btn.textContent = 'Guardar contraseña';
-        return;
-      }
-
-      p1.value = ''; p2.value = '';
-      show('Tu contraseña se ha actualizado. Tu sesión sigue activa.', 'var(--gold)');
-      btn.disabled = false;
-      btn.textContent = 'Guardar contraseña';
-    };
 
     function buildMaestroHTML() {
       const bio = _profile?.frase || '';
