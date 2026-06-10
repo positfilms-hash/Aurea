@@ -111,6 +111,7 @@
       <div style="text-align:center;">
         <div id="btn-plaza" class="btn-circle" onclick="window.openSolicitud()"><div class="btn-circle-label">Enviar<br>solicitud</div></div>
         <div id="btn-wait" class="btn-circle wait hidden"><div class="btn-circle-label">Lista de<br>espera</div></div>
+        <a id="btn-own" class="btn-secondary hidden" href="perfil.html" style="display:inline-block;text-decoration:none;">Ver mi cuenta</a>
       </div>
     </div>
     <div class="col-right">
@@ -208,6 +209,10 @@
     let _disciplina  = '';
     let _nombreCompleto = 'este maestro';
 
+    // Usuario actual (para impedir solicitarse a uno mismo — spec 031).
+    let _currentUserId = null;
+    const _sessionReady = getSession().then(s => { _currentUserId = s?.user?.id || null; });
+
     const MOT_MIN = 120, OBJ_MIN = 60;
 
     function updCounter(id, counterId, min) {
@@ -236,6 +241,12 @@
       const texto = formatSolicitud({ motivacion: mot, objetivo: obj, ritmo });
 
       const session = await getSession();
+      // Defensa: nunca crear una solicitud hacia uno mismo, aunque se manipule el front.
+      if (session && _maestroId && session.user.id === _maestroId) {
+        err.textContent = 'No puedes enviarte una solicitud a ti mismo.';
+        err.classList.add('show');
+        return;
+      }
       if (session && _maestroId) {
         const { error } = await supabase.from('solicitudes').insert({
           discipulo_id: session.user.id,
@@ -360,6 +371,15 @@
       if (!m.acepta_solicitudes || plazas === 0) {
         document.getElementById('btn-plaza').classList.add('hidden');
         document.getElementById('btn-wait').classList.remove('hidden');
+      }
+
+      // Perfil propio: no puedes solicitarte a ti mismo (spec 031). Oculta
+      // solicitar/lista de espera y ofrece ir a tu cuenta.
+      await _sessionReady;
+      if (_currentUserId && _currentUserId === id) {
+        document.getElementById('btn-plaza').classList.add('hidden');
+        document.getElementById('btn-wait').classList.add('hidden');
+        document.getElementById('btn-own').classList.remove('hidden');
       }
 
       // — Columna derecha —
