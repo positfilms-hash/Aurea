@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="js/scale.js"></script>
+  <title>No sé qué buscar — Aurea</title>
+  <meta name="description" content="¿No sabes por dónde empezar en Aurea? Responde unas preguntas breves y te orientamos hacia maestros y categorías que pueden encajar contigo.">
+  <link rel="canonical" href="https://aureacatena.com/intencion.html">
+  <meta property="og:site_name" content="Aurea">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="No sé qué buscar — Aurea">
+  <meta property="og:description" content="Responde unas preguntas breves y te orientamos hacia maestros que pueden encajar contigo.">
+  <meta property="og:url" content="https://aureacatena.com/intencion.html">
+  <meta property="og:image" content="https://aureacatena.com/assets/logo.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="No sé qué buscar — Aurea">
+  <meta name="twitter:description" content="Responde unas preguntas breves y te orientamos.">
+  <meta name="twitter:image" content="https://aureacatena.com/assets/logo.png">
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .int-wrap{max-width:640px;margin:0 auto;padding:var(--space-7) var(--space-5) var(--space-8);}
+    .int-card{background:var(--night-mid);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:var(--space-7) var(--space-6);}
+    .int-progress{font-size:11px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint);margin-bottom:var(--space-3);}
+    .int-progress-bar{height:4px;background:var(--border);border-radius:100px;overflow:hidden;margin-bottom:var(--space-6);}
+    .int-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold));transition:width .3s;}
+    .int-q{font-family:var(--font-serif);font-size:26px;font-weight:500;color:var(--text-primary);line-height:1.2;margin:0 0 var(--space-6);}
+    .int-options{display:flex;flex-direction:column;gap:var(--space-3);}
+    .int-opt{display:block;width:100%;text-align:left;background:var(--night-soft);border:0.5px solid var(--border);border-radius:var(--radius-md);padding:16px 18px;font-family:var(--font-sans);font-size:15px;color:var(--text-primary);cursor:pointer;transition:border-color .18s,background .18s;min-height:var(--tap);}
+    .int-opt:hover{border-color:var(--border-gold);background:rgba(200,151,58,.06);}
+    .int-opt:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+    .int-opt.sel{border-color:var(--gold);background:rgba(200,151,58,.1);}
+    .int-opt.sel::before{content:'\2713\00a0\00a0';color:var(--gold);font-weight:700;}
+    .int-nav{display:flex;justify-content:space-between;align-items:center;margin-top:var(--space-6);gap:var(--space-3);}
+    .int-back{font-size:12px;color:var(--text-muted);background:none;border:none;cursor:pointer;padding:8px 4px;}
+    .int-back:hover{color:var(--gold);}
+    .int-hint{font-size:11px;color:var(--text-ghost);}
+    /* — Intro — */
+    .int-intro-title{font-family:var(--font-serif);font-size:32px;font-weight:500;color:var(--text-primary);line-height:1.15;margin:0 0 var(--space-4);}
+    .int-intro-text{font-size:15px;font-weight:300;color:var(--text-muted);line-height:1.8;margin:0 0 var(--space-6);}
+    .int-actions{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-4);}
+    /* — Resultado — */
+    .int-res-lead{font-family:var(--font-serif);font-size:21px;font-weight:500;font-style:italic;color:var(--text-secondary);line-height:1.5;margin:0 0 var(--space-5);}
+    .int-res-lead strong{font-style:normal;color:var(--gold);}
+    .int-fallback{font-size:13px;font-weight:300;color:var(--text-muted);line-height:1.7;background:var(--night-soft);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin:0 0 var(--space-5);}
+    .int-res-block{margin-bottom:var(--space-5);}
+    .int-res-h{font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:block;}
+    .int-cats{display:flex;flex-wrap:wrap;gap:var(--space-2);}
+    .int-cat-btn{font-family:var(--font-serif);font-size:16px;font-style:italic;color:var(--text-primary);border:0.5px solid var(--border-gold);background:rgba(200,151,58,.06);padding:9px 20px;border-radius:100px;text-decoration:none;transition:all .2s;}
+    .int-cat-btn:hover{color:var(--gold);background:rgba(200,151,58,.12);}
+    .int-res-text{font-size:14px;font-weight:300;color:var(--text-secondary);line-height:1.7;margin:0;}
+    .int-disclaimer{font-size:12px;font-weight:300;font-style:italic;color:var(--text-faint);line-height:1.6;margin:var(--space-6) 0 0;border-top:0.5px solid var(--border);padding-top:var(--space-4);}
+    .page-footer-bar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:36px;border-top:0.5px solid var(--border);background:var(--night-soft);}
+    @media(max-width:599px){
+      .int-wrap{padding:var(--space-5) var(--space-4) var(--space-7);}
+      .int-card{padding:var(--space-6) var(--space-4);}
+      .int-q{font-size:22px;}
+      .int-intro-title{font-size:26px;}
+      .int-actions{flex-direction:column;align-items:stretch;}
+      .int-actions .btn-primary,.int-actions .btn-ghost{text-align:center;}
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+  <main class="int-wrap">
+    <div class="int-card" id="int-card">
+      <div class="int-progress">Orientación</div>
+      <div class="int-q">Cargando…</div>
+    </div>
+  </main>
+
+  <div class="page-footer-bar">
+    <span class="footer-copy">© 2026 Aurea · Todos los derechos reservados</span>
+    <div class="footer-legal">
+      <a class="footer-legal-link" href="privacidad.html">Privacidad</a>
+      <a class="footer-legal-link" href="cookies.html">Cookies</a>
+      <a class="footer-legal-link" href="aviso-legal.html">Aviso legal</a>
+      <a class="footer-legal-link" href="contacto.html">Contacto</a>
+    </div>
+  </div>
+
+  <div id="chat-container"></div>
+  <script src="js/components.js"></script>
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { checkNotificaciones } from './js/notif.js';
+    import { PREGUNTAS, calcularResultado } from './js/intencion.js';
+
+    // — Nav inteligente: público sin sesión, auth con sesión (el test no requiere login) —
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const { data: p } = await supabase.from('profiles')
+        .select('nombre, apellido').eq('id', session.user.id).single();
+      const ini = p ? ((p.nombre || '')[0] + (p.apellido || '')[0]).toUpperCase() || '?' : '?';
+      document.getElementById('nav-container').innerHTML = renderNavAuth('', ini);
+      checkNotificaciones();
+    } else {
+      document.getElementById('nav-container').innerHTML = renderNavPublic('');
+    }
+
+    const card  = document.getElementById('int-card');
+    const TOTAL = PREGUNTAS.length;
+    const SS_KEY = 'aurea-intencion';
+    let answersIdx = new Array(TOTAL).fill(null);   // índice de opción elegida por pregunta
+    let idx = -1;                                   // -1 = intro · 0..TOTAL-1 = preguntas · TOTAL = resultado
+
+    function persist(done) {
+      try { sessionStorage.setItem(SS_KEY, JSON.stringify({ answersIdx, done: !!done })); } catch { /* sin sessionStorage */ }
+    }
+
+    function scrollTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+    // — Intro —
+    function renderIntro() {
+      idx = -1;
+      card.innerHTML = `
+        <div class="int-progress">Orientación</div>
+        <h1 class="int-intro-title">No sé qué buscar</h1>
+        <p class="int-intro-text">A veces no empiezas por una categoría, sino por una necesidad. Responde ${TOTAL} preguntas breves y te orientamos hacia maestros que pueden encajar contigo.</p>
+        <div class="int-actions">
+          <button type="button" class="btn-primary" id="int-empezar">Empezar orientación</button>
+          <a class="btn-ghost" href="discover.html">Explorar maestros</a>
+        </div>
+        <p class="int-disclaimer">Esto no es un diagnóstico ni un examen. No guardamos tus respuestas ni te pedimos datos personales.</p>`;
+      document.getElementById('int-empezar').addEventListener('click', () => { idx = 0; renderPregunta(); scrollTop(); });
+    }
+
+    // — Pregunta n —
+    function renderPregunta() {
+      const q = PREGUNTAS[idx];
+      const sel = answersIdx[idx];
+      const opts = q.opciones.map((o, i) =>
+        `<button type="button" class="int-opt${i === sel ? ' sel' : ''}" data-opt="${i}" aria-pressed="${i === sel}">${escHtml(o.label)}</button>`
+      ).join('');
+      card.innerHTML = `
+        <div class="int-progress" aria-live="polite">Pregunta ${idx + 1} de ${TOTAL}</div>
+        <div class="int-progress-bar"><div class="int-progress-fill" style="width:${Math.round(((idx + 1) / TOTAL) * 100)}%;"></div></div>
+        <h1 class="int-q">${escHtml(q.titulo)}</h1>
+        <div class="int-options" role="group" aria-label="${escHtml(q.titulo)}">${opts}</div>
+        <div class="int-nav">
+          <button type="button" class="int-back" id="int-back">${idx === 0 ? '← Volver al inicio' : '← Atrás'}</button>
+          <span class="int-hint">Elige una opción para continuar</span>
+        </div>`;
+      card.querySelectorAll('.int-opt').forEach((b) => b.addEventListener('click', () => {
+        answersIdx[idx] = +b.dataset.opt;
+        persist(false);
+        if (idx < TOTAL - 1) { idx++; renderPregunta(); scrollTop(); }
+        else renderResultado();
+      }));
+      document.getElementById('int-back').addEventListener('click', () => {
+        if (idx === 0) renderIntro();
+        else { idx--; renderPregunta(); }
+        scrollTop();
+      });
+      const first = card.querySelector('.int-opt');
+      if (first) first.focus();
+    }
+
+    // — Resultado —
+    function renderResultado() {
+      idx = TOTAL;
+      persist(true);
+      const respuestas = answersIdx.map((oi, qi) => (oi == null ? null : PREGUNTAS[qi].opciones[oi]));
+      const r = calcularResultado(respuestas);
+
+      const lead = r.necesidad
+        ? `Según tus respuestas, ahora mismo buscas sobre todo <strong>${escHtml(r.necesidad.toLowerCase())}</strong>. Estos caminos pueden encajar contigo.`
+        : 'Según tus respuestas, estos caminos pueden encajar contigo.';
+      const fallback = r.fallback
+        ? `<p class="int-fallback">No pasa nada si aún no lo tienes claro. Puedes empezar explorando maestros que ayuden a ordenar ideas y encontrar dirección.</p>`
+        : '';
+      const catBtns = r.cats.map((c) =>
+        `<a class="int-cat-btn" href="discover.html?categoria=${encodeURIComponent(c)}&origen=intencion">${escHtml(c)}</a>`
+      ).join('');
+      const tipoNombres = r.arqs.length ? escHtml(r.arqs.join(' · ')) : 'A tu medida';
+      const tipoDesc = r.arqDesc.length ? `Alguien ${escHtml(r.arqDesc.join(', '))}.` : 'Un maestro con quien te sientas cómodo para empezar.';
+      const ritmoBlock = r.ritmo
+        ? `<div class="int-res-block"><span class="int-res-h">Ritmo sugerido</span><p class="int-res-text">${escHtml(r.ritmo)}</p></div>`
+        : '';
+      const primera = r.cats[0] || '';
+      const ctaHref = primera
+        ? `discover.html?categoria=${encodeURIComponent(primera)}&origen=intencion`
+        : 'discover.html';
+
+      card.innerHTML = `
+        <div class="int-progress">Tu orientación</div>
+        <p class="int-res-lead">${lead}</p>
+        ${fallback}
+        <div class="int-res-block">
+          <span class="int-res-h">Categorías que pueden encajar</span>
+          <div class="int-cats">${catBtns}</div>
+        </div>
+        <div class="int-res-block">
+          <span class="int-res-h">Tipo de maestro</span>
+          <p class="int-res-text"><strong style="color:var(--text-primary);font-weight:500;">${tipoNombres}</strong><br>${tipoDesc}</p>
+        </div>
+        ${ritmoBlock}
+        <div class="int-actions" style="margin-top:var(--space-6);">
+          <a class="btn-primary" href="${ctaHref}">Ver maestros recomendados</a>
+          <button type="button" class="btn-ghost" id="int-repetir">Repetir test</button>
+        </div>
+        <p class="int-disclaimer">Esto no es un diagnóstico ni una decisión cerrada. Es solo una ayuda para empezar a explorar.</p>`;
+
+      document.getElementById('int-repetir').addEventListener('click', () => {
+        answersIdx = new Array(TOTAL).fill(null);
+        try { sessionStorage.removeItem(SS_KEY); } catch { /* noop */ }
+        renderIntro();
+        scrollTop();
+      });
+    }
+
+    // — Restaurar progreso desde sessionStorage (volver desde discover) —
+    function restaurar() {
+      let saved = null;
+      try { saved = JSON.parse(sessionStorage.getItem(SS_KEY) || 'null'); } catch { saved = null; }
+      const valido = saved && Array.isArray(saved.answersIdx) && saved.answersIdx.length === TOTAL
+        && saved.answersIdx.every((oi, qi) => oi == null || (Number.isInteger(oi) && oi >= 0 && oi < PREGUNTAS[qi].opciones.length));
+      if (!valido) { renderIntro(); return; }
+      answersIdx = saved.answersIdx.slice();
+      if (saved.done) renderResultado();
+      else renderIntro();
+    }
+
+    restaurar();
+  </script>
+</body>
+</html>

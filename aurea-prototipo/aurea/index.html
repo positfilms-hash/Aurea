@@ -26,6 +26,9 @@
     .quote-text em{font-style:italic;color:var(--gold);}
     .quote-author{font-size:11px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin-top:14px;transition:opacity 0.6s;}
     .hero-actions{display:flex;align-items:center;gap:20px;}
+    /* Entrada al test de intención (spec 038) */
+    .hero-intencion{display:inline-block;margin-top:20px;font-size:13px;font-weight:300;color:var(--text-muted);text-decoration:none;border-bottom:0.5px solid var(--border);padding-bottom:2px;transition:color 0.2s,border-color 0.2s;}
+    .hero-intencion:hover{color:var(--gold);border-color:var(--gold);}
 
     /* Tarjeta de maestro */
     .maestro-card{background:var(--night-mid);border:0.5px solid var(--border-soft);border-radius:16px;width:100%;max-width:340px;overflow:hidden;transition:border-color 0.2s;}
@@ -106,6 +109,8 @@
         <button class="btn-primary" onclick="document.getElementById('modal-empezar').classList.add('open')">Empezar ahora</button>
         <a href="discover.html" class="btn-ghost">Ver maestros</a>
       </div>
+      <!-- Entrada suave para quien no sabe qué buscar (spec 038) -->
+      <a href="intencion.html" class="hero-intencion">No sé qué buscar →</a>
     </div>
 
     <!-- Tarjeta de maestro real (o skeleton mientras carga) -->
