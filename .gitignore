@@ -12,6 +12,10 @@ node_modules/
 aurea-prototipo/aurea/dist/
 dist/
 
+# Playwright (spec 040)
+test-results/
+playwright-report/
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
