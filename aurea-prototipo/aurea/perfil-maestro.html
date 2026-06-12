@@ -86,6 +86,10 @@
     .sol-error{display:none;color:var(--red);font-size:11px;font-weight:300;margin-top:10px;line-height:1.5;}
     .sol-error.show{display:block;}
     .page-footer-bar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:36px;border-top:0.5px solid var(--border);background:var(--night-soft);}
+    /* — Señales de confianza (spec 042): etiquetas honestas de datos reales — */
+    .conf-chips{display:flex;flex-wrap:wrap;gap:6px;}
+    .conf-chip{font-size:11px;font-weight:400;color:var(--text-secondary);background:var(--night-mid);border:0.5px solid var(--border);padding:6px 12px;border-radius:100px;display:inline-flex;align-items:center;gap:5px;}
+    .conf-chip .conf-ico{color:var(--gold);font-size:10px;}
     /* — Guardar maestro / favoritos (spec 037) — */
     #btn-fav.is-saved{color:var(--gold);border-color:var(--border-gold);background:rgba(200,151,58,.08);}
     #btn-fav:disabled{opacity:0.5;cursor:default;}
@@ -138,6 +142,12 @@
       </div>
     </div>
     <div class="col-right">
+      <!-- Señales de confianza (spec 042): solo etiquetas derivadas de datos
+           reales; si no hay ninguna, el bloque entero queda oculto. -->
+      <div id="sec-confianza" hidden>
+        <span class="section-label">Señales de confianza</span>
+        <div class="conf-chips" id="conf-chips"></div>
+      </div>
       <div>
         <div class="bio-title">Sobre este maestro</div>
         <p class="bio-text" id="p-bio"></p>
@@ -494,6 +504,38 @@
         const nEl = document.getElementById('av-notas');
         nEl.textContent = m.disponibilidad_notas;   // texto plano (textContent), sin HTML
         nEl.style.display = 'block';
+      }
+
+      // — Señales de confianza (spec 042): solo datos reales ya cargados —
+      // Prohibido aquí: favoritos, solicitudes, mensajes, decisiones privadas
+      // y "Verificado" como señal nueva (el badge existente de la cabecera se
+      // mantiene tal cual, no se duplica).
+      {
+        const tieneTrayectoria = !trayRes.error && (trayRes.data || []).length > 0;
+        const tieneResenas     = !resenasRes.error && (resenasRes.data || []).length > 0;
+        const disciplinaReal   = !!(m.disciplina && m.disciplina !== 'Sin especificar');
+        const categoriaReal    = !!(m.categoria && m.categoria !== 'Otra');
+        const tieneRitmoODisp  = !!(m.disponibilidad_estado || m.ritmo_preferido);
+        const perfilCompleto   = !!fullName && categoriaReal && disciplinaReal
+          && tieneRitmoODisp && (tieneTrayectoria || (m.experiencia_anos || 0) > 0);
+
+        const RITMO_CHIP = { mensual: 'Ritmo mensual', quincenal: 'Ritmo quincenal', semanal: 'Ritmo semanal', intensivo: 'Ritmo intensivo', flexible: 'Ritmo flexible', a_acordar: 'Ritmo a acordar' };
+        const MOD_CHIP   = { presencial: 'Presencial', online: 'Online', ambos: 'Online o presencial', a_acordar: 'Modalidad a acordar' };
+
+        const chips = [];
+        if (perfilCompleto) chips.push('Perfil completo');
+        chips.push(ESTADO_LBL[_estadoDisp] || 'Acepta solicitudes');   // siempre derivable
+        if (m.ritmo_preferido && RITMO_CHIP[m.ritmo_preferido]) chips.push(RITMO_CHIP[m.ritmo_preferido]);
+        if (m.formato && MOD_CHIP[m.formato]) chips.push(MOD_CHIP[m.formato]);
+        if (tieneTrayectoria) chips.push('Trayectoria añadida');
+        if (tieneResenas) chips.push('Reseñas de relaciones consolidadas');
+
+        if (chips.length) {
+          document.getElementById('conf-chips').innerHTML = chips.map(c =>
+            `<span class="conf-chip"><span class="conf-ico" aria-hidden="true">✦</span>${escHtml(c)}</span>`
+          ).join('');
+          document.getElementById('sec-confianza').hidden = false;
+        }
       }
 
       // — CTA según el estado de disponibilidad —

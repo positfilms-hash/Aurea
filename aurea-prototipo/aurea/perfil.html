@@ -92,6 +92,12 @@
     .pp-foot{margin-top:14px;}
     .pp-foot a{font-size:11px;font-weight:300;color:var(--text-muted);text-decoration:none;border-bottom:0.5px solid var(--border);}
     .pp-foot a:hover{color:var(--gold);border-color:var(--gold);}
+    /* — Señales de confianza: sugerencias privadas (spec 042) — */
+    #senales-sugerencias:empty{display:none;}
+    .sg-list{margin:4px 0 0;padding-left:18px;}
+    .sg-list li{font-size:12px;font-weight:300;color:var(--text-secondary);line-height:1.7;}
+    .sg-grupo{font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.6;margin:10px 0 0;}
+    .sg-grupo:first-of-type{margin-top:0;}
     /* — Maestros guardados / favoritos (spec 037) — */
     /* Maestro puro no ve la sección: vacía → fuera del layout (sin gap extra). */
     #favoritos-section:empty{display:none;}
@@ -165,6 +171,7 @@
     </div>
     <div class="col-right" id="col-right">
       <div id="primeros-pasos"></div>
+      <div id="senales-sugerencias"></div>
       <div id="ajustes-section"></div>
       <div id="favoritos-section"></div>
       <div id="col-right-content" style="display:flex;flex-direction:column;gap:28px;"></div>
@@ -461,6 +468,45 @@
         </div>`;
     }
 
+    // ── Señales de confianza: sugerencias privadas (spec 042) ────────────────
+    // Solo visible para el dueño del perfil. Tono amable, sin porcentajes y sin
+    // guardar nada en BD: se calcula al vuelo con los datos ya cargados.
+    function renderSenalesSugerencias(rol) {
+      const sec = document.getElementById('senales-sugerencias');
+      const esM = rol === 'maestro' || rol === 'ambos';
+      const esD = rol === 'discipulo' || rol === 'ambos';
+      const frase = (_profile?.frase || '').trim();
+
+      const faltaM = [];
+      if (esM) {
+        if (!_maestro?.disciplina || _maestro.disciplina === 'Sin especificar') faltaM.push('tu disciplina o propuesta');
+        if (!_maestro?.categoria || _maestro.categoria === 'Otra') faltaM.push('tu categoría');
+        if (!frase) faltaM.push('una frase que te presente');
+        if (!_maestro?.disponibilidad_estado && !_maestro?.ritmo_preferido) faltaM.push('tu disponibilidad y ritmo');
+        if (!_tray.length) faltaM.push('tu trayectoria');
+      }
+      const faltaD = [];
+      if (esD) {
+        if (!(_discipulo?.disciplina_buscada || '').trim()) faltaD.push('qué quieres aprender');
+        if ((!_discipulo?.categoria || _discipulo.categoria === 'Otra') && !(_discipulo?.hashtags || []).length) faltaD.push('tus intereses (categoría o hashtags)');
+        if (!frase) faltaD.push('cómo aprendes mejor (tu frase)');
+      }
+
+      if (!faltaM.length && !faltaD.length) { sec.innerHTML = ''; return; }   // completo → nada
+
+      const lista = (items) => `<ul class="sg-list">${items.map(i => `<li>${escHtml(i)}</li>`).join('')}</ul>`;
+      let cuerpo = '';
+      if (faltaM.length) cuerpo += `<p class="sg-grupo">Para que tu perfil de maestro transmita más confianza, completa:</p>${lista(faltaM)}`;
+      if (faltaD.length) cuerpo += `<p class="sg-grupo">Para que tu perfil de discípulo sea más claro, completa:</p>${lista(faltaD)}`;
+
+      sec.innerHTML = `
+        <div class="ajuste-card">
+          <div class="ajuste-card-hd">Señales de confianza</div>
+          ${cuerpo}
+          <div class="ajuste-ctas"><a class="btn-primary" href="perfil-edicion.html" style="font-size:13px;">Ajustes de cuenta</a></div>
+        </div>`;
+    }
+
     // ── Maestros guardados / favoritos (spec 037) ───────────────────────────
     function favRowHTML(m) {
       const p = m.profiles || {};
@@ -651,6 +697,9 @@
 
       // — Primeros pasos (spec 039): solo si faltan datos básicos según el rol —
       renderPrimerosPasos(_profile.rol || 'discipulo');
+
+      // — Señales de confianza: sugerencias privadas (spec 042) —
+      renderSenalesSugerencias(_profile.rol || 'discipulo');
 
       // — Maestros guardados (spec 037): es una acción de aprendizaje, así que
       //   solo se muestra a discípulo/ambos (un maestro puro no guarda). —

@@ -47,6 +47,10 @@
     .msg-mot-label{font-size:9px;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-faint);margin-bottom:8px;}
     .msg-mot-text{font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-primary);line-height:1.7;}
     .pd-fullstate{padding:80px 20px;}
+    /* — Señales de claridad (spec 042): derivadas de datos públicos reales — */
+    .conf-chips{display:flex;flex-wrap:wrap;gap:6px;}
+    .conf-chip{font-size:11px;font-weight:400;color:var(--text-secondary);background:var(--night-mid);border:0.5px solid var(--border);padding:6px 12px;border-radius:100px;display:inline-flex;align-items:center;gap:5px;}
+    .conf-chip .conf-ico{color:var(--gold);font-size:10px;}
     @media(max-width:899px){
       .layout{grid-template-columns:1fr;}
       .col-left{position:static;height:auto;border-right:none;border-bottom:0.5px solid var(--border);}
@@ -89,6 +93,14 @@
           <div class="msg-mot-label">Por qué quiere aprender contigo</div>
           <p class="msg-mot-text" id="pd-motivacion">Cargando…</p>
         </div>
+      </div>
+
+      <!-- Señales de claridad (spec 042): solo datos públicos reales; sin
+           historial, solicitudes, relaciones ni decisiones. Si no hay ninguna,
+           el bloque queda oculto. -->
+      <div id="pd-confianza-sec" hidden>
+        <span class="section-label">Señales de claridad</span>
+        <div class="conf-chips" id="pd-conf-chips"></div>
       </div>
 
       <!-- Qué quiere aprender -->
@@ -306,6 +318,29 @@
         if (perfil.frase) {
           document.getElementById('pd-bio').textContent = perfil.frase;
           document.getElementById('pd-bio-sec').style.display = '';
+        }
+
+        // ── Señales de claridad (spec 042) ────────────────────────────────
+        // Claridad de intención, no historial: nada de solicitudes, relaciones,
+        // mensajes ni decisiones. Solo lo que el propio perfil ya hace público.
+        {
+          const intencion = !!(dp.disciplina_buscada && dp.disciplina_buscada.trim());
+          const intereses = hayCategoria || tags.length > 0;
+          const forma     = !!(perfil.frase || dispParts.length);
+          const completo  = !!nombre && intencion && intereses && forma;
+
+          const chips = [];
+          if (completo)  chips.push('Perfil completo');
+          if (intencion) chips.push('Intención clara');
+          if (intereses) chips.push('Intereses definidos');
+          if (forma)     chips.push('Forma de aprender descrita');
+
+          if (chips.length) {
+            document.getElementById('pd-conf-chips').innerHTML = chips.map(c =>
+              `<span class="conf-chip"><span class="conf-ico" aria-hidden="true">✦</span>${escHtml(c)}</span>`
+            ).join('');
+            document.getElementById('pd-confianza-sec').hidden = false;
+          }
         }
 
         // ── Carta de motivación (solo ?sol=) ──────────────────────────────
