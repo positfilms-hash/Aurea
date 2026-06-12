@@ -100,3 +100,23 @@ Nunca se envían automáticamente. Solo visibles mientras el chat está activo.
   obliga a registrar sesiones (no bloquea), solo refleja las que existan.
 - El fix móvil de periodo-prueba (altura fija → scroll de página a ≤899px)
   corrige un problema preexistente que el ritual habría agravado.
+
+## Correcciones tras el review de Codex (misma rama)
+
+- **Bloqueante — 403 en `resultados_consolidacion`:** las migraciones 008/013
+  crearon sus tablas con RLS correcta pero sin GRANT de tabla a `authenticated`
+  (mismo fallo que la 015 corrigió para `anon`). Nueva migración
+  `supabase/migrations/020_grants_authenticated_consolidacion_notif_resenas.sql`
+  con GRANTs mínimos (resultados: select · decisiones: select+insert ·
+  notificaciones: select+update · resenas: select+insert). La RLS existente
+  sigue decidiendo las filas; no se toca ninguna policy. **Requiere ejecución
+  manual en Supabase Studio.** Cubre también el recomendado de 403 en
+  notificaciones/reseñas (misma causa raíz).
+- **Recomendado — nav autenticada móvil solapada:** reglas compactas a ≤599px en
+  `global.css` (se oculta el wordmark cuando hay nav autenticada; controles
+  reducidos; el rol vive en el dropdown).
+- **Recomendado — `aurea-onboarding-visto` global por navegador:** ahora es por
+  usuario (`aurea-onboarding-visto:<uid>`, helper `claveOnboardingVisto` en
+  `auth.js`; `onboarding.html` actualizado).
+- **Menor — filtro del smoke E2E demasiado amplio:** `tests/e2e/helpers.js` ya
+  solo ignora el favicon; cualquier 4xx de Supabase hace fallar el smoke.
