@@ -6,17 +6,15 @@
  * (`pageerror`) y mensajes `console.error`. Llamar ANTES de page.goto().
  * Devuelve la lista viva (se va llenando) para afirmar sobre ella al final.
  *
- * Se ignora el ruido conocido que no indica fallo de la página:
+ * Se ignora SOLO el ruido conocido que no indica fallo de la página:
  * - favicon 404 (las páginas no declaran favicon; el navegador lo pide igual)
- * - fallos de red hacia Supabase (el smoke no debe depender de datos remotos;
- *   las páginas ya degradan a estados vacío/error sin romperse)
+ * Cualquier otro error (incluidos 4xx de la API de Supabase, p. ej. un 403
+ * por GRANT/RLS mal configurados) debe hacer fallar el smoke: es señal real
+ * (hallazgo del review de Codex sobre la spec 041).
  */
 export function recogerErroresGraves(page) {
   const errores = [];
-  const esRuido = (texto) =>
-    texto.includes('favicon') ||
-    texto.includes('Failed to load resource') ||
-    texto.includes('supabase');
+  const esRuido = (texto) => texto.includes('favicon');
 
   page.on('pageerror', (err) => {
     errores.push(`pageerror: ${err.message}`);

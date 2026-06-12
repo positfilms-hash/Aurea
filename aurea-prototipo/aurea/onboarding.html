@@ -61,15 +61,17 @@
   <script src="js/components.js"></script>
   <script type="module">
     import { supabase } from './js/supabase.js';
-    import { requireAuth } from './js/auth.js';
+    import { requireAuth, claveOnboardingVisto } from './js/auth.js';
     import { checkNotificaciones } from './js/notif.js';
 
-    const VISTO_KEY = 'aurea-onboarding-visto';
     const card = document.getElementById('ob-card');
+    let _uid = null;   // lo fija init() tras requireAuth
 
-    // Marca el onboarding como visto (estado no sensible en localStorage).
+    // Marca el onboarding como visto (estado no sensible, POR USUARIO: en un
+    // navegador compartido el flag de una cuenta no afecta a otra).
     function marcarVisto() {
-      try { localStorage.setItem(VISTO_KEY, '1'); } catch { /* sin localStorage */ }
+      if (!_uid) return;
+      try { localStorage.setItem(claveOnboardingVisto(_uid), '1'); } catch { /* sin localStorage */ }
     }
     function irA(url) { marcarVisto(); window.location.href = url; }
 
@@ -173,6 +175,7 @@
     (async () => {
       const session = await requireAuth();
       if (!session) return;   // requireAuth ya redirige a login si no hay sesión
+      _uid = session.user.id;
 
       const ini = '';
       document.getElementById('nav-container').innerHTML = renderNavAuth('', ini);

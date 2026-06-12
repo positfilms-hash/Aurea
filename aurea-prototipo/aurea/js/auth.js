@@ -60,7 +60,8 @@ export async function requireAuth() {
  * sesión inmediata). Devuelve una URL relativa. Usado por login.html y
  * registro.html para no duplicar la lógica de bienvenida (spec 039).
  *
- * - Si ya vio el onboarding (`aurea-onboarding-visto`) → discover.
+ * - Si ya vio el onboarding (flag por usuario, ver claveOnboardingVisto) →
+ *   discover.
  * - Si su perfil ya tiene contenido propio (frase, disciplina real de maestro o
  *   disciplina buscada de discípulo) → es un usuario establecido → discover.
  * - En otro caso (recién registrado, perfil vacío) → onboarding.
@@ -69,10 +70,20 @@ export async function requireAuth() {
  * registrarse (con placeholders), así que la mera existencia de esas filas NO
  * indica que el usuario esté configurado: se mira el contenido real.
  */
+
+/**
+ * Clave de localStorage del flag "onboarding visto", POR USUARIO: en un
+ * navegador compartido, el flag de una cuenta no debe saltarse la bienvenida
+ * de otra (hallazgo del review de Codex sobre la spec 039/041).
+ */
+export function claveOnboardingVisto(uid) {
+  return `aurea-onboarding-visto:${uid}`;
+}
+
 export async function destinoPostAuth() {
   const session = await getSession();
   if (!session) return 'login.html';
-  if (localStorage.getItem('aurea-onboarding-visto')) return 'discover.html';
+  if (localStorage.getItem(claveOnboardingVisto(session.user.id))) return 'discover.html';
 
   try {
     const uid = session.user.id;
