@@ -84,6 +84,23 @@
       .filter-row{flex-direction:row;gap:var(--space-3);}
       .filter-row .filter-section{flex:1;min-width:0;}
     }
+    /* — Discover personalizado (spec 043) — */
+    .disc-hero{padding:var(--space-6) var(--space-5) var(--space-4);border-bottom:0.5px solid var(--border);}
+    .disc-hero-title{font-family:var(--font-serif);font-size:24px;font-weight:600;color:var(--text-primary);line-height:1.2;margin:0;}
+    .disc-hero-sub{font-size:13px;font-weight:300;color:var(--text-muted);line-height:1.6;margin:6px 0 0;max-width:64ch;}
+    .disc-hero-note{font-size:11px;font-weight:300;color:var(--text-faint);line-height:1.5;margin:10px 0 0;}
+    .disc-sec{padding:var(--space-5) var(--space-5) 0;}
+    .disc-sec-hd{font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--text-primary);}
+    .disc-sec-sub{font-size:12px;font-weight:300;color:var(--text-muted);margin-top:3px;}
+    .disc-sec .cards{margin-top:var(--space-4);}
+    .disc-nodata{margin-top:var(--space-3);padding:14px 16px;font-size:12px;font-weight:300;color:var(--text-muted);line-height:1.7;background:var(--night-soft);border:0.5px solid var(--border);border-radius:var(--radius-sm);}
+    .disc-nodata a{color:var(--gold);border-bottom:0.5px solid var(--border-gold);}
+    .disc-cats{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-4);}
+    @media(max-width:899px){
+      .disc-hero{padding:var(--space-4);}
+      .disc-hero-title{font-size:20px;}
+      .disc-sec{padding:var(--space-4) var(--space-4) 0;}
+    }
     /* — Cabecera contextual de categoría (spec 026) — */
     .cat-note{margin:var(--space-4) var(--space-5) 0;padding:10px 14px;font-size:12px;color:var(--text-muted);background:var(--night-soft);border:0.5px solid var(--border);border-radius:var(--radius-sm);}
     .cat-header{padding:var(--space-6) var(--space-5) var(--space-4);border-bottom:0.5px solid var(--border);}
@@ -129,7 +146,15 @@
     </aside>
     <div class="main-content">
       <div id="cat-note" class="cat-note" hidden></div>
+      <!-- Cabecera contextual según sesión/rol (spec 043) -->
+      <div id="disc-hero" class="disc-hero" hidden>
+        <h1 class="disc-hero-title" id="disc-hero-title"></h1>
+        <p class="disc-hero-sub" id="disc-hero-sub"></p>
+        <p class="disc-hero-note" id="disc-hero-note" hidden></p>
+      </div>
       <div id="cat-header" class="cat-header" hidden></div>
+      <!-- Secciones personalizadas (spec 043): solo sin filtros activos -->
+      <div id="disc-secciones" hidden></div>
       <div class="list-header"><span class="list-title" id="list-title">Cargando maestros…</span></div>
       <div class="cards-wrap"><div class="cards" id="cards-grid"></div></div>
       <div class="pagination" id="pagination"></div>
@@ -151,23 +176,53 @@
     import { checkNotificaciones } from './js/notif.js';
     import { CATS, CAT_DESC } from './js/categorias.js';
     import { fetchFavoritos, guardarFavorito, quitarFavorito } from './js/favoritos.js';
+    import { PREGUNTAS, calcularResultado } from './js/intencion.js';
 
     // Nav inteligente: público si no hay sesión, auth si la hay.
     // _puedeSolicitar / _canSave: solo discípulos (o ambos) autenticados ven el
     // CTA secundario y el botón de guardar (spec 037, acción de aprendizaje).
     let _puedeSolicitar = false;
     let _userId = null;
+    let _rol = null;
     let _canSave = false;
     let FAVS = new Set();        // maestro_id guardados por el usuario actual
+
+    // — Preferencias para personalizar (spec 043): locales y explicables.
+    //   Fuentes: perfil de discípulo (1 query) + resultado del test de intención
+    //   (sessionStorage, spec 038). Nunca se guardan ni se muestran como score.
+    let _prefCats = [];   // categorías de interés (canónicas)
+    let _prefSub  = '';   // subcategoría de interés, si existe
+
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       _userId = session.user.id;
       const { data: p } = await supabase.from('profiles')
         .select('nombre, apellido, rol').eq('id', session.user.id).single();
       const ini = p ? ((p.nombre||'')[0] + (p.apellido||'')[0]).toUpperCase() || '?' : '?';
-      _puedeSolicitar = p?.rol === 'discipulo' || p?.rol === 'ambos';
+      _rol = p?.rol || null;
+      _puedeSolicitar = _rol === 'discipulo' || _rol === 'ambos';
       _canSave = _puedeSolicitar;
-      if (_canSave) FAVS = await fetchFavoritos(_userId);
+      if (_canSave) {
+        FAVS = await fetchFavoritos(_userId);
+        // Categoría/subcategoría de interés del perfil de discípulo (una query).
+        const { data: dp } = await supabase.from('discipulo_perfiles')
+          .select('categoria, subcategoria').eq('id', _userId).maybeSingle();
+        if (dp?.categoria && dp.categoria !== 'Otra' && (dp.categoria in CATS)) _prefCats.push(dp.categoria);
+        if (dp?.subcategoria) _prefSub = (dp.subcategoria || '').trim();
+        // Resultado del test de intención (si lo hizo en esta sesión de navegador).
+        try {
+          const saved = JSON.parse(sessionStorage.getItem('aurea-intencion') || 'null');
+          const valido = saved?.done && Array.isArray(saved.answersIdx)
+            && saved.answersIdx.length === PREGUNTAS.length
+            && saved.answersIdx.every((oi, qi) => oi == null || (Number.isInteger(oi) && oi >= 0 && oi < PREGUNTAS[qi].opciones.length));
+          if (valido) {
+            const resp = saved.answersIdx.map((oi, qi) => (oi == null ? null : PREGUNTAS[qi].opciones[oi]));
+            calcularResultado(resp).cats.forEach(c => {
+              if ((c in CATS) && !_prefCats.includes(c)) _prefCats.push(c);
+            });
+          }
+        } catch { /* sin resultado de intención */ }
+      }
       document.getElementById('nav-container').innerHTML = renderNavAuth('discover', ini);
       checkNotificaciones();
     } else {
@@ -389,7 +444,9 @@
                    profiles (nombre, apellido, avatar_color, avatar_url, frase)`)
           .order('reputacion', { ascending: false, nullsFirst: false });
         if (error) throw error;
-        ALL = (data || []).map(mapMaestro).filter(Boolean);
+        // Regla obligatoria (spec 043): el propio usuario nunca aparece como
+        // candidato (ni en secciones ni en el listado, ni con CTA de solicitarse).
+        ALL = (data || []).map(mapMaestro).filter(Boolean).filter(m => m.id !== _userId);
         refrescar();   // pinta cabecera + cards + normaliza la URL
       } catch (e) {
         console.warn('Error cargando maestros:', e?.message || e);
@@ -463,8 +520,143 @@
       renderPage(1);
     }
 
+    // ── Discover personalizado (spec 043): secciones locales y explicables ──
+    // Sin IA: un score interno SOLO para ordenar lo que ya está cargado.
+    // No se muestra, no se guarda y no usa favoritos/reputación como ranking.
+
+    function hayFiltrosActivos() {
+      return !!(catEl.value || activeSub || (searchEl.value || '').trim());
+    }
+
+    // ¿El perfil de la card tiene datos suficientes? (señal honesta, spec 042)
+    function datosSuficientes(m) {
+      return !!(m.categoria && m.categoria !== 'Otra' && m.disciplina && (m.frase || m.tags.length));
+    }
+
+    function scoreMaestro(m) {
+      let s = 0;
+      if (_prefCats.includes(m.categoria)) s += 3;          // coincide categoría de interés
+      if (_prefSub && m.subcategoria === _prefSub) s += 2;  // coincide subcategoría
+      if (m.estado === 'abierta') s += 2;                   // acepta solicitudes
+      else if (m.estado === 'limitada') s += 1;             // disponibilidad limitada
+      else if (m.estado === 'pausada') s -= 3;              // no acepta ahora → al final
+      if (m.ritmo) s += 1;                                  // ritmo definido
+      if (m.modalidad) s += 1;                              // formato definido
+      if (datosSuficientes(m)) s += 1;                      // perfil con datos suficientes
+      return s;
+    }
+
+    // — Cabecera contextual según sesión/rol —
+    function renderHero() {
+      const hero = document.getElementById('disc-hero');
+      const tEl = document.getElementById('disc-hero-title');
+      const sEl = document.getElementById('disc-hero-sub');
+      const nEl = document.getElementById('disc-hero-note');
+      if (!session) {
+        tEl.textContent = 'Encuentra maestros para una relación de aprendizaje real';
+        sEl.textContent = 'Explora perfiles, guarda los que te interesen y envía una solicitud cuando encuentres a alguien que encaje contigo.';
+      } else if (_rol === 'maestro') {
+        tEl.textContent = 'Explora maestros';
+        sEl.textContent = 'También puedes aprender de otros maestros cambiando a rol discípulo.';
+      } else if (_rol === 'ambos') {
+        tEl.textContent = 'Explora como discípulo';
+        sEl.textContent = 'Puedes aprender de otros y mantener tu perfil de maestro activo.';
+      } else {
+        tEl.textContent = 'Maestros que pueden encajar contigo';
+        sEl.textContent = 'Ordenamos perfiles según tu intención, categorías y señales disponibles. Puedes explorar libremente.';
+      }
+      // Explicación discreta y honesta de cómo se ordena lo que se ve.
+      const origenIntencion = new URLSearchParams(location.search).get('origen') === 'intencion';
+      let nota = '';
+      if (hayFiltrosActivos()) nota = origenIntencion
+        ? 'Mostrando maestros relacionados con tu orientación inicial.'
+        : 'Mostrando perfiles según tus filtros.';
+      else if (_puedeSolicitar && _prefCats.length) nota = 'Ordenamos estos perfiles con señales simples: categoría, disponibilidad, perfil completo y preferencias que hayas indicado.';
+      nEl.textContent = nota;
+      nEl.hidden = !nota;
+      hero.hidden = false;
+    }
+
+    // — Secciones personalizadas: solo sin filtros activos —
+    function renderSecciones() {
+      const sec = document.getElementById('disc-secciones');
+      if (!sec) return;
+      if (hayFiltrosActivos() || !ALL.length) { sec.hidden = true; sec.innerHTML = ''; return; }
+
+      const porScore = (a, b) => scoreMaestro(b) - scoreMaestro(a);   // estable: empate conserva orden
+      let html = '';
+      const usados = new Set();
+
+      // 1. Para ti — afinidad con categorías de interés (solo discípulo/ambos).
+      if (_puedeSolicitar) {
+        if (_prefCats.length || _prefSub) {
+          const paraTi = ALL
+            .filter(m => _prefCats.includes(m.categoria) || (_prefSub && m.subcategoria === _prefSub))
+            .sort(porScore)
+            .slice(0, 6);
+          if (paraTi.length) {
+            paraTi.forEach(m => usados.add(m.id));
+            html += `<section class="disc-sec" aria-label="Para ti">
+              <h2 class="disc-sec-hd">Para ti</h2>
+              <p class="disc-sec-sub">Perfiles que coinciden con tu intención o categorías principales.</p>
+              <div class="cards">${paraTi.map(cardHTML).join('')}</div>
+            </section>`;
+          }
+        } else {
+          // Sin datos para personalizar: invitación amable, sin bloque vacío.
+          html += `<section class="disc-sec" aria-label="Para ti">
+            <h2 class="disc-sec-hd">Para ti</h2>
+            <div class="disc-nodata">Aún no sabemos qué puede encajar contigo. <a href="intencion.html">Haz el test de intención</a> o explora por categoría.</div>
+          </section>`;
+        }
+      }
+
+      // 2. Aceptan solicitudes ahora (sin repetir los ya mostrados).
+      const abiertos = ALL.filter(m => m.estado === 'abierta' && !usados.has(m.id)).sort(porScore).slice(0, 6);
+      if (abiertos.length) {
+        html += `<section class="disc-sec" aria-label="Aceptan solicitudes ahora">
+          <h2 class="disc-sec-hd">Aceptan solicitudes ahora</h2>
+          <div class="cards">${abiertos.map(cardHTML).join('')}</div>
+        </section>`;
+      }
+
+      // 3. Guardados por ti — favoritos privados presentes en la carga actual
+      //    (spec 037; nunca como popularidad ni con conteos públicos).
+      if (_canSave && FAVS.size) {
+        const guardados = ALL.filter(m => FAVS.has(m.id));
+        if (guardados.length) {
+          html += `<section class="disc-sec" aria-label="Guardados por ti">
+            <h2 class="disc-sec-hd">Guardados por ti</h2>
+            <p class="disc-sec-sub">Tu lista privada. Solo tú la ves.</p>
+            <div class="cards">${guardados.map(cardHTML).join('')}</div>
+          </section>`;
+        }
+      }
+
+      // 4. Explorar por categoría — canónicas de categorias.js ('Otra' fuera,
+      //    sigue accesible desde el selector lateral).
+      html += `<section class="disc-sec" aria-label="Explorar por categoría" style="padding-bottom:var(--space-4);">
+        <h2 class="disc-sec-hd">Explorar por categoría</h2>
+        <div class="disc-cats">${Object.keys(CATS).map(c =>
+          `<button type="button" class="chip" data-cat="${escHtml(c)}">${escHtml(c)}</button>`).join('')}</div>
+      </section>`;
+
+      sec.innerHTML = html;
+      sec.hidden = false;
+    }
+
+    // Chips de categoría de las secciones → mismo flujo que el selector lateral.
+    document.getElementById('disc-secciones').addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-cat]');
+      if (!chip) return;
+      catEl.value = chip.dataset.cat;
+      activeSub = '';
+      refrescar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
     // Refresca cabecera + cards + URL tras un cambio de filtro.
-    function refrescar() { renderCatHeader(); aplicarFiltros(); syncURL(); }
+    function refrescar() { renderHero(); renderCatHeader(); aplicarFiltros(); renderSecciones(); syncURL(); }
 
     // — Limpiar la categoría → volver a todas las categorías —
     function verTodasCategorias() {

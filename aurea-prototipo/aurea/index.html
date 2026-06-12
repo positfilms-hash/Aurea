@@ -268,8 +268,11 @@
         .order('reputacion', { ascending: false, nullsFirst: false })
         .limit(5);
 
+      // El propio usuario nunca se muestra como candidato a solicitar (spec 043).
+      const maestrosVisibles = (maestros || []).filter(m => m.id !== session?.user?.id);
+
       const card = document.getElementById('featured-card');
-      if (!maestros?.length) {
+      if (!maestrosVisibles.length) {
         card.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-faint);">
           <div style="font-size:32px;margin-bottom:12px;">✦</div>
           <div style="font-family:var(--font-serif);font-size:18px;font-style:italic;margin-bottom:8px;">Los primeros maestros<br>están llegando</div>
@@ -280,7 +283,7 @@
       }
 
       // Elegir uno al azar de los mejores
-      const m  = maestros[Math.floor(Math.random() * maestros.length)];
+      const m  = maestrosVisibles[Math.floor(Math.random() * maestrosVisibles.length)];
       const p  = m.profiles || {};
       const nombre = ((p.nombre||'') + ' ' + (p.apellido||'')).trim();
       const ini    = ((p.nombre||'')[0]+(p.apellido||'')[0]).toUpperCase() || '?';
