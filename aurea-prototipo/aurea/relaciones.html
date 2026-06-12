@@ -248,6 +248,7 @@
     let _relById = {};
     let _reviewed = new Set();
     let _consolidadas = new Set();
+    let _sesionesByRel = {};   // relacion_id → nº de sesiones (null si falló la query)
     let _relError = false;
 
     const _rSections = document.querySelectorAll('.filter-chips');
@@ -353,12 +354,34 @@
         const esFinalizada = r.estado === 'finalizada';
         const rolLabel = r._rol === 'maestro' ? 'Discípulo' : 'Maestro';
         const disc = r.disciplina || r._disciplina || '—';
-        const totalDias = r.dias_prueba_total || 30;
-        const pruebaVencida = r.estado === 'prueba' && r.iniciada_at &&
-          (Date.now() > new Date(r.iniciada_at).getTime() + totalDias * 86400000);
+        const totalDias = Number(r.dias_prueba_total) > 0 ? Number(r.dias_prueba_total) : 30;
+        // Días restantes con datos reales (spec 041): si iniciada_at falta o es
+        // inválida, no se calculan ni se muestran días (nada de datos falsos).
+        const inicioMs = r.iniciada_at ? new Date(r.iniciada_at).getTime() : NaN;
+        const diasValidos = Number.isFinite(inicioMs) && inicioMs <= Date.now();
+        const pruebaVencida = r.estado === 'prueba' && diasValidos &&
+          (Date.now() > inicioMs + totalDias * 86400000);
         const badgeHTML = pruebaVencida
           ? '<span class="estado-badge badge-prueba">⏳ Prueba vencida · decidir</span>'
           : (BADGE_MAP[r.estado] || '');
+
+        // Línea de detalle del periodo de prueba: solo datos calculables.
+        let pruebaInfo = '';
+        if (r.estado === 'prueba') {
+          if (pruebaVencida) {
+            pruebaInfo = '· Prueba vencida';
+          } else {
+            const partes = ['· En periodo de prueba'];
+            if (diasValidos) {
+              const restantes = Math.max(0, Math.ceil((inicioMs + totalDias * 86400000 - Date.now()) / 86400000));
+              partes.push(`${restantes} día${restantes !== 1 ? 's' : ''} restantes`);
+            }
+            if (_sesionesByRel) {
+              partes.push(`${Math.min(_sesionesByRel[r.id] || 0, 3)}/3 sesiones`);
+            }
+            pruebaInfo = partes.join(' · ');
+          }
+        }
 
         // CTA de reseña: solo el discípulo de una relación con resultado consolidado.
         let resenaBtn = '';
@@ -369,7 +392,7 @@
         }
 
         const actionsHTML = esFinalizada ? '' : (r.estado === 'prueba'
-          ? `<button class="btn-small" onclick="location.href='periodo-prueba.html?id=${r.id}'">Chat</button>`
+          ? `<button class="btn-small" onclick="location.href='periodo-prueba.html?id=${r.id}'">Ver periodo de prueba</button>`
           : `<button class="btn-small" onclick="location.href='periodo-prueba.html?id=${r.id}'">Chat</button>
              ${resenaBtn}
              <button class="btn-small warn" onclick="window.openMediador('${jsAttr(nombre)}')">Incidencia</button>
@@ -382,7 +405,7 @@
             <div>
               <div class="rel-nombre">${escHtml(nombre)}</div>
               <div class="rel-disc">${escHtml(disc)}</div>
-              <div class="rel-rol">${rolLabel} ${r.estado === 'prueba' ? (pruebaVencida ? '· Prueba vencida' : '· En periodo de prueba') : r.estado === 'finalizada' ? '· Finalizado' : '· Aceptado'}</div>
+              <div class="rel-rol">${rolLabel} ${r.estado === 'prueba' ? pruebaInfo : r.estado === 'finalizada' ? '· Finalizado' : '· Aceptado'}</div>
             </div>
             ${badgeHTML}
             <div>
@@ -485,6 +508,24 @@
         _consolidadas = new Set((resCons || []).map(x => x.relacion_id));
       } else {
         _consolidadas = new Set();
+      }
+
+      // Sesiones usadas de las relaciones en prueba (spec 041): UNA sola query
+      // agrupable para todas las relaciones, nunca una query por tarjeta.
+      _sesionesByRel = {};
+      const _pruebaIds = _allRels.filter(r => r.estado === 'prueba').map(r => r.id);
+      if (_pruebaIds.length) {
+        const { data: sesRows, error: sesErr } = await supabase
+          .from('sesiones_prueba')
+          .select('relacion_id')
+          .in('relacion_id', _pruebaIds);
+        if (!sesErr) {
+          (sesRows || []).forEach(s => {
+            _sesionesByRel[s.relacion_id] = (_sesionesByRel[s.relacion_id] || 0) + 1;
+          });
+        } else {
+          _sesionesByRel = null;   // sin dato fiable → no mostrar conteo falso
+        }
       }
 
       renderRelaciones();
