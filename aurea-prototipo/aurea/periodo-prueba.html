@@ -76,6 +76,47 @@
     .sobre-sub{font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.6;}
     .msgs-empty{text-align:center;padding:40px 20px;font-family:var(--font-serif);font-size:14px;font-style:italic;color:var(--text-faint);}
     .ya-decidio{width:100%;text-align:center;font-size:11px;font-weight:300;color:var(--text-muted);padding:12px 0;letter-spacing:0.04em;}
+    /* — Ritual guiado del periodo de prueba (spec 041) — */
+    .rit-item{display:flex;align-items:flex-start;gap:10px;padding:11px 16px;border-bottom:0.5px solid var(--border);}
+    .rit-num{font-family:var(--font-serif);font-size:18px;font-weight:400;color:var(--border);width:22px;flex-shrink:0;text-align:center;line-height:1.3;}
+    .rit-item.done .rit-num{color:var(--green);}
+    .rit-item.current .rit-num{color:var(--gold);}
+    .rit-info{flex:1;min-width:0;}
+    .rit-title{font-size:12px;font-weight:400;color:var(--text-primary);line-height:1.4;}
+    .rit-item.current .rit-title{color:var(--gold);}
+    .rit-state{font-size:10px;font-weight:300;color:var(--text-faint);margin-top:2px;line-height:1.5;}
+    .rit-item.current .rit-state{color:var(--text-muted);}
+    .rit-det{margin-top:5px;}
+    .rit-det summary{font-size:10px;color:var(--text-muted);cursor:pointer;list-style:none;border-bottom:0.5px dotted var(--border);display:inline;}
+    .rit-det summary::-webkit-details-marker{display:none;}
+    .rit-det summary:hover{color:var(--gold);}
+    .rit-det[open] summary{color:var(--gold);}
+    .rit-det-body{font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.6;padding:7px 0 2px;}
+    .rit-det-body ul{margin:5px 0 0;padding-left:16px;}
+    .rit-det-body li{margin-bottom:3px;}
+    .next-step{padding:12px 16px;border-bottom:0.5px solid var(--border);background:var(--night-mid);}
+    .next-step-hd{font-size:9px;font-weight:400;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);margin-bottom:5px;}
+    .next-step-txt{font-size:11px;font-weight:300;color:var(--text-secondary);line-height:1.6;}
+    .next-step-cta{margin-top:9px;}
+    .next-step-cta button{width:100%;font-family:var(--font-serif);font-size:13px;font-style:italic;color:var(--gold);background:none;border:0.5px solid var(--border-gold);padding:9px;border-radius:100px;cursor:pointer;transition:background .18s;}
+    .next-step-cta button:hover{background:rgba(200,151,58,.08);}
+    .tpl-wrap{padding:10px 16px;border-bottom:0.5px solid var(--border);}
+    .tpl-wrap summary{font-size:10px;font-weight:400;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);cursor:pointer;list-style:none;}
+    .tpl-wrap summary::-webkit-details-marker{display:none;}
+    .tpl-wrap summary:hover{color:var(--gold);}
+    .tpl-item{margin-top:10px;}
+    .tpl-label{font-size:10px;font-weight:400;color:var(--text-muted);margin-bottom:4px;}
+    .tpl-text{font-family:var(--font-serif);font-size:12px;font-style:italic;color:var(--text-secondary);line-height:1.6;background:var(--night-mid);border:0.5px solid var(--border);border-radius:8px;padding:9px 11px;}
+    .tpl-btns{display:flex;gap:6px;margin-top:6px;}
+    .tpl-btns button{font-size:10px;font-weight:300;color:var(--text-muted);background:none;border:0.5px solid var(--border);padding:5px 11px;border-radius:100px;cursor:pointer;transition:all .18s;}
+    .tpl-btns button:hover{color:var(--gold);border-color:var(--gold);}
+    /* Móvil: la página deja de ser una app de altura fija (el ritual necesita
+       scroll de página; global.css apila .layout en bloque a ≤899px). */
+    @media(max-width:899px){
+      body{overflow:auto;}
+      .layout{height:auto;}
+      .messages{min-height:300px;max-height:55vh;}
+    }
   </style>
 </head>
 <body>
@@ -89,9 +130,20 @@
           <div class="col-head-sub" id="col-head-sub"></div>
         </div>
       </div>
-      <div class="sesiones-title">Sesiones del periodo de prueba · <span id="sesiones-count">—/3</span></div>
-      <div class="sesiones-list" id="sesiones-list">
-        <!-- Renderizado dinámico -->
+      <div class="sesiones-title">Camino del periodo de prueba · <span id="sesiones-count">—/3</span> sesiones</div>
+      <div class="sesiones-list" id="ritual-wrap">
+        <div class="next-step" id="next-step" hidden>
+          <div class="next-step-hd">Próximo paso</div>
+          <div class="next-step-txt" id="next-step-txt"></div>
+          <div class="next-step-cta" id="next-step-cta" hidden><button type="button" id="next-step-btn"></button></div>
+        </div>
+        <div id="ritual-list" aria-label="Etapas del periodo de prueba">
+          <!-- Timeline de 6 etapas (renderizado dinámico) -->
+        </div>
+        <details class="tpl-wrap" id="tpl-wrap" hidden>
+          <summary>Plantillas de mensaje</summary>
+          <div id="tpl-list"></div>
+        </details>
       </div>
       <div class="progress-section">
         <div class="prog-label">
@@ -153,6 +205,7 @@
 
     (async () => {
     const session = await requireAuth();
+    if (!session) return;
     const uid = session.user.id;
 
     // — Relacion ID desde URL —
@@ -182,13 +235,23 @@
       const lay = document.querySelector('.layout');
       if (lay) {
         lay.style.display = 'block';
-        lay.innerHTML = renderEmptyState({
-          icon: '⏳',
-          title: 'No hay un periodo de prueba activo seleccionado',
-          body: 'Cuando una solicitud sea aceptada, aquí podrás seguir los 30 días de prueba y las sesiones disponibles.',
-          ctaLabel: 'Ver relaciones',
-          ctaHref: 'relaciones.html',
-        });
+        // Con id: no existe o no tienes acceso (la RLS no distingue ambos casos).
+        // Sin id: entrada genérica. Nunca errores técnicos crudos.
+        lay.innerHTML = relacionId
+          ? renderEmptyState({
+              icon: '🔍',
+              title: 'No hemos encontrado este periodo de prueba',
+              body: 'Puede que el enlace no sea válido o que no tengas acceso a esta relación.',
+              ctaLabel: 'Ver relaciones',
+              ctaHref: 'relaciones.html',
+            })
+          : renderEmptyState({
+              icon: '⏳',
+              title: 'No hay un periodo de prueba activo seleccionado',
+              body: 'Cuando una solicitud sea aceptada, aquí podrás seguir los 30 días de prueba y las sesiones disponibles.',
+              ctaLabel: 'Ver relaciones',
+              ctaHref: 'relaciones.html',
+            });
       }
       return; // detener init tras pintar el estado vacío (estamos en una IIFE async)
     }
@@ -206,30 +269,72 @@
     document.getElementById('col-head-sub').textContent =
       `${rel.disciplina} · ${esMaestro ? 'Discípulo' : 'Maestro'}`;
 
-    // — Sesiones —
+    // — Sesiones reales (máximo 3 según el modelo del periodo de prueba) —
     const { data: sesiones } = await supabase
       .from('sesiones_prueba')
       .select('*')
       .eq('relacion_id', relacionId)
       .order('numero', { ascending: true });
-    renderSesiones(sesiones || []);
 
-    // — Barra de progreso y límites del periodo de prueba —
-    const totalDias = rel.dias_prueba_total || 30;
-    const finMs = new Date(rel.iniciada_at).getTime() + totalDias * 86400000;
-    const vencido = Date.now() > finMs;
-    const diasRestantes = Math.max(0, Math.ceil((finMs - Date.now()) / 86400000));
-    const diasTranscurridos = Math.min(
-      Math.floor((Date.now() - new Date(rel.iniciada_at)) / 86400000),
-      totalDias
-    );
-    const sesionesUsadas = (sesiones || []).length;
-    const pct = Math.round((diasTranscurridos / totalDias) * 100);
-    document.getElementById('prog-pct').textContent = `${diasTranscurridos} / ${totalDias}`;
-    document.getElementById('prog-fill').style.width = `${pct}%`;
-    document.getElementById('prog-text').textContent = vencido
-      ? 'El periodo de prueba ha terminado'
-      : `Quedan ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}`;
+    // — Estado del ritual (spec 041): se rellena según cargan datos —
+    let _msgsCount = 0;       // mensajes de la conversación (etapa 1)
+    let _miDec     = null;    // mi decisión propia (sobre cerrado) o null
+    let _resultado = null;    // resultado final, solo si ambas partes decidieron
+    let _tplRendered = false; // las plantillas se pintan una sola vez
+
+    // Etapas de la guía (contenido fijo, UI-only).
+    const ETAPAS_GUIA = [
+      { titulo: 'Acordad la intención',
+        det: 'Antes de empezar, aclarad qué queréis probar durante estos días.',
+        puntos: ['Qué quiere aprender el discípulo', 'Qué puede ofrecer el maestro', 'Qué ritmo tiene sentido', 'Cómo sabréis si encaja'] },
+      { titulo: 'Primera sesión: diagnóstico',
+        det: 'Usad la primera conversación para entender el punto de partida y decidir si merece la pena seguir probando.',
+        puntos: ['¿Desde dónde parte el discípulo?', '¿Qué necesita ahora?', '¿Qué puede aportar el maestro?', '¿Qué no encaja?'] },
+      { titulo: 'Segunda sesión: práctica o revisión',
+        det: 'La segunda sesión debería servir para probar la forma real de acompañamiento.',
+        puntos: ['¿Hubo avance?', '¿El ritmo fue adecuado?', '¿La comunicación funciona?', '¿Hay compromiso por ambas partes?'] },
+      { titulo: 'Tercera sesión: cierre de prueba',
+        det: 'La última sesión debe servir para decidir si la relación merece consolidarse.',
+        puntos: ['¿Queremos continuar?', '¿Qué cambiaríamos?', '¿Qué compromiso asumiría cada parte?', '¿Tiene sentido consolidar?'] },
+      { titulo: 'Decisión por sobre cerrado',
+        det: 'Cada persona decide por separado si quiere consolidar la relación. La decisión de la otra persona no se muestra hasta que ambas partes hayan decidido.',
+        puntos: [] },
+      { titulo: 'Resultado',
+        det: 'Si ambos consolidáis, la relación queda consolidada. Si no, la prueba habrá servido para decidir con claridad.',
+        puntos: [] },
+    ];
+
+    // Plantillas de mensaje (UI-only): nunca se envían solas; el usuario las
+    // copia o las inserta en el textarea y decide si enviar.
+    const PLANTILLAS = [
+      esMaestro
+        ? { label: 'Al inicio', texto: 'Bienvenido. Para aprovechar este periodo de prueba, cuéntame desde dónde partes y qué te gustaría conseguir.' }
+        : { label: 'Al inicio', texto: 'Hola. Para empezar bien este periodo de prueba, me gustaría contarte qué busco aprender y qué espero de estos 30 días.' },
+      { label: 'Antes de la segunda sesión', texto: 'Creo que en la próxima sesión podríamos revisar lo que ha funcionado hasta ahora y probar una forma más concreta de trabajo.' },
+      { label: 'Antes de decidir', texto: 'Antes de tomar la decisión de consolidar o no, me gustaría que revisáramos si el ritmo, la comunicación y el compromiso tienen sentido para ambos.' },
+    ];
+
+    // — Progreso con datos reales: si iniciada_at/dias_prueba_total faltan o
+    //   son inválidos, NO se inventan días (copy genérico sin números). —
+    const totalDias = Number(rel.dias_prueba_total) > 0 ? Number(rel.dias_prueba_total) : 30;
+    const inicioMs = rel.iniciada_at ? new Date(rel.iniciada_at).getTime() : NaN;
+    const diasValidos = Number.isFinite(inicioMs) && inicioMs <= Date.now();
+    const finMs = inicioMs + totalDias * 86400000;
+    const vencido = diasValidos && Date.now() > finMs;
+    const diasRestantes = diasValidos ? Math.max(0, Math.ceil((finMs - Date.now()) / 86400000)) : null;
+    const sesionesUsadas = Math.min((sesiones || []).length, 3);
+    if (diasValidos) {
+      const diasTranscurridos = Math.min(Math.floor((Date.now() - inicioMs) / 86400000), totalDias);
+      const pct = Math.round((diasTranscurridos / totalDias) * 100);
+      document.getElementById('prog-pct').textContent = `${diasTranscurridos} / ${totalDias}`;
+      document.getElementById('prog-fill').style.width = `${pct}%`;
+      document.getElementById('prog-text').textContent = vencido
+        ? 'El periodo de prueba ha terminado'
+        : `Quedan ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}`;
+    } else {
+      document.getElementById('prog-pct').textContent = '—';
+      document.getElementById('prog-text').textContent = 'Periodo de prueba en curso';
+    }
     const sesCountEl = document.getElementById('sesiones-count');
     if (sesCountEl) sesCountEl.textContent = `${sesionesUsadas}/3`;
 
@@ -258,7 +363,9 @@
     } else {
       badgeEl.textContent = vencido
         ? '⏳ Periodo vencido · toca decidir'
-        : `⏳ En prueba · quedan ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}`;
+        : diasValidos
+          ? `⏳ En prueba · quedan ${diasRestantes} día${diasRestantes !== 1 ? 's' : ''}`
+          : '⏳ En prueba';
     }
 
     // — Cargar mensajes —
@@ -276,6 +383,10 @@
       msgs.forEach(m => appendMsg(m, uid));
     }
     msgBox.scrollTop = msgBox.scrollHeight;
+
+    // La etapa 1 del ritual depende de si la conversación ha empezado.
+    _msgsCount = (msgs || []).length;
+    actualizarRitual();
 
     // — Marcar como leídos los mensajes del otro y actualizar badge global —
     async function marcarLeidos() {
@@ -310,47 +421,168 @@
           msgBox.scrollTop = msgBox.scrollHeight;
           // Si el mensaje es del otro, marcarlo como leído de inmediato
           if (m.autor_id !== uid) marcarLeidos();
+          // El primer mensaje completa la etapa 1 del ritual.
+          _msgsCount++;
+          actualizarRitual();
         }
       })
       .subscribe();
 
     // ─── Helpers ────────────────────────────────────────────
 
-    function renderSesiones(list) {
-      const container = document.getElementById('sesiones-list');
-      // Si no hay sesiones en BD, mostrar 3 pendientes por defecto
-      const total = list.length > 0 ? list.length : 3;
-      const items = list.length > 0 ? list : [
-        { numero: 1, titulo: 'Primera sesión', estado: 'pendiente', programada_at: null, completada_at: null },
-        { numero: 2, titulo: 'Segunda sesión', estado: 'pendiente', programada_at: null, completada_at: null },
-        { numero: 3, titulo: 'Tercera sesión', estado: 'pendiente', programada_at: null, completada_at: null },
-      ];
-      container.innerHTML = items.map(s => {
-        const activa = s.estado !== 'pendiente';
-        const numClass = activa ? 'sesion-n' : '';
-        const numStyle = activa ? '' : 'style="color:var(--border);"';
-        let fechaTxt = 'Por acordar';
-        if (s.completada_at) fechaTxt = formatDate(s.completada_at);
-        else if (s.programada_at) {
-          fechaTxt = isToday(s.programada_at)
-            ? `Hoy · ${formatTime(s.programada_at)}`
-            : formatDate(s.programada_at);
-        }
-        let badgeClass = 'sb-pending', badgeTxt = 'Pendiente';
-        if (s.estado === 'completada') { badgeClass = 'sb-done'; badgeTxt = '✓ Completada'; }
-        else if (s.estado === 'programada' && s.programada_at && isToday(s.programada_at)) { badgeClass = 'sb-today'; badgeTxt = 'Hoy'; }
-        else if (s.estado === 'programada') { badgeClass = 'sb-pending'; badgeTxt = 'Programada'; }
-        return `
-          <div class="sesion-item">
-            <span class="sesion-num ${numClass}" ${numStyle}>${s.numero}</span>
-            <div class="sesion-info">
-              <div class="sesion-title">${esc(s.titulo || ordinal(s.numero) + ' sesión')}</div>
-              <div class="sesion-fecha">${fechaTxt}</div>
-            </div>
-            <span class="sesion-badge ${badgeClass}">${badgeTxt}</span>
-          </div>`;
-      }).join('');
+    // ─── Ritual guiado del periodo de prueba (spec 041) ──────
+    // Guía UI-only: no cambia la lógica de consolidación ni los límites
+    // (30 días / 3 sesiones máximo) definidos en specs anteriores.
+    // (ETAPAS_GUIA y PLANTILLAS se declaran arriba, junto al estado del ritual,
+    //  porque actualizarRitual() se invoca antes de llegar a esta sección.)
+
+    // Etapa actual del camino, derivada SOLO de datos reales.
+    function etapaActual() {
+      if (_resultado) return 6;
+      if (_miDec) return 5;
+      if (rel.estado !== 'prueba') return 6;          // cerrada por otra vía (legacy)
+      if (vencido || sesionesUsadas >= 3) return 5;   // toca decidir
+      if (_msgsCount === 0) return 1;                 // aún sin conversación
+      return Math.min(2 + sesionesUsadas, 4);         // 0/1/2 sesiones → etapa 2/3/4
     }
+
+    function actualizarRitual() {
+      const cont = document.getElementById('ritual-list');
+      if (!cont) return;
+      const cur = etapaActual();
+      cont.innerHTML = ETAPAS_GUIA.map((e, idx) => {
+        const n = idx + 1;
+        const cls = n < cur ? 'done' : n === cur ? 'current' : '';
+        // Estado textual (no solo color): "Etapa actual" marca dónde estáis.
+        let estadoTxt = n < cur ? 'Completada' : n === cur ? 'Etapa actual' : 'Pendiente';
+        if (n >= 2 && n <= 4) {
+          // Las etapas 2–4 reflejan la sesión real correspondiente si existe.
+          const s = (sesiones || []).find(x => x.numero === n - 1);
+          if (s?.completada_at) estadoTxt = (n === cur ? 'Etapa actual · ' : '') + 'Completada · ' + formatDate(s.completada_at);
+          else if (s?.programada_at) estadoTxt = (n === cur ? 'Etapa actual · ' : '') + 'Programada · ' + formatDate(s.programada_at);
+          else if (n === cur) estadoTxt = 'Etapa actual · Por acordar';
+        }
+        if (n === 5 && _miDec) estadoTxt = 'Tu decisión está guardada';
+        if (n === 6 && _resultado) {
+          estadoTxt = _resultado.resultado === 'consolidada'
+            ? 'La relación se ha consolidado'
+            : 'La relación no se ha consolidado';
+        }
+        const det = `
+          <details class="rit-det"><summary>Ver guía</summary>
+            <div class="rit-det-body">${esc(e.det)}${e.puntos.length ? '<ul>' + e.puntos.map(p => '<li>' + esc(p) + '</li>').join('') + '</ul>' : ''}</div>
+          </details>`;
+        return `<div class="rit-item ${cls}">
+          <span class="rit-num" aria-hidden="true">${n}</span>
+          <div class="rit-info">
+            <div class="rit-title">${n}. ${esc(e.titulo)}</div>
+            <div class="rit-state">${esc(estadoTxt)}</div>
+            ${det}
+          </div>
+        </div>`;
+      }).join('');
+      renderNextStep();
+      renderPlantillas();
+    }
+
+    // Próximo paso recomendado + CTA principal según el estado real.
+    function renderNextStep() {
+      const wrap = document.getElementById('next-step');
+      if (!wrap) return;
+      const txt = document.getElementById('next-step-txt');
+      const ctaWrap = document.getElementById('next-step-cta');
+      const btn = document.getElementById('next-step-btn');
+      let mensaje = '', ctaLabel = '', ctaAction = null;
+
+      if (_resultado) {
+        mensaje = _resultado.resultado === 'consolidada'
+          ? 'La relación queda consolidada.'
+          : 'La relación no se consolida. La prueba ha servido para decidir con claridad.';
+      } else if (_miDec) {
+        mensaje = 'Tu decisión queda guardada de forma privada hasta que ambas partes hayan decidido. Cuando estén ambas decisiones, Aurea mostrará el resultado.';
+      } else if (rel.estado !== 'prueba') {
+        wrap.hidden = true; return;
+      } else if (vencido) {
+        mensaje = 'El periodo de prueba ha terminado. Ya podéis tomar una decisión.';
+        ctaLabel = 'Tomar decisión'; ctaAction = irADecision;
+      } else if (sesionesUsadas >= 3) {
+        mensaje = 'Ya habéis usado las tres sesiones de prueba. Ahora toca decidir si queréis consolidar.';
+        ctaLabel = 'Tomar decisión'; ctaAction = irADecision;
+      } else if (sesionesUsadas === 2) {
+        mensaje = 'Antes de decidir, usad la tercera sesión para revisar si la relación tiene sentido para ambos.';
+        ctaLabel = 'Continuar conversación'; ctaAction = irAlChat;
+      } else if (sesionesUsadas === 1) {
+        mensaje = 'Ya habéis empezado. La segunda sesión puede servir para probar la forma real de acompañamiento.';
+        ctaLabel = 'Continuar conversación'; ctaAction = irAlChat;
+      } else if (_msgsCount === 0) {
+        mensaje = `Aún no habéis registrado ninguna sesión de prueba. Empezad por acordar la intención de estos ${totalDias} días.`;
+        ctaLabel = 'Abrir conversación'; ctaAction = irAlChat;
+      } else {
+        mensaje = 'Aún no habéis registrado ninguna sesión de prueba. La primera puede servir como diagnóstico del punto de partida.';
+        ctaLabel = 'Continuar conversación'; ctaAction = irAlChat;
+      }
+      wrap.hidden = false;
+      txt.textContent = mensaje;
+      if (ctaLabel) {
+        ctaWrap.hidden = false;
+        btn.textContent = ctaLabel;
+        btn.onclick = ctaAction;
+      } else {
+        ctaWrap.hidden = true;
+      }
+    }
+
+    function irAlChat() {
+      const inp = document.getElementById('msg-input');
+      if (inp && !inp.disabled) {
+        inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        inp.focus({ preventScroll: true });
+      }
+    }
+    function irADecision() {
+      const band = document.getElementById('decision-band');
+      if (band) band.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function renderPlantillas() {
+      const wrap = document.getElementById('tpl-wrap');
+      if (!wrap) return;
+      // Solo tienen sentido mientras la conversación sigue abierta.
+      const inp = document.getElementById('msg-input');
+      const chatActivo = rel.estado === 'prueba' && !_resultado && inp && !inp.disabled;
+      wrap.hidden = !chatActivo;
+      if (_tplRendered || !chatActivo) return;
+      _tplRendered = true;
+      document.getElementById('tpl-list').innerHTML = PLANTILLAS.map((t, i) => `
+        <div class="tpl-item">
+          <div class="tpl-label">${esc(t.label)}</div>
+          <div class="tpl-text">${esc(t.texto)}</div>
+          <div class="tpl-btns">
+            <button type="button" onclick="window.copiarPlantilla(${i}, this)">Copiar</button>
+            <button type="button" onclick="window.usarPlantilla(${i})">Usar en el chat</button>
+          </div>
+        </div>`).join('');
+    }
+
+    window.copiarPlantilla = async function(i, btn) {
+      const t = PLANTILLAS[i];
+      if (!t || !btn) return;
+      try {
+        await navigator.clipboard.writeText(t.texto);
+        btn.textContent = 'Copiada ✓';
+      } catch {
+        btn.textContent = 'No se pudo copiar';
+      }
+      setTimeout(() => { btn.textContent = 'Copiar'; }, 2000);
+    };
+
+    window.usarPlantilla = function(i) {
+      const t = PLANTILLAS[i];
+      const inp = document.getElementById('msg-input');
+      if (!t || !inp || inp.disabled) return;
+      inp.value = t.texto;   // solo inserta: enviar sigue siendo decisión del usuario
+      irAlChat();
+    };
 
     function appendMsg(m, myUid) {
       const isMine = m.autor_id === myUid;
@@ -370,15 +602,9 @@
     function formatDate(ts) {
       return new Date(ts).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
     }
-    function formatTime(ts) {
-      return new Date(ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) + 'h';
-    }
     function formatDateChat(ts) {
       if (isToday(ts)) return 'Hoy';
       return new Date(ts).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
-    }
-    function ordinal(n) {
-      return ['Primera','Segunda','Tercera','Cuarta','Quinta'][n - 1] || `${n}ª`;
     }
     function esc(s) {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -415,10 +641,9 @@
 
     window.openDecision = function(tipo) {
       _decisionElegida = tipo;
-      const nombre = esc(otroP.nombre || 'la otra persona');
       document.getElementById('decision-sub').innerHTML = tipo === 'consolidar'
-        ? `Vas a indicar que <strong>sí</strong> quieres consolidar esta relación.<br>Tu decisión será privada hasta que ${nombre} también decida.`
-        : `Vas a indicar que <strong>prefieres no</strong> consolidar esta relación.<br>Tu decisión será privada hasta que ${nombre} también decida.`;
+        ? `Vas a indicar que <strong>sí</strong> quieres consolidar esta relación.<br>Tu decisión queda guardada de forma privada hasta que ambas partes hayan decidido.`
+        : `Vas a indicar que <strong>prefieres no</strong> consolidar esta relación.<br>Tu decisión queda guardada de forma privada hasta que ambas partes hayan decidido.`;
       document.getElementById('decision-confirm-btn').textContent =
         tipo === 'consolidar' ? 'Confirmar: consolidar' : 'Confirmar: no consolidar';
       document.getElementById('modal-decision').classList.add('open');
@@ -454,6 +679,7 @@
         .select('resultado')
         .eq('relacion_id', relacionId)
         .maybeSingle();
+      _resultado = resultado || null;   // estado para el ritual (spec 041)
       if (resultado) {
         const consolidada = resultado.resultado === 'consolidada';
         band.style.display = '';
@@ -468,6 +694,7 @@
         }
         const sb = document.getElementById('send-btn'); if (sb) sb.disabled = true;
         const mi = document.getElementById('msg-input'); if (mi) mi.disabled = true;
+        actualizarRitual();
         return;
       }
 
@@ -478,20 +705,24 @@
         .eq('relacion_id', relacionId)
         .eq('user_id', uid)
         .maybeSingle();
+      _miDec = miDec || null;   // estado para el ritual (spec 041)
       if (miDec) {
         band.style.display = '';
-        band.innerHTML = `<div class="ya-decidio">Tu decisión está guardada · El resultado se mostrará cuando ${esc(otroP.nombre || 'la otra persona')} también decida.</div>`;
+        // Copia neutral (spec 041): no insinuar quién falta por decidir.
+        band.innerHTML = `<div class="ya-decidio">Tu decisión queda guardada de forma privada hasta que ambas partes hayan decidido.</div>`;
+        actualizarRitual();
         return;
       }
 
       // Relación ya cerrada por otra vía (legacy) → ocultar la banda.
-      if (rel.estado !== 'prueba') { band.style.display = 'none'; return; }
+      if (rel.estado !== 'prueba') { band.style.display = 'none'; actualizarRitual(); return; }
 
       // Aún no he decidido: mostrar las opciones.
       band.style.display = '';
       band.innerHTML =
         `<button class="btn-decision btn-accept" onclick="openDecision('consolidar')">Sí, consolidar</button>
          <button class="btn-decision btn-cancel" onclick="openDecision('no_consolidar')">No consolidar</button>`;
+      actualizarRitual();
     }
 
     document.querySelectorAll('.overlay').forEach(o =>

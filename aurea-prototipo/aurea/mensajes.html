@@ -57,6 +57,10 @@
       <div class="main-empty-icon">✦</div>
       <div class="main-empty-text">Selecciona una conversación</div>
       <div class="main-empty-sub">Aquí aparecen los mensajes de tus relaciones activas y en periodo de prueba.</div>
+      <!-- Aviso compacto (spec 041): solo se muestra si hay conversaciones en prueba -->
+      <div id="prueba-aviso" hidden style="max-width:320px;margin-top:4px;padding:10px 14px;font-size:11px;font-weight:300;color:var(--text-muted);line-height:1.6;background:var(--night-soft);border:0.5px solid var(--border);border-radius:8px;text-align:center;">
+        Las conversaciones marcadas como <strong style="font-weight:500;color:var(--text-secondary);">Prueba</strong> forman parte de un periodo de prueba. Acordad intención, ritmo y próximos pasos antes de consolidar.
+      </div>
     </div>
   </div>
 
@@ -192,6 +196,12 @@
           <div class="no-conv-icon">✉</div>
           <div class="no-conv-text">Sin conversaciones activas</div>
         </div>`;
+
+      // Aviso compacto del periodo de prueba (spec 041): solo si aplica.
+      if (rels.some(r => r.estado === 'prueba')) {
+        const aviso = document.getElementById('prueba-aviso');
+        if (aviso) aviso.hidden = false;
+      }
     }
 
     init();
